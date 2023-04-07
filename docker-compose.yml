@@ -1,0 +1,54 @@
+version: "3.8"
+
+services:
+  crud-postgres:
+    image: postgres:14.0-alpine
+    container_name: crud-postgres
+    restart: unless-stopped
+    volumes:
+      - crud-pg-data:/var/lib/postgresql/data
+    networks:
+      - crud-network
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
+
+  crud-spring:
+    build:
+      context: .
+      dockerfile: ./docker/spring/Dockerfile
+    image: crud-spring
+    container_name: crud-spring
+    ports:
+      - "8000:8000"
+    depends_on:
+      - crud-postgres
+    networks:
+      - crud-network
+      - crud-proxy-network
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
+
+  crud-vue:
+    build:
+      context: .
+      dockerfile: ./docker/vue/Dockerfile
+    image: crud-vue
+    container_name: crud-vue
+    ports:
+      - "8080:80"
+    depends_on:
+      - crud-postgres
+    networks:
+      - crud-network
+      - crud-proxy-network
+
+networks:
+  crud-proxy-network:
+    name: crud-proxy-network
+
+  crud-network:
+
+volumes:
+  crud-pg-data:
