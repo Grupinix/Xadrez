@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/Xadrez.iml" filepath="$PROJECT_DIR$/.idea/Xadrez.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/xadrez.main.iml" filepath="$PROJECT_DIR$/.idea/modules/xadrez.main.iml" />
+    </modules>
+  </component>
+</project>
