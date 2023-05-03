@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.UUID;
+
 @SpringBootTest
 public class PlayerServiceImplTest {
 
@@ -45,7 +47,7 @@ public class PlayerServiceImplTest {
 
         @Test
         public void shouldRaiseExceptionWheGetFromUnregisteredUUID() {
-            Assertions.assertThrows(ResponseStatusException.class, () -> playerService.registerPlayer(INVALID));
+            Assertions.assertThrows(ResponseStatusException.class, () -> playerService.getFromUUID(UUID.randomUUID()));
         }
 
     }
