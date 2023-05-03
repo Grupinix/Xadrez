@@ -2,8 +2,8 @@ package br.com.eterniaserver.xadrez.rest.controllers;
 
 import br.com.eterniaserver.xadrez.domain.enums.GameType;
 import br.com.eterniaserver.xadrez.domain.service.GameService;
-import br.com.eterniaserver.xadrez.domain.service.impl.ClassicPIAGameService;
-import br.com.eterniaserver.xadrez.domain.service.impl.ClassicPPGameService;
+import br.com.eterniaserver.xadrez.domain.service.impl.ClassicPIAGameServiceImpl;
+import br.com.eterniaserver.xadrez.domain.service.impl.ClassicPPGameServiceImpl;
 import br.com.eterniaserver.xadrez.rest.dtos.GameDto;
 import br.com.eterniaserver.xadrez.rest.dtos.PlayerDto;
 
@@ -19,8 +19,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class GameController {
 
-    private final ClassicPIAGameService classicPIAGameService;
-    private final ClassicPPGameService classicPPGameService;
+    private final ClassicPIAGameServiceImpl classicPIAGameService;
+    private final ClassicPPGameServiceImpl classicPPGameService;
 
     private GameService getGameService(GameType gameType) {
         return switch (gameType) {

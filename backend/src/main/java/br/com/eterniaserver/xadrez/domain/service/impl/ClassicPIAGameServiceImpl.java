@@ -2,7 +2,6 @@ package br.com.eterniaserver.xadrez.domain.service.impl;
 
 import br.com.eterniaserver.xadrez.domain.entities.Game;
 import br.com.eterniaserver.xadrez.domain.entities.Piece;
-import br.com.eterniaserver.xadrez.domain.enums.GameDifficulty;
 import br.com.eterniaserver.xadrez.domain.enums.GameStatus;
 import br.com.eterniaserver.xadrez.domain.enums.GameType;
 import br.com.eterniaserver.xadrez.domain.enums.MoveType;
@@ -17,10 +16,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-
-@Service("classicPPGameService")
+@Service("classicPIAGameService")
 @AllArgsConstructor
-public class ClassicPPGameService implements GameService {
+public class ClassicPIAGameServiceImpl implements GameService {
 
     private final GameRepository gameRepository;
 
@@ -33,10 +31,11 @@ public class ClassicPPGameService implements GameService {
     @Override
     public List<GameDto> getGames() {
         List<Game> gameList = gameRepository.findAllByBlackPlayerUUIDIsNullAndGameTypeEquals(
-                GameType.PLAYER_PLAYER_CLASSIC
+                GameType.PLAYER_IA_CLASSIC
         );
         return convertToDtoList(gameList);
     }
+
 
     @Override
     public GameDto createGame(UUID whiteUUID) {

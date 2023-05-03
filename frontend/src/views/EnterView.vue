@@ -1,39 +1,26 @@
 <template>
-  <el-row type="flex" justify="center">
+  <el-row id="main-row" type="flex" justify="center">
     <el-card>
       <template #header>
-        <span class="card-title">Já possui um cadastro? Faça login</span>
+        <span class="card-title">
+          Olá! Antes de jogar defina um identificador com exatos 8 caracteres!
+        </span>
       </template>
 
       <el-form :model="model" :rules="rules" ref="ruleForm">
-        <el-form-item prop="email">
+        <el-form-item prop="identifier">
           <el-input
-            placeholder="Email..."
+            placeholder="Identificador..."
             :prefix-icon="lock"
-            v-model="model.email"
-          ></el-input>
-        </el-form-item>
-
-        <el-form-item prop="password">
-          <el-input
-            placeholder="Senha..."
-            type="password"
-            :prefix-icon="lock"
-            v-model="model.password"
-            show-password
+            v-model="model.identifier"
           ></el-input>
         </el-form-item>
 
         <el-row type="flex" justify="center">
           <el-col>
-            <el-button type="primary" :loading="loading" @click="login">
-              ENTRAR
+            <el-button type="primary" :loading="loading" @click="register">
+              CONFIRMAR
             </el-button>
-          </el-col>
-          <el-col>
-            <el-link type="primary" @click="register">
-              Não possui cadastro?
-            </el-link>
           </el-col>
         </el-row>
       </el-form>
@@ -55,28 +42,19 @@ export default {
       lock: shallowRef(Lock),
       message: shallowRef(Message),
       model: {
-        email: "",
-        password: "",
+        identifier: "",
       },
       rules: {
-        email: [
+        identifier: [
           {
             required: true,
-            message: "Insira um endereço de email",
+            message: "Insira um identificador",
             trigger: "blur",
           },
           {
-            type: "email",
-            message: "Insira um endereço de email válido",
-            trigger: "blur",
-          },
-        ],
-        password: [
-          { required: true, message: "Insira uma senha", trigger: "blur" },
-          {
-            min: 5,
-            max: 20,
-            message: "Escolha uma senha entre 5 à 20 caracteres",
+            min: 8,
+            max: 8,
+            message: "Precisa possuir exatos 8 caracteres",
             trigger: "blur",
           },
         ],
@@ -85,42 +63,18 @@ export default {
   },
 
   async created() {
-    const self = this;
-    const userDTO = JSON.parse(localStorage.getItem("userDTO"));
-    if (!userDTO) {
+    const playerDto = JSON.parse(localStorage.getItem("playerDto"));
+    if (!playerDto) {
       return;
     }
 
-    const userToken = `Bearer ${userDTO.token}`;
-    const headers = { "Content-Type": "application/json" };
-    const payload = JSON.stringify({ token: userToken });
-    let isValid = true;
-
-    await fetch("http://localhost:8000/api/user/check/", {
-      method: "POST",
-      headers: headers,
-      body: payload,
-    })
-      .then((response) => {
-        if (!response.ok) {
-          self.alertExpired();
-          isValid = false;
-          return;
-        }
-      })
-      .catch(() => {
-        self.alertExpired();
-        isValid = false;
-        return;
-      });
-
-    if (isValid) {
+    if (playerDto.uuid) {
       this.$router.push({ path: "/inicio" });
     }
   },
 
   methods: {
-    async login() {
+    async register() {
       const self = this;
       const form = this.$refs.ruleForm;
       self.loading = true;
@@ -142,30 +96,25 @@ export default {
       }
 
       const headers = { "Content-Type": "application/json" };
-      const payload = JSON.stringify({
-        login: this.model.email,
-        password: this.model.password,
-      });
-      await fetch("http://localhost:8000/api/user/auth/", {
-        method: "POST",
-        headers: headers,
-        body: payload,
+      const identifier = this.model.identifier;
+      await fetch(`http://localhost:8000/api/player/${identifier}/`, {
+        method: "POST", headers: headers
       })
         .then(async (response) => {
           const data = await response.json();
-          if (!response.ok) {
-            self.alertLoginFaill();
+          if (response.ok) {
+            isValid = true;
+            localStorage.setItem("playerDto", JSON.stringify(data));
+          } else {
+            self.alertRegisterFail();
             isValid = false;
             self.loading = false;
-            return;
           }
-          localStorage.setItem("userDTO", JSON.stringify(data));
         })
         .catch(() => {
-          self.alertLoginFaill();
+          self.alertRegisterFail();
           isValid = false;
           self.loading = false;
-          return;
         });
 
       if (isValid) {
@@ -173,16 +122,7 @@ export default {
       }
     },
 
-    register() {
-      this.$router.push({ path: "/cadastro" });
-    },
-
-    alertExpired() {
-      localStorage.removeItem("userDTO");
-      ElMessage.error("Sua sessão expirou, entre novamente por favor.");
-    },
-
-    alertLoginFaill() {
+    alertRegisterFail() {
       ElMessage.error("Credenciais inválidas.");
     },
   },
@@ -190,27 +130,14 @@ export default {
 </script>
 
 <style scoped>
-.el-link {
-  margin-top: 16px;
+#main-row {
+  padding-top: 128px;
+  padding-bottom: 128px;
 }
-.el-row {
-  padding-top: 32px;
-  padding-bottom: 32px;
-}
-.el-card {
-  width: 512px;
-}
+
 .card-title {
   color: #4d5758;
   font-weight: bolder;
-  font-size: large;
-}
-.el-form-item {
-  text-align: center;
-}
-.el-button {
-  width: 128px;
-  height: 48px;
   font-size: large;
 }
 </style>
