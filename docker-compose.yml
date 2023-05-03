@@ -1,54 +1,39 @@
 version: "3.8"
 
 services:
-  crud-postgres:
+  xadrez-postgres:
     image: postgres:14.0-alpine
-    container_name: crud-postgres
+    container_name: xadrez-postgres
     restart: unless-stopped
     volumes:
-      - crud-pg-data:/var/lib/postgresql/data
-    networks:
-      - crud-network
+      - xadrez-pg-data:/var/lib/postgresql/data
+    network_mode: "host"
     environment:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_USER=postgres
 
-  crud-spring:
+  xadrez-spring:
     build:
       context: .
       dockerfile: ./docker/spring/Dockerfile
-    image: crud-spring
-    container_name: crud-spring
-    ports:
-      - "8000:8000"
+    image: xadrez-spring
+    container_name: xadrez-spring
     depends_on:
-      - crud-postgres
-    networks:
-      - crud-network
-      - crud-proxy-network
+      - xadrez-postgres
+    network_mode: "host"
     environment:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_USER=postgres
 
-  crud-vue:
+  xadrez-vue:
     build:
       context: .
       dockerfile: ./docker/vue/Dockerfile
-    image: crud-vue
-    container_name: crud-vue
-    ports:
-      - "8080:80"
+    image: xadrez-vue
+    container_name: xadrez-vue
     depends_on:
-      - crud-postgres
-    networks:
-      - crud-network
-      - crud-proxy-network
-
-networks:
-  crud-proxy-network:
-    name: crud-proxy-network
-
-  crud-network:
+      - xadrez-postgres
+    network_mode: "host"
 
 volumes:
-  crud-pg-data:
+  xadrez-pg-data:
