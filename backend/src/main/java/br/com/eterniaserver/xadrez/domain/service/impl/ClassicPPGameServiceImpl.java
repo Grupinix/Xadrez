@@ -16,9 +16,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-@Service("classicPIAGameService")
+
+@Service("classicPPGameService")
 @AllArgsConstructor
-public class ClassicPIAGameService implements GameService {
+public class ClassicPPGameServiceImpl implements GameService {
 
     private final GameRepository gameRepository;
 
@@ -31,11 +32,10 @@ public class ClassicPIAGameService implements GameService {
     @Override
     public List<GameDto> getGames() {
         List<Game> gameList = gameRepository.findAllByBlackPlayerUUIDIsNullAndGameTypeEquals(
-                GameType.PLAYER_IA_CLASSIC
+                GameType.PLAYER_PLAYER_CLASSIC
         );
         return convertToDtoList(gameList);
     }
-
 
     @Override
     public GameDto createGame(UUID whiteUUID) {

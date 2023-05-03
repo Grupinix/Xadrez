@@ -1,7 +1,7 @@
 <!-- eslint-disable prettier/prettier -->
 <script>
 import { defineComponent } from "vue";
-import * as logo from "../assets/logo.svg";
+import * as logo from "../assets/logo.png";
 
 export default defineComponent({
   name: "BaseHeader",
@@ -23,10 +23,5 @@ export default defineComponent({
 section {
   background-color: #0d5469;
   text-align: start;
-}
-
-.el-image {
-  width: 128px;
-  margin-left: 16px;
 }
 </style>

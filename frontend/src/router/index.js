@@ -1,5 +1,7 @@
 import { createRouter, createWebHistory } from "vue-router";
+
 import EnterView from "../views/EnterView.vue";
+import HomeView from "../views/HomeView.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -13,7 +15,7 @@ const router = createRouter({
     {
       path: "/inicio",
       name: "inicio",
-      component: () => import("../views/HomeView.vue"),
+      component: HomeView,
       meta: { requiresAuth: true },
     },
   ],
@@ -21,16 +23,16 @@ const router = createRouter({
 
 router.beforeEach((to, _, next) => {
   const requiresAuth = to.meta.requiresAuth;
-  const userDTO = JSON.parse(localStorage.getItem("userDTO"))?.token;
-  if (requiresAuth && !userDTO) {
+  const playerUUID = JSON.parse(localStorage.getItem("playerDto"))?.uuid;
+  if (requiresAuth && !playerUUID) {
     return next({ path: "/" });
   }
 
-  if (!requiresAuth && userDTO) {
+  if (!requiresAuth && playerUUID) {
     return next({ path: "/inicio" });
   }
 
-  next();
+  return next();
 });
 
 export default router;
