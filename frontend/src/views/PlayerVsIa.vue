@@ -122,8 +122,8 @@ export default {
 }
 @media screen and (min-width: 1920px) {
   .chess-square {
-    width: 50px;
-    height: 50px;
+    width: 90px;
+    height: 90px;
   }
 }
 </style>
