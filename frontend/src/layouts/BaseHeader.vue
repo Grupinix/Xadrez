@@ -1,7 +1,7 @@
 <!-- eslint-disable prettier/prettier -->
 <script>
 import { defineComponent } from "vue";
-import * as logo from "../assets/logo.png";
+import * as logo from "../assets/logo.webp";
 
 export default defineComponent({
   name: "BaseHeader",

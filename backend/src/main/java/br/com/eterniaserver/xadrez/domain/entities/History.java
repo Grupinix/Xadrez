@@ -40,10 +40,9 @@ public class History {
     @Column(name = "killed_piece")
     private PieceType killedPiece;
 
-    public HistoryDto getHistoryDto(BoardDto boardDto) {
+    public HistoryDto getHistoryDto() {
         return HistoryDto.builder()
                 .id(getId())
-                .board(boardDto)
                 .pieceType(getPieceType())
                 .oldPositionX(getOldPositionX())
                 .oldPositionY(getOldPositionY())

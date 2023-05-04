@@ -13,8 +13,7 @@ import lombok.NoArgsConstructor;
 public class PieceDto {
 
     private Integer id;
-    private BoardDto whiteBoard;
-    private BoardDto blackBoard;
+    private Boolean whitePiece;
     private PieceType pieceType;
     private Integer positionX;
     private Integer positionY;

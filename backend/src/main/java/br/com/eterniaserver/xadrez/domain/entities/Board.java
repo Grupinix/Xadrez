@@ -4,6 +4,7 @@ import br.com.eterniaserver.xadrez.rest.dtos.BoardDto;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -23,16 +24,15 @@ public class Board {
     private List<Piece> blackPieces;
 
     @OneToMany(mappedBy = "board")
-    private List<History> histories;
+    private List<History> histories = new ArrayList<>();
 
     public BoardDto getBoardDto() {
-        final BoardDto boardDto = BoardDto.builder().id(getId()).build();
-
-        boardDto.setWhitePieces(getWhitePieces().stream().map(whitePiece -> whitePiece.getPieceDto(boardDto)).toList());
-        boardDto.setBlackPieces(getBlackPieces().stream().map(blackPiece -> blackPiece.getPieceDto(boardDto)).toList());
-        boardDto.setHistories(getHistories().stream().map(history -> history.getHistoryDto(boardDto)).toList());
-
-        return boardDto;
+        return BoardDto.builder()
+                .id(getId())
+                .whitePieces(getWhitePieces().stream().map(Piece::getPieceDto).toList())
+                .blackPieces(getBlackPieces().stream().map(Piece::getPieceDto).toList())
+                .histories(getHistories().stream().map(History::getHistoryDto).toList())
+                .build();
     }
 
 

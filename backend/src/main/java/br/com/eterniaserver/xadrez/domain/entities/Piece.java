@@ -18,11 +18,11 @@ public class Piece {
     private Integer id;
 
     @ManyToOne
-    @JoinColumn(name = "white_board_id", nullable = false)
+    @JoinColumn(name = "white_board_id")
     private Board whiteBoard;
 
     @ManyToOne
-    @JoinColumn(name = "black_board_id", nullable = false)
+    @JoinColumn(name = "black_board_id")
     private Board blackBoard;
 
     @Enumerated(EnumType.STRING)
@@ -35,22 +35,14 @@ public class Piece {
     @Column(name = "position_y", nullable = false)
     private Integer positionY;
 
-    public PieceDto getPieceDto(BoardDto boardDto) {
-        PieceDto pieceDto = PieceDto.builder()
+    public PieceDto getPieceDto() {
+        return PieceDto.builder()
                 .id(getId())
                 .pieceType(getPieceType())
                 .positionX(getPositionX())
                 .positionY(getPositionY())
+                .whitePiece(getWhiteBoard() != null)
                 .build();
-
-        if (getWhiteBoard() != null) {
-            pieceDto.setWhiteBoard(boardDto);
-        }
-        else {
-            pieceDto.setBlackBoard(boardDto);
-        }
-
-        return pieceDto;
     }
 
 }

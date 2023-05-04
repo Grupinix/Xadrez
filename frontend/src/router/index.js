@@ -18,6 +18,12 @@ const router = createRouter({
       component: HomeView,
       meta: { requiresAuth: true },
     },
+    {
+      path: "/playervsia",
+      name: "playervsia",
+      component: () => import("../views/PlayerVsIa.vue"),
+      meta: { requiresAuth: true },
+    },
   ],
 });
 

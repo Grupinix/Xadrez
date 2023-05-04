@@ -13,7 +13,6 @@ import lombok.NoArgsConstructor;
 public class HistoryDto {
 
     private Integer id;
-    private BoardDto board;
     private PieceType pieceType;
     private Integer oldPositionX;
     private Integer oldPositionY;

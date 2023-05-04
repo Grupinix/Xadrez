@@ -98,7 +98,8 @@ export default {
       const headers = { "Content-Type": "application/json" };
       const identifier = this.model.identifier;
       await fetch(`http://localhost:8000/api/player/${identifier}/`, {
-        method: "POST", headers: headers
+        method: "POST",
+        headers: headers,
       })
         .then(async (response) => {
           const data = await response.json();
