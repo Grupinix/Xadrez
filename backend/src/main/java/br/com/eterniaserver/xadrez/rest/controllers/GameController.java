@@ -1,5 +1,6 @@
 package br.com.eterniaserver.xadrez.rest.controllers;
 
+import br.com.eterniaserver.xadrez.domain.entities.Game;
 import br.com.eterniaserver.xadrez.domain.enums.GameType;
 import br.com.eterniaserver.xadrez.domain.service.GameService;
 import br.com.eterniaserver.xadrez.domain.service.impl.ClassicPIAGameServiceImpl;
@@ -13,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/game/")
@@ -32,18 +34,18 @@ public class GameController {
     @GetMapping("list/")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public List<GameDto> listGames() {
-        return classicPPGameService.getAllGames();
+        return classicPPGameService.getAllGames().stream().map(Game::getGameDto).collect(Collectors.toList());
     }
 
     @GetMapping("list/{type}/")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public List<GameDto> listGamesByType(@PathVariable GameType type) {
-        return getGameService(type).getGames();
+        return getGameService(type).getGames().stream().map(Game::getGameDto).collect(Collectors.toList());
     }
 
     @PostMapping("create/{type}")
     public GameDto createGame(@PathVariable GameType type, @RequestBody PlayerDto playerDto) {
-        return getGameService(type).createGame(playerDto.getUuid());
+        return getGameService(type).createGame(playerDto.getUuid()).getGameDto();
     }
 
 }

@@ -1,13 +1,15 @@
 package br.com.eterniaserver.xadrez.domain.service.impl;
 
+import br.com.eterniaserver.xadrez.domain.entities.Board;
 import br.com.eterniaserver.xadrez.domain.entities.Game;
 import br.com.eterniaserver.xadrez.domain.entities.Piece;
+import br.com.eterniaserver.xadrez.domain.enums.GameDifficulty;
 import br.com.eterniaserver.xadrez.domain.enums.GameStatus;
 import br.com.eterniaserver.xadrez.domain.enums.GameType;
 import br.com.eterniaserver.xadrez.domain.enums.MoveType;
 import br.com.eterniaserver.xadrez.domain.repositories.GameRepository;
+import br.com.eterniaserver.xadrez.domain.service.BoardService;
 import br.com.eterniaserver.xadrez.domain.service.GameService;
-import br.com.eterniaserver.xadrez.rest.dtos.GameDto;
 import lombok.AllArgsConstructor;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
@@ -21,30 +23,40 @@ import java.util.UUID;
 public class ClassicPIAGameServiceImpl implements GameService {
 
     private final GameRepository gameRepository;
+    private final BoardService boardService;
 
     @Override
-    public List<GameDto> getAllGames() {
-        List<Game> gameList = gameRepository.findAllByBlackPlayerUUIDIsNull();
-        return convertToDtoList(gameList);
+    public List<Game> getAllGames() {
+        return gameRepository.findAllByBlackPlayerUUIDIsNull();
     }
 
     @Override
-    public List<GameDto> getGames() {
-        List<Game> gameList = gameRepository.findAllByBlackPlayerUUIDIsNullAndGameTypeEquals(
+    public List<Game> getGames() {
+        return gameRepository.findAllByBlackPlayerUUIDIsNullAndGameTypeEquals(
                 GameType.PLAYER_IA_CLASSIC
         );
-        return convertToDtoList(gameList);
-    }
-
-
-    @Override
-    public GameDto createGame(UUID whiteUUID) {
-        return null;
     }
 
     @Override
-    public GameDto enterGame(UUID blackUUID, Integer gameId) {
+    public Game enterGame(UUID blackUUID, Integer gameId) {
         return null;
+    }
+
+    public Game createGame(UUID whiteUUID) {
+        Board board = boardService.createBoard();
+        Game game = new Game();
+
+        game.setGameType(GameType.PLAYER_IA_CLASSIC);
+        game.setGameDifficulty(GameDifficulty.NORMAL);
+        game.setBoard(board);
+        game.setWhiteTurn(true);
+        game.setWhitePlayerUUID(whiteUUID);
+        game.setWhiteMoves(0);
+        game.setBlackMoves(0);
+
+        gameRepository.save(game);
+
+        return game;
     }
 
     @Override
@@ -56,13 +68,13 @@ public class ClassicPIAGameServiceImpl implements GameService {
     }
 
     @Override
-    public GameStatus getGameStatus(GameDto game) {
+    public GameStatus getGameStatus(Game game) {
         return null;
     }
 
     @Override
-    public GameDto movePiece(
-            GameDto game,
+    public Game movePiece(
+            Game game,
             UUID playerUUID,
             Piece piece,
             Pair<MoveType, Pair<Integer, Integer>> moveTypePairPair

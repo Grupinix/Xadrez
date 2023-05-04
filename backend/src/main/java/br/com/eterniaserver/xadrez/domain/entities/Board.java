@@ -1,9 +1,11 @@
 package br.com.eterniaserver.xadrez.domain.entities;
 
+import br.com.eterniaserver.xadrez.rest.dtos.BoardDto;
 import jakarta.persistence.*;
 import lombok.Data;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "board")
@@ -23,6 +25,28 @@ public class Board {
 
     @OneToMany(mappedBy = "board")
     private List<History> histories;
+
+    public BoardDto getBoardDto() {
+        final BoardDto boardDto = BoardDto.builder().id(getId()).build();
+
+        boardDto.setWhitePieces(
+                getWhitePieces().stream()
+                        .map(whitePiece -> whitePiece.getPieceDto(boardDto))
+                        .collect(Collectors.toList())
+        );
+        boardDto.setBlackPieces(
+                getBlackPieces().stream()
+                        .map(blackPiece -> blackPiece.getPieceDto(boardDto))
+                        .collect(Collectors.toList())
+        );
+        boardDto.setHistories(
+                getHistories().stream()
+                        .map(history -> history.getHistoryDto(boardDto))
+                        .collect(Collectors.toList())
+        );
+
+        return boardDto;
+    }
 
 
 }

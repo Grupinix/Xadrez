@@ -1,21 +1,23 @@
 package br.com.eterniaserver.xadrez.domain.service;
 
+import br.com.eterniaserver.xadrez.domain.service.impl.PlayerServiceImpl;
 import br.com.eterniaserver.xadrez.rest.dtos.PlayerDto;
 import org.junit.jupiter.api.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.UUID;
 
-@SpringBootTest
-public class PlayerServiceImplTest {
+public class PlayerServiceImplUnitTest {
 
     private static final String VALID = "8AFSD35D";
     private static final String INVALID = "8AFSD";
 
-    @Autowired
     private PlayerService playerService;
+
+    @BeforeEach
+    public void init() {
+        playerService = new PlayerServiceImpl();
+    }
 
     @Test
     void shouldRegister() {
