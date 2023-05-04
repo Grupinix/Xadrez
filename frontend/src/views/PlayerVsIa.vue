@@ -11,8 +11,8 @@
             :key="col"
             class="chess-square"
             :class="{
-              'black-square': (row + col) % 2 === 0,
-              'white-square': (row + col) % 2 !== 0,
+              'black-square': (row + col) % 2 !== 0,
+              'white-square': (row + col) % 2 === 0,
             }"
         >
           <div v-if="pieceAt(row, col)" class="chess-piece">{{ pieceAt(row, col) }}</div>
