@@ -21,10 +21,7 @@ public interface GameService {
 
     Game enterGame(UUID blackUUID, Integer gameId);
 
-    Map<Pair<Integer, Integer>, List<Pair<MoveType, Pair<Integer, Integer>>>> getPossibleMoves(
-            Game game,
-            UUID playerUUID
-    );
+    List<Pair<MoveType, Pair<Integer, Integer>>> getPossibleMoves(Game game, Piece piece, UUID playerUUID);
 
     GameStatus getGameStatus(Game game);
 

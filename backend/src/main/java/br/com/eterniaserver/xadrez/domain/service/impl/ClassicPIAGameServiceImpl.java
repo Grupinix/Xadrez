@@ -60,10 +60,7 @@ public class ClassicPIAGameServiceImpl implements GameService {
     }
 
     @Override
-    public Map<Pair<Integer, Integer>, List<Pair<MoveType, Pair<Integer, Integer>>>> getPossibleMoves(
-            Game game,
-            UUID playerUUID
-    ) {
+    public List<Pair<MoveType, Pair<Integer, Integer>>> getPossibleMoves(Game game, Piece piece, UUID playerUUID) {
         return null;
     }
 
