@@ -2,20 +2,20 @@
   <el-row  type="flex" justify="center">
     <div class="chess-board">
       <div
-          v-for="row in 8"
-          :key="row"
+          v-for="(line, lineIndex) in gameMatrix"
+          :key="line"
           class="chess-row"
       >
         <div
-            v-for="col in 8"
-            :key="col"
+            v-for="(piece, pieceIndex) in line"
+            :key="piece"
             class="chess-square"
             :class="{
-              'black-square': (row + col) % 2 !== 0,
-              'white-square': (row + col) % 2 === 0,
+              'black-square': (lineIndex + pieceIndex) % 2 !== 0,
+              'white-square': (lineIndex + pieceIndex) % 2 === 0,
             }"
         >
-          <div v-if="pieceAt(row, col)" class="chess-piece">{{ pieceAt(row, col) }}</div>
+          <div v-if="piece.pieceType" class="chess-piece">{{ piece.pieceType.at(0) }}</div>
         </div>
       </div>
     </div>
@@ -69,14 +69,6 @@ export default {
         matrixPiece.whitePiece = piece.whitePiece;
       }
     },
-
-    pieceAt(row, col) {
-      const piece = this.gameMatrix[row - 1][col - 1];
-      if (piece.pieceType) {
-        return piece.pieceType.at(0);
-      }
-      return "";
-    }
   },
 };
 </script>
