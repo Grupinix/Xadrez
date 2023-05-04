@@ -5,7 +5,6 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "board")
@@ -29,21 +28,9 @@ public class Board {
     public BoardDto getBoardDto() {
         final BoardDto boardDto = BoardDto.builder().id(getId()).build();
 
-        boardDto.setWhitePieces(
-                getWhitePieces().stream()
-                        .map(whitePiece -> whitePiece.getPieceDto(boardDto))
-                        .collect(Collectors.toList())
-        );
-        boardDto.setBlackPieces(
-                getBlackPieces().stream()
-                        .map(blackPiece -> blackPiece.getPieceDto(boardDto))
-                        .collect(Collectors.toList())
-        );
-        boardDto.setHistories(
-                getHistories().stream()
-                        .map(history -> history.getHistoryDto(boardDto))
-                        .collect(Collectors.toList())
-        );
+        boardDto.setWhitePieces(getWhitePieces().stream().map(whitePiece -> whitePiece.getPieceDto(boardDto)).toList());
+        boardDto.setBlackPieces(getBlackPieces().stream().map(blackPiece -> blackPiece.getPieceDto(boardDto)).toList());
+        boardDto.setHistories(getHistories().stream().map(history -> history.getHistoryDto(boardDto)).toList());
 
         return boardDto;
     }

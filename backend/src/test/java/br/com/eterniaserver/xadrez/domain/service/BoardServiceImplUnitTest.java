@@ -14,7 +14,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class BoardServiceImplUnitTest {
+class BoardServiceImplUnitTest {
 
     private static final int PAWN_START_INDEX = 8;
     private static final int WHITE_MAIN_Y_POSITION = 7;
@@ -28,12 +28,12 @@ public class BoardServiceImplUnitTest {
     private BoardServiceImpl boardService;
 
     @BeforeEach
-    public void init() {
+    void init() {
         boardService = new BoardServiceImpl(boardRepository, pieceRepository);
     }
 
     @Test
-    public void verifyPawns() {
+    void verifyPawns() {
         Board board = boardService.createBoard();
 
         for (int i = 0; i < 8; i++) {
@@ -46,7 +46,7 @@ public class BoardServiceImplUnitTest {
     }
 
     @Test
-    public void verifyQueenPosition() {
+    void verifyQueenPosition() {
         Board board = boardService.createBoard();
 
         int queenIndex = 3;
@@ -67,7 +67,7 @@ public class BoardServiceImplUnitTest {
     }
 
     @Test
-    public void verifyKingPosition() {
+    void verifyKingPosition() {
         Board board = boardService.createBoard();
 
         int kingIndex = 4;

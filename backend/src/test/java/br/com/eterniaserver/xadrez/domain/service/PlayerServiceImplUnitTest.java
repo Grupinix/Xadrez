@@ -7,7 +7,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.UUID;
 
-public class PlayerServiceImplUnitTest {
+class PlayerServiceImplUnitTest {
 
     private static final String VALID = "8AFSD35D";
     private static final String INVALID = "8AFSD";
@@ -15,7 +15,7 @@ public class PlayerServiceImplUnitTest {
     private PlayerService playerService;
 
     @BeforeEach
-    public void init() {
+    void init() {
         playerService = new PlayerServiceImpl();
     }
 
@@ -36,20 +36,21 @@ public class PlayerServiceImplUnitTest {
         private PlayerDto registered;
 
         @BeforeEach
-        public void init() {
+        void init() {
             registered = playerService.registerPlayer(VALID);
         }
 
         @Test
-        public void shouldGetFromUUIDWhenGetFromRegisteredUUID() {
+        void shouldGetFromUUIDWhenGetFromRegisteredUUID() {
             PlayerDto playerDto = playerService.getFromUUID(registered.getUuid());
 
             Assertions.assertNotNull(playerDto);
         }
 
         @Test
-        public void shouldRaiseExceptionWheGetFromUnregisteredUUID() {
-            Assertions.assertThrows(ResponseStatusException.class, () -> playerService.getFromUUID(UUID.randomUUID()));
+        void shouldRaiseExceptionWheGetFromUnregisteredUUID() {
+            final UUID uuid = UUID.randomUUID();
+            Assertions.assertThrows(ResponseStatusException.class, () -> playerService.getFromUUID(uuid));
         }
 
     }

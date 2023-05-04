@@ -15,7 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.UUID;
 
 @ExtendWith(MockitoExtension.class)
-public class ClassicPIAGameServiceImplUnitTest {
+class ClassicPIAGameServiceImplUnitTest {
 
     @Mock
     private GameRepository gameRepository;
@@ -25,12 +25,12 @@ public class ClassicPIAGameServiceImplUnitTest {
     private GameService gameService;
 
     @BeforeEach
-    public void init() {
+    void init() {
         gameService = new ClassicPIAGameServiceImpl(gameRepository, boardService);
     }
 
     @Test
-    public void testCreateGame() {
+    void testCreateGame() {
         UUID uuid = UUID.randomUUID();
 
         Game game = gameService.createGame(uuid);

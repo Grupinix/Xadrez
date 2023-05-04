@@ -14,7 +14,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/game/")
@@ -34,13 +33,13 @@ public class GameController {
     @GetMapping("list/")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public List<GameDto> listGames() {
-        return classicPPGameService.getAllGames().stream().map(Game::getGameDto).collect(Collectors.toList());
+        return classicPPGameService.getAllGames().stream().map(Game::getGameDto).toList();
     }
 
     @GetMapping("list/{type}/")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public List<GameDto> listGamesByType(@PathVariable GameType type) {
-        return getGameService(type).getGames().stream().map(Game::getGameDto).collect(Collectors.toList());
+        return getGameService(type).getGames().stream().map(Game::getGameDto).toList();
     }
 
     @PostMapping("create/{type}")
