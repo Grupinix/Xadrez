@@ -40,8 +40,8 @@ public class BoardServiceImpl implements BoardService {
 
     private List<Piece> createPieces(Board board, boolean isWhite) {
         PieceType[] pieceOrdering = new PieceType[]{
-                PieceType.TOWER, PieceType.KNIGHT, PieceType.BISHOP, PieceType.QUEEN,
-                PieceType.KING, PieceType.KNIGHT, PieceType.BISHOP, PieceType.TOWER
+                PieceType.TOWER, PieceType.HORSE, PieceType.BISHOP, PieceType.QUEEN,
+                PieceType.KING, PieceType.BISHOP, PieceType.HORSE, PieceType.TOWER
         };
 
         List<Piece> pieces = new ArrayList<>();
