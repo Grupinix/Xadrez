@@ -1,5 +1,6 @@
 package br.com.eterniaserver.xadrez.domain.entities;
 
+import br.com.eterniaserver.xadrez.rest.dtos.BoardDto;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -23,6 +24,16 @@ public class Board {
 
     @OneToMany(mappedBy = "board")
     private List<History> histories;
+
+    public BoardDto getBoardDto() {
+        final BoardDto boardDto = BoardDto.builder().id(getId()).build();
+
+        boardDto.setWhitePieces(getWhitePieces().stream().map(whitePiece -> whitePiece.getPieceDto(boardDto)).toList());
+        boardDto.setBlackPieces(getBlackPieces().stream().map(blackPiece -> blackPiece.getPieceDto(boardDto)).toList());
+        boardDto.setHistories(getHistories().stream().map(history -> history.getHistoryDto(boardDto)).toList());
+
+        return boardDto;
+    }
 
 
 }

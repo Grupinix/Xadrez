@@ -1,21 +1,23 @@
 package br.com.eterniaserver.xadrez.domain.service;
 
+import br.com.eterniaserver.xadrez.domain.service.impl.PlayerServiceImpl;
 import br.com.eterniaserver.xadrez.rest.dtos.PlayerDto;
 import org.junit.jupiter.api.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.UUID;
 
-@SpringBootTest
-public class PlayerServiceImplTest {
+class PlayerServiceImplUnitTest {
 
     private static final String VALID = "8AFSD35D";
     private static final String INVALID = "8AFSD";
 
-    @Autowired
     private PlayerService playerService;
+
+    @BeforeEach
+    void init() {
+        playerService = new PlayerServiceImpl();
+    }
 
     @Test
     void shouldRegister() {
@@ -34,20 +36,21 @@ public class PlayerServiceImplTest {
         private PlayerDto registered;
 
         @BeforeEach
-        public void init() {
+        void init() {
             registered = playerService.registerPlayer(VALID);
         }
 
         @Test
-        public void shouldGetFromUUIDWhenGetFromRegisteredUUID() {
+        void shouldGetFromUUIDWhenGetFromRegisteredUUID() {
             PlayerDto playerDto = playerService.getFromUUID(registered.getUuid());
 
             Assertions.assertNotNull(playerDto);
         }
 
         @Test
-        public void shouldRaiseExceptionWheGetFromUnregisteredUUID() {
-            Assertions.assertThrows(ResponseStatusException.class, () -> playerService.getFromUUID(UUID.randomUUID()));
+        void shouldRaiseExceptionWheGetFromUnregisteredUUID() {
+            final UUID uuid = UUID.randomUUID();
+            Assertions.assertThrows(ResponseStatusException.class, () -> playerService.getFromUUID(uuid));
         }
 
     }
