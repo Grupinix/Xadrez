@@ -5,16 +5,17 @@
       <profile name="Gradle Imported" enabled="true">
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="false">
-          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.springframework.boot/spring-boot-configuration-processor/3.0.5/a042112791600faeb5c7d65d71277a9c9dd9996c/spring-boot-configuration-processor-3.0.5.jar" />
-          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.projectlombok/lombok/1.18.26/8f8cf0372abf564913e9796623aac4c8ea44025a/lombok-1.18.26.jar" />
+          <entry name="$PROJECT_DIR$/../.gradle/caches/modules-2/files-2.1/org.springframework.boot/spring-boot-configuration-processor/3.0.5/a042112791600faeb5c7d65d71277a9c9dd9996c/spring-boot-configuration-processor-3.0.5.jar" />
+          <entry name="$PROJECT_DIR$/../.gradle/caches/modules-2/files-2.1/org.projectlombok/lombok/1.18.26/8f8cf0372abf564913e9796623aac4c8ea44025a/lombok-1.18.26.jar" />
         </processorPath>
         <module name="xadrez-backend.main" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="backend" target="17" />
-      <module name="spring_main" target="17" />
-      <module name="spring_test" target="17" />
+      <module name="br.com.eterniaserver.xadrez-backend.main" target="17" />
+      <module name="xadrez-backend" target="17" />
+      <module name="xadrez-backend.test" target="17" />
     </bytecodeTargetLevel>
   </component>
 </project>
