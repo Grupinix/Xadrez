@@ -1,7 +1,6 @@
 package br.com.eterniaserver.xadrez.domain.entities;
 
 import br.com.eterniaserver.xadrez.domain.enums.PieceType;
-import br.com.eterniaserver.xadrez.rest.dtos.BoardDto;
 import br.com.eterniaserver.xadrez.rest.dtos.HistoryDto;
 import jakarta.persistence.*;
 import lombok.Data;

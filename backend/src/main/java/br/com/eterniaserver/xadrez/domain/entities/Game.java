@@ -26,7 +26,7 @@ public class Game {
     @Column(name = "game_difficulty")
     private GameDifficulty gameDifficulty;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.REMOVE)
     @JoinColumn(name = "board_id", nullable = false)
     private Board board;
 
@@ -45,6 +45,9 @@ public class Game {
     @Column(name = "black_moves", nullable = false)
     private Integer blackMoves;
 
+    @Column(name = "time", nullable = false)
+    private Long timer;
+
     public GameDto getGameDto() {
         return GameDto.builder()
                 .id(getId())
@@ -56,6 +59,7 @@ public class Game {
                 .whiteMoves(getWhiteMoves())
                 .blackPlayerUUID(getBlackPlayerUUID())
                 .blackMoves(getBlackMoves())
+                .timer(getTimer())
                 .build();
     }
 

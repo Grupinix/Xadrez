@@ -8,7 +8,6 @@ import br.com.eterniaserver.xadrez.domain.enums.MoveType;
 import org.springframework.data.util.Pair;
 
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 public interface GameService {
@@ -19,11 +18,15 @@ public interface GameService {
 
     Game createGame(UUID whiteUUID);
 
+    boolean checkGame(Integer gameId);
+
+    void refreshGameTimer(Integer gameId);
+
     Game enterGame(UUID blackUUID, Integer gameId);
 
     List<Pair<MoveType, Pair<Integer, Integer>>> getPossibleMoves(Game game, Piece piece, UUID playerUUID);
 
-    GameStatus getGameStatus(Game game);
+    GameStatus getGameStatus(Integer gameId);
 
     Game movePiece(Game game, UUID playerUUID, Piece piece, Pair<MoveType, Pair<Integer, Integer>> moveTypePairPair);
 

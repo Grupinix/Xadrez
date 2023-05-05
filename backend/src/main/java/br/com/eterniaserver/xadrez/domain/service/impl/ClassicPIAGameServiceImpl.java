@@ -13,9 +13,10 @@ import br.com.eterniaserver.xadrez.domain.service.GameService;
 import lombok.AllArgsConstructor;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service("classicPIAGameService")
@@ -42,6 +43,7 @@ public class ClassicPIAGameServiceImpl implements GameService {
         return null;
     }
 
+    @Transactional
     public Game createGame(UUID whiteUUID) {
         Board board = boardService.createBoard();
         Game game = new Game();
@@ -53,10 +55,28 @@ public class ClassicPIAGameServiceImpl implements GameService {
         game.setWhitePlayerUUID(whiteUUID);
         game.setWhiteMoves(0);
         game.setBlackMoves(0);
+        game.setTimer(System.currentTimeMillis());
 
         gameRepository.save(game);
 
         return game;
+    }
+
+    @Override
+    public boolean checkGame(Integer gameId) {
+        return gameRepository.existsById(gameId);
+    }
+
+    @Override
+    @Transactional
+    public void refreshGameTimer(Integer gameId) {
+        Optional<Game> optionalGame = gameRepository.findById(gameId);
+
+        if (optionalGame.isPresent()) {
+            Game game = optionalGame.get();
+            game.setTimer(System.currentTimeMillis());
+            gameRepository.save(game);
+        }
     }
 
     @Override
@@ -65,7 +85,7 @@ public class ClassicPIAGameServiceImpl implements GameService {
     }
 
     @Override
-    public GameStatus getGameStatus(Game game) {
+    public GameStatus getGameStatus(Integer gameId) {
         return null;
     }
 

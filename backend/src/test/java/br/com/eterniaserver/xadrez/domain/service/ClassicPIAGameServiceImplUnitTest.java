@@ -10,8 +10,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @ExtendWith(MockitoExtension.class)
@@ -42,6 +44,40 @@ class ClassicPIAGameServiceImplUnitTest {
         Assertions.assertNull(game.getBlackPlayerUUID());
         Assertions.assertEquals(0, game.getWhiteMoves());
         Assertions.assertEquals(0, game.getBlackMoves());
+    }
+
+    @Test
+    void testRefreshGameTimer() {
+        Integer gameId = 1;
+        Game game = Mockito.mock(Game.class);
+
+        Mockito.when(gameRepository.findById(gameId)).thenReturn(Optional.of(game));
+
+        gameService.refreshGameTimer(gameId);
+
+        Mockito.verify(game, Mockito.times(1)).setTimer(Mockito.anyLong());
+    }
+
+    @Test
+    void testCheckGameShouldReturnTrue() {
+        Integer gameId = 1;
+
+        Mockito.when(gameRepository.existsById(gameId)).thenReturn(true);
+
+        boolean result = gameService.checkGame(gameId);
+
+        Assertions.assertTrue(result);
+    }
+
+    @Test
+    void testCheckGameShouldReturnFalse() {
+        Integer gameId = 1;
+
+        Mockito.when(gameRepository.existsById(gameId)).thenReturn(false);
+
+        boolean result = gameService.checkGame(gameId);
+
+        Assertions.assertFalse(result);
     }
 
 }

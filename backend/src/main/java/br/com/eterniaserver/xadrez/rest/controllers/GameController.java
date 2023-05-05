@@ -30,6 +30,18 @@ public class GameController {
         };
     }
 
+    @GetMapping("check/{type}/{gameId}/")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public boolean checkGame(@PathVariable GameType type, @PathVariable Integer gameId) {
+        return getGameService(type).checkGame(gameId);
+    }
+
+    @GetMapping("refresh/{type}/{gameId}/")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public void refreshGameTimer(@PathVariable GameType type, @PathVariable Integer gameId) {
+        getGameService(type).refreshGameTimer(gameId);
+    }
+
     @GetMapping("list/")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public List<GameDto> listGames() {
@@ -42,7 +54,8 @@ public class GameController {
         return getGameService(type).getGames().stream().map(Game::getGameDto).toList();
     }
 
-    @PostMapping("create/{type}")
+    @PostMapping("create/{type}/")
+    @ResponseStatus(HttpStatus.ACCEPTED)
     public GameDto createGame(@PathVariable GameType type, @RequestBody PlayerDto playerDto) {
         return getGameService(type).createGame(playerDto.getUuid()).getGameDto();
     }
