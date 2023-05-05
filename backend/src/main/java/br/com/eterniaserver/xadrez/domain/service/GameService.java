@@ -8,7 +8,6 @@ import br.com.eterniaserver.xadrez.domain.enums.MoveType;
 import org.springframework.data.util.Pair;
 
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 public interface GameService {
