@@ -17,13 +17,13 @@ public class Board {
     @Column(name = "id", nullable = false)
     private Integer id;
 
-    @OneToMany(mappedBy = "whiteBoard")
+    @OneToMany(mappedBy = "whiteBoard", cascade = CascadeType.REMOVE)
     private List<Piece> whitePieces;
 
-    @OneToMany(mappedBy = "blackBoard")
+    @OneToMany(mappedBy = "blackBoard", cascade = CascadeType.REMOVE)
     private List<Piece> blackPieces;
 
-    @OneToMany(mappedBy = "board")
+    @OneToMany(mappedBy = "board", cascade = CascadeType.REMOVE)
     private List<History> histories = new ArrayList<>();
 
     public BoardDto getBoardDto() {

@@ -12,7 +12,6 @@ import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 
@@ -40,6 +39,15 @@ public class ClassicPPGameServiceImpl implements GameService {
     }
 
     @Override
+    public boolean checkGame(Integer gameId) {
+        return false;
+    }
+
+    @Override
+    public void refreshGameTimer(Integer gameId) {
+    }
+
+    @Override
     public Game enterGame(UUID blackUUID, Integer gameId) {
         return null;
     }
@@ -50,7 +58,7 @@ public class ClassicPPGameServiceImpl implements GameService {
     }
 
     @Override
-    public GameStatus getGameStatus(Game game) {
+    public GameStatus getGameStatus(Integer gameId) {
         return null;
     }
 

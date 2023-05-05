@@ -5,7 +5,8 @@
         color="#626aef"
         size="large"
         :loading="vsIaLoading"
-        @click="playVsIa">
+        @click="playVsIa"
+      >
         JOGAR CONTRA IA
       </el-button>
     </el-col>
@@ -34,6 +35,7 @@ export default {
 
   data() {
     return {
+      isValid: true,
       vsIaLoading: false,
     };
   },
@@ -46,10 +48,36 @@ export default {
     clearInterval(this.timer);
   },
 
+  async created() {
+    const self = this;
+
+    const iaGameDto = JSON.parse(localStorage.getItem("iaGameDto"));
+    const headers = { "Content-Type": "application/json" };
+    const gameType = iaGameDto.gameType;
+    const gameId = iaGameDto.id;
+
+    await fetch(`http://localhost:8000/api/game/check/${gameType}/${gameId}/`, {
+      method: "GET",
+      headers: headers,
+    })
+      .then(async (response) => {
+        const result = await response.json();
+        if (!result) {
+          self.isValid = false;
+        }
+      })
+      .catch(() => {
+        self.isValid = false;
+      });
+
+    if (this.isValid && gameType === "PLAYER_IA_CLASSIC") {
+      this.$router.push({ path: "/playervsia" });
+    }
+  },
+
   methods: {
     async playVsIa() {
       const self = this;
-      let isValid = true;
 
       self.vsIaLoading = true;
       const playerDto = JSON.parse(localStorage.getItem("playerDto"));
@@ -59,7 +87,7 @@ export default {
         identifier: playerDto.identifier,
       });
 
-      await fetch(`http://localhost:8000/api/game/create/PLAYER_IA_CLASSIC`, {
+      await fetch(`http://localhost:8000/api/game/create/PLAYER_IA_CLASSIC/`, {
         method: "POST",
         headers: headers,
         body: payload,
@@ -70,17 +98,17 @@ export default {
             localStorage.setItem("iaGameDto", JSON.stringify(data));
           } else {
             self.alertCreateFail();
-            isValid = false;
-            self.loading = false;
+            self.isValid = false;
+            self.vsIaLoading = false;
           }
         })
         .catch(() => {
           self.alertCreateFail();
-          isValid = false;
-          self.loading = false;
+          self.isValid = false;
+          self.vsIaLoading = false;
         });
 
-      if (isValid) {
+      if (self.isValid) {
         this.$router.push({ path: "/playervsia" });
       }
     },
