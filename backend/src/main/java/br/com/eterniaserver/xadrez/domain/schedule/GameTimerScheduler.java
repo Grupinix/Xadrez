@@ -14,9 +14,9 @@ import java.util.concurrent.TimeUnit;
 @AllArgsConstructor
 public class GameTimerScheduler {
 
-    private final static int LOBBY_GAME_TTL = 20;
-    private final static int PP_GAME_TTL = 600;
-    private final static int PIA_GAME_TTL = 900;
+    private static final int LOBBY_GAME_TTL = 20;
+    private static final int PP_GAME_TTL = 600;
+    private static final int PIA_GAME_TTL = 900;
 
     private final GameRepository gameRepository;
 
