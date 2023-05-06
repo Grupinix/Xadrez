@@ -19,6 +19,9 @@ body {
   margin: 0;
   background-color: #e2e2e2;
 }
+.pointer {
+  cursor: pointer;
+}
 .router-view {
   margin: 0;
 }

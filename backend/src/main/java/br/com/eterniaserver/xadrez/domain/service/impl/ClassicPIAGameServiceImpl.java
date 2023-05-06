@@ -32,6 +32,11 @@ public class ClassicPIAGameServiceImpl implements GameService {
     }
 
     @Override
+    public Game getGame(Integer gameId) {
+        return gameRepository.findById(gameId).orElse(null);
+    }
+
+    @Override
     public List<Game> getGames() {
         return gameRepository.findAllByBlackPlayerUUIDIsNullAndGameTypeEquals(
                 GameType.PLAYER_IA_CLASSIC

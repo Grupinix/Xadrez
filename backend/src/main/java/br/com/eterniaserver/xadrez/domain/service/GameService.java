@@ -175,14 +175,16 @@ public interface GameService {
             int y = col + (left ? -1 : 1);
 
             Integer[] leftPiece = pieceMatrix[x][y];
-            boolean pieceWhite = leftPiece != null && leftPiece[0] != null && leftPiece[1] == 1;
-            if (pieceWhite && !isWhite || !pieceWhite && isWhite) {
+            boolean hasPiece = leftPiece != null && leftPiece[0] != null;
+            if (hasPiece && (leftPiece[1] == 1 && !isWhite || leftPiece[1] == 0 && isWhite)) {
                 moves.add(Pair.of(x, y));
             }
         }
     }
 
     List<Game> getAllGames();
+
+    Game getGame(Integer gameId);
 
     List<Game> getGames();
 
