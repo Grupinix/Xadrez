@@ -95,9 +95,13 @@ export default {
         return;
       }
 
+      let url = process.env.VUE_APP_ROOT_API;
+      if (!!url) {
+        url = "http://localhost:8000/"
+      }
       const headers = { "Content-Type": "application/json" };
       const identifier = this.model.identifier;
-      await fetch(`http://localhost:8000/api/player/${identifier}/`, {
+      await fetch(`${url}api/player/${identifier}/`, {
         method: "POST",
         headers: headers,
       })
