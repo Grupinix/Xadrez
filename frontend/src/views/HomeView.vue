@@ -51,9 +51,9 @@ export default {
   async created() {
     const self = this;
 
-    let url = process.env.VUE_APP_ROOT_API;
+    let url = import.meta.env.VUE_APP_ROOT_API;
     if (!!url) {
-      url = "http://localhost:8000/"
+      url = "http://localhost:8000/";
     }
     const iaGameDto = JSON.parse(localStorage.getItem("iaGameDto"));
     const headers = { "Content-Type": "application/json" };
@@ -84,9 +84,9 @@ export default {
       const self = this;
 
       self.vsIaLoading = true;
-      let url = process.env.VUE_APP_ROOT_API;
+      let url = import.meta.env.VUE_APP_ROOT_API;
       if (!!url) {
-        url = "http://localhost:8000/"
+        url = "http://localhost:8000/";
       }
       const playerDto = JSON.parse(localStorage.getItem("playerDto"));
       const headers = { "Content-Type": "application/json" };

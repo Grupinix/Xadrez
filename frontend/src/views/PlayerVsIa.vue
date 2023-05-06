@@ -55,9 +55,9 @@ export default {
       this.$router.push({ path: "/inicio" });
     }
 
-    let url = process.env.VUE_APP_ROOT_API;
+    let url = import.meta.env.VUE_APP_ROOT_API;
     if (!!url) {
-      url = "http://localhost:8000/"
+      url = "http://localhost:8000/";
     }
     const self = this;
     const headers = { "Content-Type": "application/json" };

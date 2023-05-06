@@ -95,9 +95,9 @@ export default {
         return;
       }
 
-      let url = process.env.VUE_APP_ROOT_API;
+      let url = import.meta.env.VUE_APP_ROOT_API;
       if (!!url) {
-        url = "http://localhost:8000/"
+        url = "http://localhost:8000/";
       }
       const headers = { "Content-Type": "application/json" };
       const identifier = this.model.identifier;
