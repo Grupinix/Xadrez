@@ -1,5 +1,6 @@
 package br.com.eterniaserver.xadrez.rest.controllers;
 
+import br.com.eterniaserver.xadrez.domain.service.PlayerService;
 import br.com.eterniaserver.xadrez.rest.dtos.PlayerDto;
 
 import lombok.RequiredArgsConstructor;
@@ -14,12 +15,18 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class PlayerController {
 
-    @PutMapping("{identifier}/")
+    private final PlayerService playerService;
+
+    @PostMapping("{identifier}/")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public PlayerDto register(@PathVariable String identifier) {
-        UUID uuid = UUID.fromString(identifier);
+        return playerService.registerPlayer(identifier);
+    }
 
-        return new PlayerDto(uuid, identifier);
+    @GetMapping("{uuid}/")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public PlayerDto get(@PathVariable UUID uuid) {
+        return playerService.getFromUUID(uuid);
     }
 
 }

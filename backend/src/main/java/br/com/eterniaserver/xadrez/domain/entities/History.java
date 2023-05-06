@@ -1,6 +1,7 @@
 package br.com.eterniaserver.xadrez.domain.entities;
 
 import br.com.eterniaserver.xadrez.domain.enums.PieceType;
+import br.com.eterniaserver.xadrez.rest.dtos.HistoryDto;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -37,5 +38,17 @@ public class History {
     @Enumerated(EnumType.STRING)
     @Column(name = "killed_piece")
     private PieceType killedPiece;
+
+    public HistoryDto getHistoryDto() {
+        return HistoryDto.builder()
+                .id(getId())
+                .pieceType(getPieceType())
+                .oldPositionX(getOldPositionX())
+                .oldPositionY(getOldPositionY())
+                .newPositionX(getNewPositionX())
+                .newPositionY(getNewPositionY())
+                .killedPiece(getKilledPiece())
+                .build();
+    }
 
 }

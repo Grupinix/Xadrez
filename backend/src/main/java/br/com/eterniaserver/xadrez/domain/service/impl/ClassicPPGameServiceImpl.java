@@ -7,62 +7,64 @@ import br.com.eterniaserver.xadrez.domain.enums.GameType;
 import br.com.eterniaserver.xadrez.domain.enums.MoveType;
 import br.com.eterniaserver.xadrez.domain.repositories.GameRepository;
 import br.com.eterniaserver.xadrez.domain.service.GameService;
-import br.com.eterniaserver.xadrez.rest.dtos.GameDto;
 import lombok.AllArgsConstructor;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
-@Service("classicPIAGameService")
+
+@Service("classicPPGameService")
 @AllArgsConstructor
-public class ClassicPIAGameService implements GameService {
+public class ClassicPPGameServiceImpl implements GameService {
 
     private final GameRepository gameRepository;
 
     @Override
-    public List<GameDto> getAllGames() {
-        List<Game> gameList = gameRepository.findAllByBlackPlayerUUIDIsNull();
-        return convertToDtoList(gameList);
+    public List<Game> getAllGames() {
+        return gameRepository.findAllByBlackPlayerUUIDIsNull();
     }
 
     @Override
-    public List<GameDto> getGames() {
-        List<Game> gameList = gameRepository.findAllByBlackPlayerUUIDIsNullAndGameTypeEquals(
-                GameType.PLAYER_IA_CLASSIC
+    public List<Game> getGames() {
+        return gameRepository.findAllByBlackPlayerUUIDIsNullAndGameTypeEquals(
+                GameType.PLAYER_PLAYER_CLASSIC
         );
-        return convertToDtoList(gameList);
     }
 
-
     @Override
-    public GameDto createGame(UUID whiteUUID) {
+    public Game createGame(UUID whiteUUID) {
         return null;
     }
 
     @Override
-    public GameDto enterGame(UUID blackUUID, Integer gameId) {
+    public boolean checkGame(Integer gameId) {
+        return false;
+    }
+
+    @Override
+    public void refreshGameTimer(Integer gameId) {
+    }
+
+    @Override
+    public Game enterGame(UUID blackUUID, Integer gameId) {
         return null;
     }
 
     @Override
-    public Map<Pair<Integer, Integer>, List<Pair<MoveType, Pair<Integer, Integer>>>> getPossibleMoves(
+    public List<Pair<MoveType, Pair<Integer, Integer>>> getPossibleMoves(Game game, Piece piece, UUID playerUUID) {
+        return null;
+    }
+
+    @Override
+    public GameStatus getGameStatus(Integer gameId) {
+        return null;
+    }
+
+    @Override
+    public Game movePiece(
             Game game,
-            UUID playerUUID
-    ) {
-        return null;
-    }
-
-    @Override
-    public GameStatus getGameStatus(GameDto game) {
-        return null;
-    }
-
-    @Override
-    public GameDto movePiece(
-            GameDto game,
             UUID playerUUID,
             Piece piece,
             Pair<MoveType, Pair<Integer, Integer>> moveTypePairPair

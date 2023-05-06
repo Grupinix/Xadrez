@@ -1,6 +1,8 @@
 package br.com.eterniaserver.xadrez.domain.entities;
 
 import br.com.eterniaserver.xadrez.domain.enums.PieceType;
+import br.com.eterniaserver.xadrez.rest.dtos.BoardDto;
+import br.com.eterniaserver.xadrez.rest.dtos.PieceDto;
 import jakarta.persistence.*;
 import jakarta.persistence.Table;
 import lombok.Data;
@@ -16,11 +18,11 @@ public class Piece {
     private Integer id;
 
     @ManyToOne
-    @JoinColumn(name = "white_board_id", nullable = false)
+    @JoinColumn(name = "white_board_id")
     private Board whiteBoard;
 
     @ManyToOne
-    @JoinColumn(name = "black_board_id", nullable = false)
+    @JoinColumn(name = "black_board_id")
     private Board blackBoard;
 
     @Enumerated(EnumType.STRING)
@@ -32,5 +34,15 @@ public class Piece {
 
     @Column(name = "position_y", nullable = false)
     private Integer positionY;
+
+    public PieceDto getPieceDto() {
+        return PieceDto.builder()
+                .id(getId())
+                .pieceType(getPieceType())
+                .positionX(getPositionX())
+                .positionY(getPositionY())
+                .whitePiece(getWhiteBoard() != null)
+                .build();
+    }
 
 }

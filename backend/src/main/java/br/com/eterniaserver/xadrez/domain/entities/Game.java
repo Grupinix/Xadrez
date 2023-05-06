@@ -2,6 +2,7 @@ package br.com.eterniaserver.xadrez.domain.entities;
 
 import br.com.eterniaserver.xadrez.domain.enums.GameDifficulty;
 import br.com.eterniaserver.xadrez.domain.enums.GameType;
+import br.com.eterniaserver.xadrez.rest.dtos.GameDto;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -25,7 +26,7 @@ public class Game {
     @Column(name = "game_difficulty")
     private GameDifficulty gameDifficulty;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.REMOVE)
     @JoinColumn(name = "board_id", nullable = false)
     private Board board;
 
@@ -43,6 +44,24 @@ public class Game {
 
     @Column(name = "black_moves", nullable = false)
     private Integer blackMoves;
+
+    @Column(name = "time", nullable = false)
+    private Long timer;
+
+    public GameDto getGameDto() {
+        return GameDto.builder()
+                .id(getId())
+                .gameType(getGameType())
+                .gameDifficulty(getGameDifficulty())
+                .board(getBoard().getBoardDto())
+                .whiteTurn(getWhiteTurn())
+                .whitePlayerUUID(getWhitePlayerUUID())
+                .whiteMoves(getWhiteMoves())
+                .blackPlayerUUID(getBlackPlayerUUID())
+                .blackMoves(getBlackMoves())
+                .timer(getTimer())
+                .build();
+    }
 
 
 }

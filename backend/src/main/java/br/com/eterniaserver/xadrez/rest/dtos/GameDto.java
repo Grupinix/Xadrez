@@ -24,5 +24,6 @@ public class GameDto {
     private Integer whiteMoves;
     private UUID blackPlayerUUID;
     private Integer blackMoves;
+    private Long timer;
 
 }

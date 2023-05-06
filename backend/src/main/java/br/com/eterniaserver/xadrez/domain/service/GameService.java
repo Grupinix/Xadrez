@@ -4,52 +4,30 @@ import br.com.eterniaserver.xadrez.domain.entities.Game;
 import br.com.eterniaserver.xadrez.domain.entities.Piece;
 import br.com.eterniaserver.xadrez.domain.enums.GameStatus;
 import br.com.eterniaserver.xadrez.domain.enums.MoveType;
-import br.com.eterniaserver.xadrez.rest.dtos.GameDto;
+
 import org.springframework.data.util.Pair;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 public interface GameService {
 
-    default List<GameDto> convertToDtoList(List<Game> gameList) {
-        List<GameDto> gameDtoList = new ArrayList<>();
+    List<Game> getAllGames();
 
-        for (Game game : gameList) {
-            GameDto gameDto = GameDto.builder()
-                    .id(game.getId())
-                    .gameType(game.getGameType())
-                    .gameDifficulty(game.getGameDifficulty())
-                    .whiteTurn(game.getWhiteTurn())
-                    .whitePlayerUUID(game.getWhitePlayerUUID())
-                    .whiteMoves(game.getWhiteMoves())
-                    .blackPlayerUUID(game.getBlackPlayerUUID())
-                    .blackMoves(game.getBlackMoves())
-                    .build();
+    List<Game> getGames();
 
-            gameDtoList.add(gameDto);
-        }
+    Game createGame(UUID whiteUUID);
 
-        return gameDtoList;
-    }
+    boolean checkGame(Integer gameId);
 
-    List<GameDto> getAllGames();
+    void refreshGameTimer(Integer gameId);
 
-    List<GameDto> getGames();
+    Game enterGame(UUID blackUUID, Integer gameId);
 
-    GameDto createGame(UUID whiteUUID);
+    List<Pair<MoveType, Pair<Integer, Integer>>> getPossibleMoves(Game game, Piece piece, UUID playerUUID);
 
-    GameDto enterGame(UUID blackUUID, Integer gameId);
+    GameStatus getGameStatus(Integer gameId);
 
-    Map<Pair<Integer, Integer>, List<Pair<MoveType, Pair<Integer, Integer>>>> getPossibleMoves(
-            Game game,
-            UUID playerUUID
-    );
-
-    GameStatus getGameStatus(GameDto game);
-
-    GameDto movePiece(GameDto game, UUID playerUUID, Piece piece, Pair<MoveType, Pair<Integer, Integer>> moveTypePairPair);
+    Game movePiece(Game game, UUID playerUUID, Piece piece, Pair<MoveType, Pair<Integer, Integer>> moveTypePairPair);
 
 }
