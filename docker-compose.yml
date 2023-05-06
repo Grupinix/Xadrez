@@ -39,7 +39,7 @@ services:
       - xadrez-postgres
     network_mode: "host"
     environment:
-      - VUE_APP_ROOT_API=https://xadrez.eterniaserver.com.br/
+      - VUE_APP_ROOT_API=https://xadrez.eterniaserver.com.br
 
 volumes:
   xadrez-pg-data:

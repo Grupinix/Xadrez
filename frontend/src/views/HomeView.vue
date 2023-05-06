@@ -52,15 +52,15 @@ export default {
     const self = this;
 
     let url = import.meta.env.VUE_APP_ROOT_API;
-    if (!!url) {
-      url = "http://localhost:8000/";
+    if (url) {
+      url = "http://localhost:8000";
     }
     const iaGameDto = JSON.parse(localStorage.getItem("iaGameDto"));
     const headers = { "Content-Type": "application/json" };
     const gameType = iaGameDto.gameType;
     const gameId = iaGameDto.id;
 
-    await fetch(`${url}api/game/check/${gameType}/${gameId}/`, {
+    await fetch(`${url}/api/game/check/${gameType}/${gameId}/`, {
       method: "GET",
       headers: headers,
     })
@@ -86,7 +86,7 @@ export default {
       self.vsIaLoading = true;
       let url = import.meta.env.VUE_APP_ROOT_API;
       if (!!url) {
-        url = "http://localhost:8000/";
+        url = "http://localhost:8000";
       }
       const playerDto = JSON.parse(localStorage.getItem("playerDto"));
       const headers = { "Content-Type": "application/json" };
@@ -95,7 +95,7 @@ export default {
         identifier: playerDto.identifier,
       });
 
-      await fetch(`${url}api/game/create/PLAYER_IA_CLASSIC/`, {
+      await fetch(`${url}/api/game/create/PLAYER_IA_CLASSIC/`, {
         method: "POST",
         headers: headers,
         body: payload,
