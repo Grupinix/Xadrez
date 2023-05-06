@@ -56,15 +56,15 @@ export default {
     }
 
     let url = import.meta.env.VUE_APP_ROOT_API;
-    if (!!url) {
-      url = "http://localhost:8000/";
+    if (url) {
+      url = "http://localhost:8000";
     }
     const self = this;
     const headers = { "Content-Type": "application/json" };
     const gameType = this.iaGameDto.gameType;
     const gameId = this.iaGameDto.id;
 
-    await fetch(`${url}api/game/check/${gameType}/${gameId}/`, {
+    await fetch(`${url}/api/game/check/${gameType}/${gameId}/`, {
       method: "GET",
       headers: headers,
     })
