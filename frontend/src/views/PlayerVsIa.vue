@@ -28,6 +28,9 @@
 </template>
 
 <script>
+import GameService from "@/services/gameService";
+import PlayerService from "@/services/playerService";
+
 export default {
   name: "PlayerVsIa",
 
@@ -50,21 +53,25 @@ export default {
   },
 
   async created() {
+    const playerDto = JSON.parse(localStorage.getItem("playerDto"));
+    await PlayerService.verify(playerDto)
+        .then(async (response) => {
+          const result = await response.json();
+          if (!result) {
+            localStorage.removeItem("playerDto");
+            this.$router.push({ path: "/" });
+          }
+        });
+
     this.iaGameDto = JSON.parse(localStorage.getItem("iaGameDto"));
     if (!this.iaGameDto) {
       this.$router.push({ path: "/inicio" });
     }
 
-    const url = import.meta.env.PROD ? "https://xadrez.eterniaserver.com.br" : "http://localhost:8000";
     const self = this;
-    const headers = { "Content-Type": "application/json" };
     const gameType = this.iaGameDto.gameType;
     const gameId = this.iaGameDto.id;
-
-    await fetch(`${url}/api/game/check/${gameType}/${gameId}/`, {
-      method: "GET",
-      headers: headers,
-    })
+    await GameService.check(gameType, gameId)
       .then(async (response) => {
         const result = await response.json();
         if (!result) {
@@ -108,7 +115,7 @@ export default {
 
     getPieceImage(piece) {
       const pieceName = this.getPieceName(piece);
-      const url = `/src/assets/pieces/${pieceName}.webp`;
+      const url = `../assets/pieces/${pieceName}.webp`;
       return new URL(url, import.meta.url).href;
     },
   },

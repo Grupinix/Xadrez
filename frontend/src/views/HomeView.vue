@@ -27,6 +27,8 @@
 
 <script>
 import { ElMessage } from "element-plus";
+import GameService from "@/services/gameService";
+import PlayerService from "@/services/playerService";
 
 export default {
   name: "HomeView",
@@ -51,28 +53,34 @@ export default {
   async created() {
     const self = this;
 
-    const url = import.meta.env.PROD ? "https://xadrez.eterniaserver.com.br" : "http://localhost:8000";
+    const playerDto = JSON.parse(localStorage.getItem("playerDto"));
+    await PlayerService.verify(playerDto).then(async (response) => {
+      const result = await response.json();
+      if (!result) {
+        localStorage.removeItem("playerDto");
+        this.$router.push({ path: "/" });
+      }
+    });
+
     const iaGameDto = JSON.parse(localStorage.getItem("iaGameDto"));
-    const headers = { "Content-Type": "application/json" };
-    const gameType = iaGameDto.gameType;
-    const gameId = iaGameDto.id;
+    if (iaGameDto) {
+      const gameType = iaGameDto.gameType;
+      const gameId = iaGameDto.id;
 
-    await fetch(`${url}/api/game/check/${gameType}/${gameId}/`, {
-      method: "GET",
-      headers: headers,
-    })
-      .then(async (response) => {
-        const result = await response.json();
-        if (!result) {
-          self.isValid = false;
-        }
-      })
-      .catch(() => {
-        self.isValid = false;
-      });
+      await GameService.check(gameType, gameId)
+          .then(async (response) => {
+            const result = await response.json();
+            if (!result) {
+              self.isValid = false;
+            }
+          })
+          .catch(() => {
+            self.isValid = false;
+          });
 
-    if (this.isValid && gameType === "PLAYER_IA_CLASSIC") {
-      this.$router.push({ path: "/playervsia" });
+      if (this.isValid && gameType === "PLAYER_IA_CLASSIC") {
+        this.$router.push({ path: "/playervsia" });
+      }
     }
   },
 
@@ -81,19 +89,10 @@ export default {
       const self = this;
 
       self.vsIaLoading = true;
-      const url = import.meta.env.PROD ? "https://xadrez.eterniaserver.com.br" : "http://localhost:8000";
       const playerDto = JSON.parse(localStorage.getItem("playerDto"));
-      const headers = { "Content-Type": "application/json" };
-      const payload = JSON.stringify({
-        uuid: playerDto.uuid,
-        identifier: playerDto.identifier,
-      });
+      const gameType = "PLAYER_IA_CLASSIC";
 
-      await fetch(`${url}/api/game/create/PLAYER_IA_CLASSIC/`, {
-        method: "POST",
-        headers: headers,
-        body: payload,
-      })
+      await GameService.create(gameType, playerDto)
         .then(async (response) => {
           const data = await response.json();
           if (response.ok) {
