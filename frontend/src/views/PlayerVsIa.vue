@@ -31,6 +31,19 @@
 import GameService from "@/services/gameService";
 import PlayerService from "@/services/playerService";
 
+import BISHOP_BLACK from "../assets/pieces/BISHOP_BLACK.webp";
+import BISHOP_WHITE from "../assets/pieces/BISHOP_WHITE.webp";
+import HORSE_BLACK from "../assets/pieces/HORSE_BLACK.webp";
+import HORSE_WHITE from "../assets/pieces/HORSE_WHITE.webp";
+import KING_BLACK from "../assets/pieces/KING_BLACK.webp";
+import KING_WHITE from "../assets/pieces/KING_WHITE.webp";
+import PAWN_BLACK from "../assets/pieces/PAWN_BLACK.webp";
+import PAWN_WHITE from "../assets/pieces/PAWN_WHITE.webp";
+import QUEEN_BLACK from "../assets/pieces/QUEEN_BLACK.webp";
+import QUEEN_WHITE from "../assets/pieces/QUEEN_WHITE.webp";
+import TOWER_BLACK from "../assets/pieces/TOWER_BLACK.webp";
+import TOWER_WHITE from "../assets/pieces/TOWER_WHITE.webp";
+
 export default {
   name: "PlayerVsIa",
 
@@ -49,19 +62,32 @@ export default {
         [{}, {}, {}, {}, {}, {}, {}, {}],
         [{}, {}, {}, {}, {}, {}, {}, {}],
       ],
+      pieceImages: {
+        BISHOP_BLACK: BISHOP_BLACK,
+        BISHOP_WHITE: BISHOP_WHITE,
+        HORSE_BLACK: HORSE_BLACK,
+        HORSE_WHITE: HORSE_WHITE,
+        KING_BLACK: KING_BLACK,
+        KING_WHITE: KING_WHITE,
+        PAWN_BLACK: PAWN_BLACK,
+        PAWN_WHITE: PAWN_WHITE,
+        QUEEN_BLACK: QUEEN_BLACK,
+        QUEEN_WHITE: QUEEN_WHITE,
+        TOWER_BLACK: TOWER_BLACK,
+        TOWER_WHITE: TOWER_WHITE,
+      },
     };
   },
 
   async created() {
     const playerDto = JSON.parse(localStorage.getItem("playerDto"));
-    await PlayerService.verify(playerDto)
-        .then(async (response) => {
-          const result = await response.json();
-          if (!result) {
-            localStorage.removeItem("playerDto");
-            this.$router.push({ path: "/" });
-          }
-        });
+    await PlayerService.verify(playerDto).then(async (response) => {
+      const result = await response.json();
+      if (!result) {
+        localStorage.removeItem("playerDto");
+        this.$router.push({ path: "/" });
+      }
+    });
 
     this.iaGameDto = JSON.parse(localStorage.getItem("iaGameDto"));
     if (!this.iaGameDto) {
@@ -115,8 +141,7 @@ export default {
 
     getPieceImage(piece) {
       const pieceName = this.getPieceName(piece);
-      const url = `../assets/pieces/${pieceName}.webp`;
-      return new URL(url, import.meta.url).href;
+      return this.pieceImages[pieceName];
     },
   },
 };
