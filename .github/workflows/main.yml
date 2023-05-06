@@ -41,7 +41,8 @@ jobs:
         run: ./gradlew clean build test
 
   deploy:
-    name: Build and analyze
+    name: Deploy
+    needs: build
     runs-on: ubuntu-latest
 
     steps:
