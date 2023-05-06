@@ -13,7 +13,7 @@ RUN gradle clean build -x test --no-daemon
 
 
 # Run the application
-FROM openjdk:17-jdk-alpine AS xadrez-spring
+FROM amazoncorretto:17-alpine AS xadrez-spring
 
 LABEL maintainer="yurinogueira@id.uff.br"
 LABEL vendor="Grupinix"
