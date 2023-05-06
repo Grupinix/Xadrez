@@ -51,10 +51,7 @@ export default {
   async created() {
     const self = this;
 
-    let url = import.meta.env.VUE_APP_ROOT_API;
-    if (url) {
-      url = "http://localhost:8000";
-    }
+    const url = import.meta.env.PROD ? "https://xadrez.eterniaserver.com.br" : "http://localhost:8000";
     const iaGameDto = JSON.parse(localStorage.getItem("iaGameDto"));
     const headers = { "Content-Type": "application/json" };
     const gameType = iaGameDto.gameType;
@@ -84,10 +81,7 @@ export default {
       const self = this;
 
       self.vsIaLoading = true;
-      let url = import.meta.env.VUE_APP_ROOT_API;
-      if (!!url) {
-        url = "http://localhost:8000";
-      }
+      const url = import.meta.env.PROD ? "https://xadrez.eterniaserver.com.br" : "http://localhost:8000";
       const playerDto = JSON.parse(localStorage.getItem("playerDto"));
       const headers = { "Content-Type": "application/json" };
       const payload = JSON.stringify({

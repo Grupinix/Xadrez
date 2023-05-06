@@ -55,10 +55,7 @@ export default {
       this.$router.push({ path: "/inicio" });
     }
 
-    let url = import.meta.env.VUE_APP_ROOT_API;
-    if (url) {
-      url = "http://localhost:8000";
-    }
+    const url = import.meta.env.PROD ? "https://xadrez.eterniaserver.com.br" : "http://localhost:8000";
     const self = this;
     const headers = { "Content-Type": "application/json" };
     const gameType = this.iaGameDto.gameType;
