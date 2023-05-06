@@ -95,10 +95,7 @@ export default {
         return;
       }
 
-      let url = import.meta.env.VUE_APP_ROOT_API;
-      if (url) {
-        url = "http://localhost:8000";
-      }
+      const url = import.meta.env.PROD ? "https://xadrez.eterniaserver.com.br" : "http://localhost:8000";
       const headers = { "Content-Type": "application/json" };
       const identifier = this.model.identifier;
       await fetch(`${url}/api/player/${identifier}/`, {
