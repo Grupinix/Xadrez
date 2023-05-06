@@ -18,7 +18,7 @@ public class PlayerServiceImpl implements PlayerService {
     private static final Map<UUID, PlayerDto> uuidIdentifierMap = new HashMap<>();
 
     @Override
-    public PlayerDto registerPlayer(String identifier) throws ResponseStatusException {
+    public PlayerDto register(String identifier) throws ResponseStatusException {
         if (identifier.length() != 8) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
@@ -40,5 +40,18 @@ public class PlayerServiceImpl implements PlayerService {
         }
 
         return playerDto;
+    }
+
+    @Override
+    public Boolean verify(PlayerDto playerDto) {
+        UUID uuid = playerDto.getUuid();
+
+        PlayerDto savedPlayerDto = uuidIdentifierMap.get(uuid);
+        if (savedPlayerDto == null) {
+            uuidIdentifierMap.put(uuid, playerDto);
+            return true;
+        }
+
+        return savedPlayerDto.equals(playerDto);
     }
 }

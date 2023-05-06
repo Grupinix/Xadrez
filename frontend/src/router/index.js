@@ -34,10 +34,6 @@ router.beforeEach((to, _, next) => {
     return next({ path: "/" });
   }
 
-  if (!requiresAuth && playerUUID) {
-    return next({ path: "/inicio" });
-  }
-
   return next();
 });
 

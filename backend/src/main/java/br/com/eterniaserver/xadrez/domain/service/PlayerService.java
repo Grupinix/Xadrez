@@ -7,8 +7,10 @@ import java.util.UUID;
 
 public interface PlayerService {
 
-    PlayerDto registerPlayer(String identifier) throws ResponseStatusException;
+    PlayerDto register(String identifier) throws ResponseStatusException;
 
     PlayerDto getFromUUID(UUID uuid) throws ResponseStatusException;
+
+    Boolean verify(PlayerDto playerDto);
 
 }

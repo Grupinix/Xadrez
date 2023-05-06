@@ -10,6 +10,7 @@ import java.util.UUID;
 class PlayerServiceImplUnitTest {
 
     private static final String VALID = "8AFSD35D";
+    private static final String VALID_2 = "8A4SD35D";
     private static final String INVALID = "8AFSD";
 
     private PlayerService playerService;
@@ -21,13 +22,13 @@ class PlayerServiceImplUnitTest {
 
     @Test
     void shouldRegister() {
-        PlayerDto playerDto = playerService.registerPlayer(VALID);
+        PlayerDto playerDto = playerService.register(VALID);
         Assertions.assertNotNull(playerDto);
     }
 
     @Test
     void shouldRaiseExceptionWhenIdentifyLengthIsnt8() {
-        Assertions.assertThrows(ResponseStatusException.class, () -> playerService.registerPlayer(INVALID));
+        Assertions.assertThrows(ResponseStatusException.class, () -> playerService.register(INVALID));
     }
 
     @Nested
@@ -37,7 +38,7 @@ class PlayerServiceImplUnitTest {
 
         @BeforeEach
         void init() {
-            registered = playerService.registerPlayer(VALID);
+            registered = playerService.register(VALID);
         }
 
         @Test
@@ -53,6 +54,37 @@ class PlayerServiceImplUnitTest {
             Assertions.assertThrows(ResponseStatusException.class, () -> playerService.getFromUUID(uuid));
         }
 
+    }
+
+    @Test
+    void verifyShouldReturnTrueWhenNotRegistered() {
+        PlayerDto playerDto = new PlayerDto();
+        playerDto.setUuid(UUID.randomUUID());
+        playerDto.setIdentifier(VALID);
+
+        Assertions.assertTrue(playerService.verify(playerDto));
+    }
+
+    @Test
+    void verifyShouldReturnTrueWhenRegisteredWithSameInfos() {
+        PlayerDto playerRegistered = playerService.register(VALID);
+
+        PlayerDto playerDto = new PlayerDto();
+        playerDto.setIdentifier(VALID);
+        playerDto.setUuid(playerRegistered.getUuid());
+
+        Assertions.assertTrue(playerService.verify(playerDto));
+    }
+
+    @Test
+    void verifyShouldReturnFalseWhenRegisteredWithDifferentIdentifier() {
+        PlayerDto playerRegistered = playerService.register(VALID);
+
+        PlayerDto playerDto = new PlayerDto();
+        playerDto.setIdentifier(VALID_2);
+        playerDto.setUuid(playerRegistered.getUuid());
+
+        Assertions.assertFalse(playerService.verify(playerDto));
     }
 
 }

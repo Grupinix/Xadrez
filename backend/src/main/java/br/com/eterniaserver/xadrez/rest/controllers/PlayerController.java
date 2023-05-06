@@ -17,14 +17,20 @@ public class PlayerController {
 
     private final PlayerService playerService;
 
-    @PostMapping("{identifier}/")
-    @ResponseStatus(HttpStatus.ACCEPTED)
+    @PutMapping("verify/")
+    @ResponseStatus(HttpStatus.OK)
+    public Boolean verify(@RequestBody PlayerDto playerDto) {
+        return playerService.verify(playerDto);
+    }
+
+    @PutMapping("{identifier}/")
+    @ResponseStatus(HttpStatus.OK)
     public PlayerDto register(@PathVariable String identifier) {
-        return playerService.registerPlayer(identifier);
+        return playerService.register(identifier);
     }
 
     @GetMapping("{uuid}/")
-    @ResponseStatus(HttpStatus.ACCEPTED)
+    @ResponseStatus(HttpStatus.OK)
     public PlayerDto get(@PathVariable UUID uuid) {
         return playerService.getFromUUID(uuid);
     }

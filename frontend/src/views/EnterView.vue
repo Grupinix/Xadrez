@@ -32,6 +32,7 @@
 import { shallowRef } from "vue";
 import { Lock, Message } from "@element-plus/icons-vue";
 import { ElMessage } from "element-plus";
+import PlayerService from "@/services/playerService";
 
 export default {
   name: "EnterView",
@@ -68,9 +69,18 @@ export default {
       return;
     }
 
-    if (playerDto.uuid) {
-      this.$router.push({ path: "/inicio" });
-    }
+    await PlayerService.verify(playerDto)
+      .then(async (response) => {
+        const result = await response.json();
+        if (result) {
+          this.$router.push({ path: "/inicio" });
+        } else {
+          localStorage.removeItem("playerDto");
+        }
+      })
+      .catch(() => {
+        localStorage.removeItem("playerDto");
+      });
   },
 
   methods: {
@@ -95,13 +105,8 @@ export default {
         return;
       }
 
-      const url = import.meta.env.PROD ? "https://xadrez.eterniaserver.com.br" : "http://localhost:8000";
-      const headers = { "Content-Type": "application/json" };
       const identifier = this.model.identifier;
-      await fetch(`${url}/api/player/${identifier}/`, {
-        method: "POST",
-        headers: headers,
-      })
+      await PlayerService.register(identifier)
         .then(async (response) => {
           const data = await response.json();
           if (response.ok) {
