@@ -3,7 +3,7 @@ name: SonarCloud Build and Test
 on:
   push:
     branches:
-      - main
+      - dev
   pull_request:
     types: [opened, synchronize, reopened]
 
