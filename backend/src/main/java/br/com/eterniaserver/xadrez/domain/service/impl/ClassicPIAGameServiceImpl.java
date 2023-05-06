@@ -80,8 +80,9 @@ public class ClassicPIAGameServiceImpl implements GameService {
     }
 
     @Override
-    public List<Pair<MoveType, Pair<Integer, Integer>>> getPossibleMoves(Game game, Piece piece, UUID playerUUID) {
-        return null;
+    public List<Pair<MoveType, Pair<Integer, Integer>>> getPossibleMoves(Game game, Piece piece, UUID uuid) {
+        boolean isWhite = game.getWhitePlayerUUID().equals(uuid);
+        return getPiecePossibleMoves(game, piece, isWhite);
     }
 
     @Override

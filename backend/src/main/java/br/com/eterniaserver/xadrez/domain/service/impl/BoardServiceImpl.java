@@ -46,16 +46,16 @@ public class BoardServiceImpl implements BoardService {
 
         List<Piece> pieces = new ArrayList<>();
 
-        int pieceYNonPawn = isWhite ? 7 : 0;
-        int pieceYPawn = isWhite ? 6 : 1;
+        int pieceXNonPawn = isWhite ? 7 : 0;
+        int pieceXPawn = isWhite ? 6 : 1;
 
         for (boolean isPawn : List.of(false, true)) {
             for (int i = 0; i < 8; i++) {
                 PieceType pieceType = isPawn ? PieceType.PAWN : pieceOrdering[i];
                 Piece piece = new Piece();
                 piece.setPieceType(pieceType);
-                piece.setPositionY(isPawn ? pieceYPawn : pieceYNonPawn);
-                piece.setPositionX(i);
+                piece.setPositionX(isPawn ? pieceXPawn : pieceXNonPawn);
+                piece.setPositionY(i);
 
                 if (isWhite) {
                     piece.setWhiteBoard(board);

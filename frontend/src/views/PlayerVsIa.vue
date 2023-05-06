@@ -124,7 +124,7 @@ export default {
       for (let i = 0; i < pieceArray.length; i++) {
         let piece = pieceArray[i];
 
-        const matrixPiece = this.gameMatrix[piece.positionY][piece.positionX];
+        const matrixPiece = this.gameMatrix[piece.positionX][piece.positionY];
 
         matrixPiece.positionX = piece.positionX;
         matrixPiece.positionY = piece.positionY;
