@@ -19,6 +19,9 @@ public class History {
     @JoinColumn(name = "board_id", nullable = false)
     private Board board;
 
+    @Column(name = "is_white", nullable = false)
+    private Boolean isWhite;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "piece_type", nullable = false)
     private PieceType pieceType;
@@ -43,6 +46,7 @@ public class History {
         return HistoryDto.builder()
                 .id(getId())
                 .pieceType(getPieceType())
+                .isWhite(getIsWhite())
                 .oldPositionX(getOldPositionX())
                 .oldPositionY(getOldPositionY())
                 .newPositionX(getNewPositionX())

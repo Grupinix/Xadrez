@@ -8,9 +8,12 @@ import br.com.eterniaserver.xadrez.domain.enums.GameType;
 import br.com.eterniaserver.xadrez.domain.enums.MoveType;
 import br.com.eterniaserver.xadrez.domain.repositories.BoardRepository;
 import br.com.eterniaserver.xadrez.domain.repositories.GameRepository;
+import br.com.eterniaserver.xadrez.domain.repositories.HistoryRepository;
 import br.com.eterniaserver.xadrez.domain.repositories.PieceRepository;
 import br.com.eterniaserver.xadrez.domain.service.impl.BoardServiceImpl;
 import br.com.eterniaserver.xadrez.domain.service.impl.ClassicPIAGameServiceImpl;
+import br.com.eterniaserver.xadrez.rest.dtos.MoveDto;
+import br.com.eterniaserver.xadrez.rest.dtos.PositionDto;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -19,7 +22,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.util.Pair;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -29,15 +32,48 @@ import java.util.UUID;
 class ClassicPIAGameServiceImplUnitTest {
 
     @Mock
+    private BoardService boardService;
+    @Mock
     private GameRepository gameRepository;
     @Mock
-    private BoardService boardService;
+    private BoardRepository boardRepository;
+    @Mock
+    private PieceRepository pieceRepository;
+    @Mock
+    private HistoryRepository historyRepository;
 
     private GameService gameService;
 
     @BeforeEach
     void init() {
-        gameService = new ClassicPIAGameServiceImpl(gameRepository, boardService);
+        gameService = new ClassicPIAGameServiceImpl(
+                boardService,
+                gameRepository,
+                historyRepository,
+                pieceRepository,
+                boardRepository
+        );
+    }
+
+    @Test
+    void testGetInvalidGame() {
+        Integer gameId = 1;
+        Assertions.assertThrows(ResponseStatusException.class, () ->  gameService.getGame(gameId));
+    }
+
+    @Test
+    void testGetGame() {
+        UUID uuid = UUID.randomUUID();
+        Integer gameId = 1;
+
+        Game game = gameService.createGame(uuid);
+        game.setId(1);
+
+        Mockito.when(gameRepository.findById(gameId)).thenReturn(Optional.of(game));
+
+        Game getGame = gameService.getGame(gameId);
+
+        Assertions.assertEquals(game, getGame);
     }
 
     @Test
@@ -90,16 +126,11 @@ class ClassicPIAGameServiceImplUnitTest {
     }
 
     @Nested
-    class TestPossibleMoves {
+    class TestMoves {
 
         private Game game;
         private UUID white;
         private UUID black;
-
-        @Mock
-        private BoardRepository boardRepository;
-        @Mock
-        private PieceRepository pieceRepository;
 
 
         @BeforeEach
@@ -129,7 +160,7 @@ class ClassicPIAGameServiceImplUnitTest {
             int positionX = pawn.getPositionX();
             int positionY = pawn.getPositionY();
 
-            List<Pair<MoveType, Pair<Integer, Integer>>> moves = gameService.getPossibleMoves(game, pawn, white);
+            List<MoveDto> moves = gameService.getPossibleMoves(game, pawn, white);
 
             Assertions.assertEquals(2, moves.size());
             Assertions.assertEquals(MoveType.NORMAL, moves.get(0).getFirst());
@@ -151,7 +182,7 @@ class ClassicPIAGameServiceImplUnitTest {
             int expectedX = pawn2.getPositionX();
             int expectedY = pawn2.getPositionY();
 
-            List<Pair<MoveType, Pair<Integer, Integer>>> moves = gameService.getPossibleMoves(game, pawn, white);
+            List<MoveDto> moves = gameService.getPossibleMoves(game, pawn, white);
 
             Assertions.assertEquals(2, moves.size());
             Assertions.assertEquals(MoveType.NORMAL, moves.get(0).getFirst());
@@ -171,7 +202,7 @@ class ClassicPIAGameServiceImplUnitTest {
             int expectedX = pawn.getPositionX();
             int expectedY = pawn.getPositionY();
 
-            List<Pair<MoveType, Pair<Integer, Integer>>> moves = gameService.getPossibleMoves(game, pawn2, black);
+            List<MoveDto> moves = gameService.getPossibleMoves(game, pawn2, black);
 
             Assertions.assertEquals(2, moves.size());
             Assertions.assertEquals(MoveType.NORMAL, moves.get(0).getFirst());
@@ -184,7 +215,7 @@ class ClassicPIAGameServiceImplUnitTest {
         void testWhiteQueenStartMoves() {
             Piece queen = game.getBoard().getWhitePieces().get(3);
 
-            List<Pair<MoveType, Pair<Integer, Integer>>> moves = gameService.getPossibleMoves(game, queen, white);
+            List<MoveDto> moves = gameService.getPossibleMoves(game, queen, white);
 
             Assertions.assertEquals(0, moves.size());
         }
@@ -194,7 +225,7 @@ class ClassicPIAGameServiceImplUnitTest {
             game.getBoard().getWhitePieces().remove(11);
             Piece queen = game.getBoard().getWhitePieces().get(3);
 
-            List<Pair<MoveType, Pair<Integer, Integer>>> moves = gameService.getPossibleMoves(game, queen, white);
+            List<MoveDto> moves = gameService.getPossibleMoves(game, queen, white);
 
             Assertions.assertEquals(6, moves.size());
             Assertions.assertEquals(MoveType.NORMAL, moves.get(0).getFirst());
@@ -211,7 +242,7 @@ class ClassicPIAGameServiceImplUnitTest {
             Piece queen = game.getBoard().getWhitePieces().get(3);
             queen.setPositionX(6);
 
-            List<Pair<MoveType, Pair<Integer, Integer>>> moves = gameService.getPossibleMoves(game, queen, white);
+            List<MoveDto> moves = gameService.getPossibleMoves(game, queen, white);
 
             Assertions.assertEquals(13, moves.size());
             Assertions.assertEquals(MoveType.NORMAL, moves.get(0).getFirst());
@@ -233,7 +264,7 @@ class ClassicPIAGameServiceImplUnitTest {
         void testWhiteBishopStartMove() {
             Piece bishop = game.getBoard().getWhitePieces().get(2);
 
-            List<Pair<MoveType, Pair<Integer, Integer>>> moves = gameService.getPossibleMoves(game, bishop, white);
+            List<MoveDto> moves = gameService.getPossibleMoves(game, bishop, white);
 
             Assertions.assertEquals(0, moves.size());
         }
@@ -242,7 +273,7 @@ class ClassicPIAGameServiceImplUnitTest {
         void testWhiteHorseStartMove() {
             Piece horse = game.getBoard().getWhitePieces().get(1);
 
-            List<Pair<MoveType, Pair<Integer, Integer>>> moves = gameService.getPossibleMoves(game, horse, white);
+            List<MoveDto> moves = gameService.getPossibleMoves(game, horse, white);
 
             Assertions.assertEquals(2, moves.size());
         }
@@ -251,7 +282,7 @@ class ClassicPIAGameServiceImplUnitTest {
         void testWhiteTowerStartMove() {
             Piece tower = game.getBoard().getWhitePieces().get(0);
 
-            List<Pair<MoveType, Pair<Integer, Integer>>> moves = gameService.getPossibleMoves(game, tower, white);
+            List<MoveDto> moves = gameService.getPossibleMoves(game, tower, white);
 
             Assertions.assertEquals(0, moves.size());
         }
@@ -260,9 +291,209 @@ class ClassicPIAGameServiceImplUnitTest {
         void testWhiteKingStartMove() {
             Piece king = game.getBoard().getWhitePieces().get(4);
 
-            List<Pair<MoveType, Pair<Integer, Integer>>> moves = gameService.getPossibleMoves(game, king, white);
+            List<MoveDto> moves = gameService.getPossibleMoves(game, king, white);
 
             Assertions.assertEquals(0, moves.size());
+        }
+
+        @Test
+        void testMoveWhiteInBlackTurn() {
+            game.setWhiteTurn(false);
+            Piece pawn = game.getBoard().getWhitePieces().get(8);
+            int positionX = pawn.getPositionX();
+            int positionY = pawn.getPositionY();
+
+            PositionDto positionDto = PositionDto.builder()
+                                                 .first(positionX - 2)
+                                                 .second(positionY)
+                                                 .build();
+            MoveDto moveDto = MoveDto.builder()
+                                     .first(MoveType.NORMAL)
+                                     .second(positionDto)
+                                     .build();
+
+            Assertions.assertThrows(
+                    ResponseStatusException.class, () ->  gameService.movePiece(game, white, pawn, moveDto)
+            );
+        }
+
+
+        @Test
+        void testMoveWhiteToPosition() {
+            Piece pawn = game.getBoard().getWhitePieces().get(8);
+            int positionX = pawn.getPositionX();
+            int positionY = pawn.getPositionY();
+
+            PositionDto positionDto = PositionDto.builder()
+                                                 .first(positionX - 2)
+                                                 .second(positionY)
+                                                 .build();
+            MoveDto moveDto = MoveDto.builder()
+                                     .first(MoveType.NORMAL)
+                                     .second(positionDto)
+                                     .build();
+
+            gameService.movePiece(game, white, pawn, moveDto);
+
+            Assertions.assertEquals(1, game.getBoard().getHistories().size());
+            Assertions.assertEquals(positionX - 2, pawn.getPositionX());
+            Assertions.assertEquals(positionY, pawn.getPositionY());
+        }
+
+        @Test
+        void testMoveWhiteToSameTeamPieceShouldRaiseError() {
+            Piece pawn = game.getBoard().getWhitePieces().get(8);
+            int positionX = pawn.getPositionX();
+            int positionY = pawn.getPositionY();
+
+            PositionDto positionDto = PositionDto.builder()
+                                                 .first(positionX)
+                                                 .second(positionY + 1)
+                                                 .build();
+            MoveDto moveDto = MoveDto.builder()
+                                     .first(MoveType.CAPTURE)
+                                     .second(positionDto)
+                                     .build();
+
+            Assertions.assertThrows(
+                    ResponseStatusException.class, () ->  gameService.movePiece(game, white, pawn, moveDto)
+            );
+        }
+
+        @Test
+        void testMoveWhiteToCaptureVoidShouldRaiseError() {
+            Piece pawn = game.getBoard().getWhitePieces().get(8);
+            int positionX = pawn.getPositionX();
+            int positionY = pawn.getPositionY();
+
+            PositionDto positionDto = PositionDto.builder()
+                                                 .first(positionX -2)
+                                                 .second(positionY)
+                                                 .build();
+            MoveDto moveDto = MoveDto.builder()
+                                     .first(MoveType.CAPTURE)
+                                     .second(positionDto)
+                                     .build();
+
+            Assertions.assertThrows(
+                    ResponseStatusException.class, () ->  gameService.movePiece(game, white, pawn, moveDto)
+            );
+        }
+
+        @Test
+        void testMoveWhiteToCaptureAnotherPawn() {
+            Piece pawn = game.getBoard().getWhitePieces().get(8);
+            pawn.setPositionX(2);
+
+            int positionX = pawn.getPositionX();
+            int positionY = pawn.getPositionY();
+
+            PositionDto positionDto = PositionDto.builder()
+                                                 .first(positionX - 1)
+                                                 .second(positionY + 1)
+                                                 .build();
+            MoveDto moveDto = MoveDto.builder()
+                                     .first(MoveType.CAPTURE)
+                                     .second(positionDto)
+                                     .build();
+
+            gameService.movePiece(game, white, pawn, moveDto);
+
+            Assertions.assertEquals(1, game.getBoard().getHistories().size());
+            Assertions.assertEquals(15, game.getBoard().getBlackPieces().size());
+            Assertions.assertEquals(positionX - 1, pawn.getPositionX());
+            Assertions.assertEquals(positionY + 1, pawn.getPositionY());
+        }
+
+        @Test
+        void testMoveBlackToPosition() {
+            game.setWhiteTurn(false);
+            Piece pawn = game.getBoard().getBlackPieces().get(8);
+            int positionX = pawn.getPositionX();
+            int positionY = pawn.getPositionY();
+
+            PositionDto positionDto = PositionDto.builder()
+                                                 .first(positionX + 2)
+                                                 .second(positionY)
+                                                 .build();
+            MoveDto moveDto = MoveDto.builder()
+                                     .first(MoveType.NORMAL)
+                                     .second(positionDto)
+                                     .build();
+
+            gameService.movePiece(game, black, pawn, moveDto);
+
+            Assertions.assertEquals(1, game.getBoard().getHistories().size());
+            Assertions.assertEquals(positionX + 2, pawn.getPositionX());
+            Assertions.assertEquals(positionY, pawn.getPositionY());
+        }
+
+        @Test
+        void testMoveBlackToSameTeamPieceShouldRaiseError() {
+            game.setWhiteTurn(false);
+            Piece pawn = game.getBoard().getBlackPieces().get(8);
+            int positionX = pawn.getPositionX();
+            int positionY = pawn.getPositionY();
+
+            PositionDto positionDto = PositionDto.builder()
+                                                 .first(positionX)
+                                                 .second(positionY + 1)
+                                                 .build();
+            MoveDto moveDto = MoveDto.builder()
+                                     .first(MoveType.CAPTURE)
+                                     .second(positionDto)
+                                     .build();
+
+            Assertions.assertThrows(
+                    ResponseStatusException.class, () ->  gameService.movePiece(game, black, pawn, moveDto)
+            );
+        }
+
+        @Test
+        void testMoveBlackToCaptureVoidShouldRaiseError() {
+            game.setWhiteTurn(false);
+            Piece pawn = game.getBoard().getBlackPieces().get(8);
+            int positionX = pawn.getPositionX();
+            int positionY = pawn.getPositionY();
+
+            PositionDto positionDto = PositionDto.builder()
+                                                 .first(positionX + 2)
+                                                 .second(positionY)
+                                                 .build();
+            MoveDto moveDto = MoveDto.builder()
+                                     .first(MoveType.CAPTURE)
+                                     .second(positionDto)
+                                     .build();
+
+            Assertions.assertThrows(
+                    ResponseStatusException.class, () ->  gameService.movePiece(game, black, pawn, moveDto)
+            );
+        }
+
+        @Test
+        void testMoveBlackToCaptureAnotherPawn() {
+            game.setWhiteTurn(false);
+            Piece pawn = game.getBoard().getBlackPieces().get(8);
+            pawn.setPositionX(5);
+
+            int positionX = pawn.getPositionX();
+            int positionY = pawn.getPositionY();
+
+            PositionDto positionDto = PositionDto.builder()
+                                                 .first(positionX + 1)
+                                                 .second(positionY + 1)
+                                                 .build();
+            MoveDto moveDto = MoveDto.builder()
+                                     .first(MoveType.CAPTURE)
+                                     .second(positionDto)
+                                     .build();
+
+            gameService.movePiece(game, black, pawn, moveDto);
+
+            Assertions.assertEquals(1, game.getBoard().getHistories().size());
+            Assertions.assertEquals(15, game.getBoard().getWhitePieces().size());
+            Assertions.assertEquals(positionX + 1, pawn.getPositionX());
+            Assertions.assertEquals(positionY + 1, pawn.getPositionY());
         }
     }
 

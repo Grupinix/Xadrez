@@ -1,5 +1,6 @@
 package br.com.eterniaserver.xadrez.domain.service;
 
+import br.com.eterniaserver.xadrez.domain.enums.GameDifficulty;
 import br.com.eterniaserver.xadrez.domain.service.impl.PlayerServiceImpl;
 import br.com.eterniaserver.xadrez.rest.dtos.PlayerDto;
 import org.junit.jupiter.api.*;
@@ -86,5 +87,16 @@ class PlayerServiceImplUnitTest {
 
         Assertions.assertFalse(playerService.verify(playerDto));
     }
+
+    @Test
+    void verifyPlayerDifficulty() {
+        PlayerDto playerRegistered = playerService.register(VALID);
+
+        playerService.setGameDifficulty(playerRegistered.getUuid(), GameDifficulty.NORMAL);
+        GameDifficulty gameDifficulty = playerService.getGameDifficulty(playerRegistered.getUuid());
+
+        Assertions.assertEquals(GameDifficulty.NORMAL, gameDifficulty);
+    }
+
 
 }

@@ -1,5 +1,6 @@
 package br.com.eterniaserver.xadrez.rest.controllers;
 
+import br.com.eterniaserver.xadrez.domain.enums.GameDifficulty;
 import br.com.eterniaserver.xadrez.domain.service.PlayerService;
 import br.com.eterniaserver.xadrez.rest.dtos.PlayerDto;
 
@@ -33,6 +34,14 @@ public class PlayerController {
     @ResponseStatus(HttpStatus.OK)
     public PlayerDto get(@PathVariable UUID uuid) {
         return playerService.getFromUUID(uuid);
+    }
+
+    @PutMapping("setDifficulty/{gameDifficulty}/")
+    @ResponseStatus(HttpStatus.OK)
+    public PlayerDto setGameDifficulty(@PathVariable GameDifficulty gameDifficulty, @RequestBody PlayerDto playerDto) {
+        playerDto.setGameDifficulty(gameDifficulty);
+        playerService.setGameDifficulty(playerDto.getUuid(), gameDifficulty);
+        return playerDto;
     }
 
 }

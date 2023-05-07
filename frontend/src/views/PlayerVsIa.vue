@@ -29,6 +29,7 @@
           <div
             v-else
             class="chess-piece"
+            @click="getPossibleMoves(piece)"
             :class="{
               'selected-square': piece.isSelected,
               'possible-move-square': piece.isPossibleMove,
@@ -40,7 +41,11 @@
   </el-row>
 </template>
 
-<script>
+<script setup>
+import { ref, onMounted, onUnmounted } from "vue";
+import { ElLoading } from "element-plus";
+
+import router from "../router";
 import GameService from "@/services/gameService";
 import PlayerService from "@/services/playerService";
 
@@ -57,158 +62,244 @@ import QUEEN_WHITE from "../assets/pieces/QUEEN_WHITE.webp";
 import TOWER_BLACK from "../assets/pieces/TOWER_BLACK.webp";
 import TOWER_WHITE from "../assets/pieces/TOWER_WHITE.webp";
 
-export default {
-  name: "PlayerVsIa",
+const loading = ref({});
+const timer = ref(null);
+const isValid = ref(true);
+const selectedPiece = ref({});
+const playerDto = ref({});
+const iaGameDto = ref({});
+const gameMatrix = ref([
+  [{}, {}, {}, {}, {}, {}, {}, {}],
+  [{}, {}, {}, {}, {}, {}, {}, {}],
+  [{}, {}, {}, {}, {}, {}, {}, {}],
+  [{}, {}, {}, {}, {}, {}, {}, {}],
+  [{}, {}, {}, {}, {}, {}, {}, {}],
+  [{}, {}, {}, {}, {}, {}, {}, {}],
+  [{}, {}, {}, {}, {}, {}, {}, {}],
+  [{}, {}, {}, {}, {}, {}, {}, {}],
+]);
+const pieceImages = ref({
+  BISHOP_BLACK: BISHOP_BLACK,
+  BISHOP_WHITE: BISHOP_WHITE,
+  HORSE_BLACK: HORSE_BLACK,
+  HORSE_WHITE: HORSE_WHITE,
+  KING_BLACK: KING_BLACK,
+  KING_WHITE: KING_WHITE,
+  PAWN_BLACK: PAWN_BLACK,
+  PAWN_WHITE: PAWN_WHITE,
+  QUEEN_BLACK: QUEEN_BLACK,
+  QUEEN_WHITE: QUEEN_WHITE,
+  TOWER_BLACK: TOWER_BLACK,
+  TOWER_WHITE: TOWER_WHITE,
+});
 
-  data() {
-    return {
-      selectedPiece: {},
-      isValid: true,
-      playerDto: {},
-      iaGameDto: {},
-      gameMatrix: [
-        [{}, {}, {}, {}, {}, {}, {}, {}],
-        [{}, {}, {}, {}, {}, {}, {}, {}],
-        [{}, {}, {}, {}, {}, {}, {}, {}],
-        [{}, {}, {}, {}, {}, {}, {}, {}],
-        [{}, {}, {}, {}, {}, {}, {}, {}],
-        [{}, {}, {}, {}, {}, {}, {}, {}],
-        [{}, {}, {}, {}, {}, {}, {}, {}],
-        [{}, {}, {}, {}, {}, {}, {}, {}],
-      ],
-      pieceImages: {
-        BISHOP_BLACK: BISHOP_BLACK,
-        BISHOP_WHITE: BISHOP_WHITE,
-        HORSE_BLACK: HORSE_BLACK,
-        HORSE_WHITE: HORSE_WHITE,
-        KING_BLACK: KING_BLACK,
-        KING_WHITE: KING_WHITE,
-        PAWN_BLACK: PAWN_BLACK,
-        PAWN_WHITE: PAWN_WHITE,
-        QUEEN_BLACK: QUEEN_BLACK,
-        QUEEN_WHITE: QUEEN_WHITE,
-        TOWER_BLACK: TOWER_BLACK,
-        TOWER_WHITE: TOWER_WHITE,
-      },
-    };
-  },
+onMounted(() => {
+  timer.value = setInterval(async () => {
+    iaGameDto.value = JSON.parse(localStorage.getItem("iaGameDto")) || {};
+    if (iaGameDto.value.id) {
+      GameService.get(iaGameDto.value.gameType, iaGameDto.value.id)
+        .then((response) => {
+          response.json().then((result) => {
+            if (result) {
+              iaGameDto.value = result;
+              localStorage.setItem("iaGameDto", JSON.stringify(result));
+              fillGameMatrix(iaGameDto.value.board.whitePieces);
+              fillGameMatrix(iaGameDto.value.board.blackPieces);
+            }
+          });
+        })
+        .catch(() => {
+          isValid.value = false;
+        });
+    }
+  }, 2000);
+});
 
-  async created() {
-    const playerDto = JSON.parse(localStorage.getItem("playerDto"));
-    await PlayerService.verify(playerDto).then(async (response) => {
-      const result = await response.json();
+onUnmounted(() => {
+  clearInterval(timer.value);
+});
+
+function clearGameMatrix() {
+  for (let i = 0; i < 8; i++) {
+    for (let j = 0; j < 8; j++) {
+      gameMatrix.value[i][j].move = {};
+      gameMatrix.value[i][j].isPossibleMove = false;
+      gameMatrix.value[i][j].isSelected = false;
+      gameMatrix.value[i][j].id = null;
+      gameMatrix.value[i][j].pieceType = null;
+      gameMatrix.value[i][j].whitePiece = null;
+    }
+  }
+}
+
+function fillGameMatrix(pieceArray) {
+  for (let i = 0; i < pieceArray.length; i++) {
+    let piece = pieceArray[i];
+
+    const matrixPiece = gameMatrix.value[piece.positionX][piece.positionY];
+
+    matrixPiece.positionX = piece.positionX;
+    matrixPiece.positionY = piece.positionY;
+    matrixPiece.id = piece.id;
+    matrixPiece.pieceType = piece.pieceType;
+    matrixPiece.whitePiece = piece.whitePiece;
+  }
+}
+
+function getPieceName(piece) {
+  const pieceColor = piece.whitePiece ? "_WHITE" : "_BLACK";
+  return `${piece.pieceType}${pieceColor}`;
+}
+
+function getPieceImage(piece) {
+  const pieceName = getPieceName(piece);
+  return pieceImages.value[pieceName];
+}
+
+function setPieceSelected(piece) {
+  for (let i = 0; i < gameMatrix.value.length; i++) {
+    for (let j = 0; j < gameMatrix.value[i].length; j++) {
+      const matrixPiece = gameMatrix.value[i][j];
+      matrixPiece.isPossibleMove = false;
+      matrixPiece.isSelected = matrixPiece.id === piece.id;
+    }
+  }
+}
+
+function setPossiblesMoves(listOfMoves) {
+  for (let i = 0; i < listOfMoves.length; i++) {
+    const pos = listOfMoves[i]["second"];
+    const matrixPiece = gameMatrix.value[pos["first"]][pos["second"]];
+    matrixPiece.move = listOfMoves[i];
+    matrixPiece.isPossibleMove = true;
+  }
+}
+
+function movePiece(piece) {
+  const uuid = playerDto.value.uuid;
+  const isWhite = uuid === iaGameDto.value.whitePlayerUUID;
+
+  if (isWhite === piece.whitePiece || !piece.move) {
+    return;
+  }
+
+  const move = piece.move;
+  const gameType = iaGameDto.value.gameType;
+  const gameId = iaGameDto.value.id;
+  const pieceId = selectedPiece.value.id;
+
+  GameService.movePiece(gameType, gameId, uuid, pieceId, move)
+    .then((response) => {
+      response.json().then((result) => {
+        if (result) {
+          iaGameDto.value = result;
+          localStorage.setItem("iaGameDto", JSON.stringify(result));
+          clearGameMatrix();
+          fillGameMatrix(result.board.whitePieces);
+          fillGameMatrix(result.board.blackPieces);
+          setPieceSelected({ id: 0 });
+        }
+      });
+    })
+    .catch(() => {
+      setPieceSelected({ id: 0 });
+    });
+}
+
+function getPossibleMoves(piece) {
+  if (selectedPiece.value.id === piece.id) {
+    selectedPiece.value = {};
+    setPieceSelected({ id: 0 });
+    return;
+  } else if (selectedPiece.value.id && selectedPiece.value.id !== 0) {
+    loading.value = ElLoading.service({
+      lock: true,
+      text: "Carregando",
+      background: "rgba(0,0,0,0.8)",
+    });
+    movePiece(piece);
+    loading.value.close();
+    return;
+  }
+
+  const uuid = playerDto.value.uuid;
+  const isWhitePlayer = uuid === iaGameDto.value.whitePlayerUUID;
+  const isPlayerPiece = isWhitePlayer === piece.whitePiece;
+  const isPlayerTurn = isWhitePlayer === iaGameDto.value.whiteTurn;
+
+  if (!isPlayerPiece || !isPlayerTurn) {
+    return;
+  }
+
+  loading.value = ElLoading.service({
+    lock: true,
+    text: "Carregando",
+    background: "rgba(0,0,0,0.8)",
+  });
+
+  GameService.getPiecePossibleMoves(
+    iaGameDto.value.gameType,
+    iaGameDto.value.id,
+    uuid,
+    piece
+  ).then((response) => {
+    response.json().then((result) => {
+      selectedPiece.value = piece;
+      setPieceSelected(piece);
+      setPossiblesMoves(result);
+      loading.value.close();
+    });
+  });
+}
+
+loading.value = ElLoading.service({
+  lock: true,
+  text: "Carregando",
+  background: "rgba(0, 0, 0, 0.8)",
+});
+
+playerDto.value = JSON.parse(localStorage.getItem("playerDto"));
+PlayerService.verify(playerDto).then((response) => {
+  response.json().then((result) => {
+    if (!result) {
+      localStorage.removeItem("playerDto");
+      loading.value.close();
+      router.push({ path: "/" });
+    }
+  });
+});
+
+iaGameDto.value = JSON.parse(localStorage.getItem("iaGameDto"));
+if (!iaGameDto.value) {
+  loading.value.close();
+  router.push({ path: "/inicio" });
+}
+
+const gameType = iaGameDto.value.gameType;
+const gameId = iaGameDto.value.id;
+GameService.check(gameType, gameId)
+  .then((response) => {
+    response.json().then((result) => {
       if (!result) {
-        localStorage.removeItem("playerDto");
-        this.$router.push({ path: "/" });
+        isValid.value = false;
       }
     });
+  })
+  .catch(() => {
+    isValid.value = false;
+  });
 
-    this.iaGameDto = JSON.parse(localStorage.getItem("iaGameDto"));
-    if (!this.iaGameDto) {
-      this.$router.push({ path: "/inicio" });
-    }
+if (!isValid.value) {
+  localStorage.removeItem("iaGameDto");
+  loading.value.close();
+  router.push({ path: "/inicio" });
+}
 
-    const self = this;
-    const gameType = this.iaGameDto.gameType;
-    const gameId = this.iaGameDto.id;
-    await GameService.check(gameType, gameId)
-      .then(async (response) => {
-        const result = await response.json();
-        if (!result) {
-          self.isValid = false;
-        }
-      })
-      .catch(() => {
-        self.isValid = false;
-      });
+fillGameMatrix(iaGameDto.value.board.whitePieces);
+fillGameMatrix(iaGameDto.value.board.blackPieces);
 
-    if (!this.isValid) {
-      localStorage.removeItem("iaGameDto");
-      this.$router.push({ path: "/inicio" });
-    }
-
-    this.fillGameMatrix(this.iaGameDto.board.whitePieces);
-    this.fillGameMatrix(this.iaGameDto.board.blackPieces);
-
-    this.playerDto = JSON.parse(localStorage.getItem("playerDto"));
-  },
-
-  methods: {
-    fillGameMatrix(pieceArray) {
-      for (let i = 0; i < pieceArray.length; i++) {
-        let piece = pieceArray[i];
-
-        const matrixPiece = this.gameMatrix[piece.positionX][piece.positionY];
-
-        matrixPiece.isPossibleMove = false;
-        matrixPiece.isSelected = false;
-        matrixPiece.positionX = piece.positionX;
-        matrixPiece.positionY = piece.positionY;
-        matrixPiece.id = piece.id;
-        matrixPiece.pieceType = piece.pieceType;
-        matrixPiece.whitePiece = piece.whitePiece;
-      }
-    },
-
-    getPieceName(piece) {
-      const pieceColor = piece.whitePiece ? "_WHITE" : "_BLACK";
-      return `${piece.pieceType}${pieceColor}`;
-    },
-
-    getPieceImage(piece) {
-      const pieceName = this.getPieceName(piece);
-      return this.pieceImages[pieceName];
-    },
-
-    setPieceSelected(piece) {
-      for (let i = 0; i < this.gameMatrix.length; i++) {
-        for (let j = 0; j < this.gameMatrix[i].length; j++) {
-          const matrixPiece = this.gameMatrix[i][j];
-          matrixPiece.isPossibleMove = false;
-          matrixPiece.isSelected = matrixPiece.id === piece.id;
-        }
-      }
-    },
-
-    setPossiblesMoves(listOfMoves) {
-      for (let i = 0; i < listOfMoves.length; i++) {
-        const pos = listOfMoves[i]["second"];
-        const matrixPiece = this.gameMatrix[pos["first"]][pos["second"]];
-        matrixPiece.isPossibleMove = true;
-      }
-    },
-
-    async getPossibleMoves(piece) {
-      const self = this;
-
-      if (this.selectedPiece.id === piece.id) {
-        this.setPieceSelected({ id: 0 });
-        return;
-      }
-
-      const uuid = self.playerDto.uuid;
-      const iaGameDto = self.iaGameDto;
-      const isWhitePiece = uuid === iaGameDto.whitePlayerUUID;
-
-      if (isWhitePiece !== piece.whitePiece) {
-        return;
-      }
-
-      await GameService.getPiecePossibleMoves(
-        iaGameDto.gameType,
-        iaGameDto.id,
-        uuid,
-        piece
-      ).then(async (response) => {
-        const result = await response.json();
-        self.selectedPiece = piece;
-        self.setPieceSelected(piece);
-        self.setPossiblesMoves(result);
-        console.log(result);
-      });
-    },
-  },
-};
+playerDto.value = JSON.parse(localStorage.getItem("playerDto"));
+loading.value.close();
 </script>
 <style scoped>
 .chess-board {

@@ -28,112 +28,96 @@
   </el-row>
 </template>
 
-<script>
-import { shallowRef } from "vue";
-import { Lock, Message } from "@element-plus/icons-vue";
+<script setup>
+import { ref, shallowRef } from "vue";
+
+import router from "../router";
+import { Lock } from "@element-plus/icons-vue";
 import { ElMessage } from "element-plus";
 import PlayerService from "@/services/playerService";
 
-export default {
-  name: "EnterView",
+const playerDto = ref({});
+const loading = ref(false);
+const lock = shallowRef(Lock);
+const ruleForm = ref({});
+const model = ref({ identifier: "" });
+const rules = ref({
+  identifier: [
+    {
+      required: true,
+      message: "Insira um identificador",
+      trigger: "blur",
+    },
+    {
+      min: 8,
+      max: 8,
+      message: "Precisa possuir exatos 8 caracteres",
+      trigger: "blur",
+    },
+  ],
+});
 
-  data() {
-    return {
-      loading: false,
-      lock: shallowRef(Lock),
-      message: shallowRef(Message),
-      model: {
-        identifier: "",
-      },
-      rules: {
-        identifier: [
-          {
-            required: true,
-            message: "Insira um identificador",
-            trigger: "blur",
-          },
-          {
-            min: 8,
-            max: 8,
-            message: "Precisa possuir exatos 8 caracteres",
-            trigger: "blur",
-          },
-        ],
-      },
-    };
-  },
-
-  async created() {
-    const playerDto = JSON.parse(localStorage.getItem("playerDto"));
-    if (!playerDto) {
-      return;
-    }
-
-    await PlayerService.verify(playerDto)
-      .then(async (response) => {
-        const result = await response.json();
-        if (result) {
-          this.$router.push({ path: "/inicio" });
-        } else {
-          localStorage.removeItem("playerDto");
-        }
-      })
-      .catch(() => {
-        localStorage.removeItem("playerDto");
-      });
-  },
-
-  methods: {
-    async register() {
-      const self = this;
-      const form = this.$refs.ruleForm;
-      self.loading = true;
-
-      let isValid = await form.validate((valid, fields) => {
-        console.log(fields);
-        if (!valid) {
-          self.loading = false;
-          ElMessage({
-            message: "Preencha todos os campos corretamente.",
-            type: "warning",
-          });
-        }
-        return valid;
-      });
-
+function register() {
+  loading.value = true;
+  ruleForm.value.validate((valid, fields) => {
+      console.log(fields);
+      if (!valid) {
+        loading.value = false;
+        ElMessage({
+          message: "Preencha todos os campos corretamente.",
+          type: "warning",
+        });
+      }
+      return valid;
+    })
+    .then((isValid) => {
       if (!isValid) {
         return;
       }
 
-      const identifier = this.model.identifier;
-      await PlayerService.register(identifier)
-        .then(async (response) => {
-          const data = await response.json();
-          if (response.ok) {
-            isValid = true;
-            localStorage.setItem("playerDto", JSON.stringify(data));
-          } else {
-            self.alertRegisterFail();
-            isValid = false;
-            self.loading = false;
-          }
+      const identifier = model.value.identifier;
+      PlayerService.register(identifier)
+        .then((response) => {
+          response.json().then((data) => {
+            if (response.ok) {
+              isValid = true;
+              localStorage.setItem("playerDto", JSON.stringify(data));
+              router.push({ path: "/inicio" });
+            } else {
+              alertRegisterFail();
+              isValid = false;
+              loading.value = false;
+            }
+          });
         })
         .catch(() => {
-          self.alertRegisterFail();
+          alertRegisterFail();
           isValid = false;
-          self.loading = false;
+          loading.value = false;
         });
+    });
+}
 
-      if (isValid) {
-        this.$router.push({ path: "/inicio" });
-      }
-    },
+function alertRegisterFail() {
+  ElMessage.error("Credenciais inválidas.");
+}
 
-    alertRegisterFail() {
-      ElMessage.error("Credenciais inválidas.");
-    },
-  },
-};
+playerDto.value = JSON.parse(localStorage.getItem("playerDto"));
+if (playerDto.value) {
+  PlayerService.verify(playerDto)
+    .then((response) => {
+      response.json().then((result) => {
+        if (result) {
+          router.push({ path: "/inicio" });
+        } else {
+          localStorage.removeItem("playerDto");
+        }
+      });
+    })
+    .catch(() => {
+      localStorage.removeItem("playerDto");
+    });
+}
 </script>
 
 <style scoped>
