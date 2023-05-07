@@ -19,8 +19,21 @@
             v-if="piece.pieceType"
             :src="getPieceImage(piece)"
             alt="{{getPieceName(piece)}}"
-            class="chess-piece"
+            @click="getPossibleMoves(piece)"
+            class="chess-piece pointer"
+            :class="{
+              'selected-square': piece.isSelected,
+              'possible-move-square': piece.isPossibleMove,
+            }"
           />
+          <div
+            v-else
+            class="chess-piece"
+            :class="{
+              'selected-square': piece.isSelected,
+              'possible-move-square': piece.isPossibleMove,
+            }"
+          ></div>
         </div>
       </div>
     </div>
@@ -49,6 +62,7 @@ export default {
 
   data() {
     return {
+      selectedPiece: {},
       isValid: true,
       playerDto: {},
       iaGameDto: {},
@@ -124,8 +138,10 @@ export default {
       for (let i = 0; i < pieceArray.length; i++) {
         let piece = pieceArray[i];
 
-        const matrixPiece = this.gameMatrix[piece.positionY][piece.positionX];
+        const matrixPiece = this.gameMatrix[piece.positionX][piece.positionY];
 
+        matrixPiece.isPossibleMove = false;
+        matrixPiece.isSelected = false;
         matrixPiece.positionX = piece.positionX;
         matrixPiece.positionY = piece.positionY;
         matrixPiece.id = piece.id;
@@ -142,6 +158,54 @@ export default {
     getPieceImage(piece) {
       const pieceName = this.getPieceName(piece);
       return this.pieceImages[pieceName];
+    },
+
+    setPieceSelected(piece) {
+      for (let i = 0; i < this.gameMatrix.length; i++) {
+        for (let j = 0; j < this.gameMatrix[i].length; j++) {
+          const matrixPiece = this.gameMatrix[i][j];
+          matrixPiece.isPossibleMove = false;
+          matrixPiece.isSelected = matrixPiece.id === piece.id;
+        }
+      }
+    },
+
+    setPossiblesMoves(listOfMoves) {
+      for (let i = 0; i < listOfMoves.length; i++) {
+        const pos = listOfMoves[i]["second"];
+        const matrixPiece = this.gameMatrix[pos["first"]][pos["second"]];
+        matrixPiece.isPossibleMove = true;
+      }
+    },
+
+    async getPossibleMoves(piece) {
+      const self = this;
+
+      if (this.selectedPiece.id === piece.id) {
+        this.setPieceSelected({ id: 0 });
+        return;
+      }
+
+      const uuid = self.playerDto.uuid;
+      const iaGameDto = self.iaGameDto;
+      const isWhitePiece = uuid === iaGameDto.whitePlayerUUID;
+
+      if (isWhitePiece !== piece.whitePiece) {
+        return;
+      }
+
+      await GameService.getPiecePossibleMoves(
+        iaGameDto.gameType,
+        iaGameDto.id,
+        uuid,
+        piece
+      ).then(async (response) => {
+        const result = await response.json();
+        self.selectedPiece = piece;
+        self.setPieceSelected(piece);
+        self.setPossiblesMoves(result);
+        console.log(result);
+      });
     },
   },
 };
@@ -160,6 +224,12 @@ export default {
   justify-content: center;
   align-items: center;
   font-size: 24px;
+}
+.selected-square {
+  background-color: rgba(174, 38, 38, 0.75);
+}
+.possible-move-square {
+  background-color: rgba(99, 164, 33, 0.75);
 }
 .white-square {
   background-color: #ffffff;

@@ -23,5 +23,9 @@ export default defineComponent({
 section {
   background-color: #0d5469;
   text-align: start;
+  height: 100%;
+}
+.el-image {
+  height: 100%;
 }
 </style>

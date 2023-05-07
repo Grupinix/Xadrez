@@ -1,17 +1,10 @@
-<!-- eslint-disable prettier/prettier -->
-<script>
-import { defineComponent } from "vue";
-
-export default defineComponent({ name: "BaseFooter" });
-</script>
-
 <template>
   <section>
     <p>
       Xadrez <b>UFF</b>
       <br />
       <br />
-      Copyright © 2022 <b>Grupinix</b>
+      Copyright © 2023 <b>Grupinix</b>
       <br />
       <br />
       <br />
@@ -24,10 +17,17 @@ export default defineComponent({ name: "BaseFooter" });
     </p>
   </section>
 </template>
+<script>
+import { defineComponent } from "vue";
 
+export default defineComponent({ name: "BaseFooter" });
+</script>
 <style scoped>
 section {
   background-color: #f1f1f1;
+  height: 100%;
+}
+p {
   padding-top: 64px;
   padding-bottom: 64px;
 }
