@@ -17,6 +17,7 @@ import br.com.eterniaserver.xadrez.domain.service.GameService;
 import br.com.eterniaserver.xadrez.rest.dtos.MoveDto;
 import br.com.eterniaserver.xadrez.rest.dtos.PositionDto;
 import lombok.AllArgsConstructor;
+import org.springframework.data.util.Pair;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -146,19 +147,20 @@ public class ClassicPIAGameServiceImpl implements GameService {
             }
 
             List<Piece> pieceList = isWhite ? board.getBlackPieces() : board.getWhitePieces();
-            Piece capturedPiece = null;
-            int removeIndex = -1;
+            Pair<Integer, Piece> piecePair = null;
             for (int i = 0; i < pieceList.size(); i++) {
                 Piece p = pieceList.get(i);
                 if (p != null && p.getId().equals(capturedPieceId)) {
-                    capturedPiece = p;
-                    removeIndex = i;
+                    piecePair = Pair.of(i, p);
                 }
             }
 
-            if (removeIndex == -1) {
+            if (piecePair == null) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Erro ao encontrar a peça capturada");
             }
+
+            int removeIndex = piecePair.getFirst();
+            Piece capturedPiece = piecePair.getSecond();
 
             history.setKilledPiece(capturedPiece.getPieceType());
             pieceList.remove(removeIndex);

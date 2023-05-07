@@ -9,23 +9,22 @@
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore"
   },
   "dependencies": {
-    "@element-plus/icons-vue": "^2.0.6",
-    "cpf-cnpj-validator": "^1.0.3",
-    "element-plus": "^2.1.9",
-    "vue": "^3.2.37",
-    "vue-router": "^4.1.2"
+    "@element-plus/icons-vue": "2.1.0",
+    "element-plus": "2.3.4",
+    "vue": "3.2.47",
+    "vue-router": "4.1.6"
   },
   "devDependencies": {
-    "@rushstack/eslint-patch": "^1.1.0",
-    "@vitejs/plugin-vue": "^3.2.0",
-    "@vitejs/plugin-vue-jsx": "^2.0.0",
-    "@vue/eslint-config-prettier": "^7.0.0",
-    "@vue/test-utils": "^2.0.2",
-    "eslint": "^8.5.0",
-    "eslint-plugin-vue": "^9.0.0",
-    "jsdom": "^20.0.0",
-    "prettier": "^2.5.1",
-    "vite": "^3.0.1",
-    "vitest": "^0.18.1"
+    "@rushstack/eslint-patch": "1.2.0",
+    "@vitejs/plugin-vue": "4.2.1",
+    "@vitejs/plugin-vue-jsx": "3.0.1",
+    "@vue/eslint-config-prettier": "7.1.0",
+    "@vue/test-utils": "2.3.2",
+    "eslint": "8.40.0",
+    "eslint-plugin-vue": "9.11.1",
+    "jsdom": "22.0.0",
+    "prettier": "2.8.8",
+    "vite": "4.3.5",
+    "vitest": "0.31.0"
   }
 }
