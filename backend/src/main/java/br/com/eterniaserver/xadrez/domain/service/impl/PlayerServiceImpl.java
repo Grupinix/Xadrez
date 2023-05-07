@@ -48,11 +48,7 @@ public class PlayerServiceImpl implements PlayerService {
     public Boolean verify(PlayerDto playerDto) {
         UUID uuid = playerDto.getUuid();
 
-        PlayerDto savedPlayerDto = uuidIdentifierMap.get(uuid);
-        if (savedPlayerDto == null) {
-            uuidIdentifierMap.put(uuid, playerDto);
-            return true;
-        }
+        PlayerDto savedPlayerDto = uuidIdentifierMap.computeIfAbsent(uuid, k -> playerDto);
 
         return savedPlayerDto.equals(playerDto);
     }
