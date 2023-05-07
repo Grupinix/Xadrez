@@ -32,6 +32,11 @@ public class ClassicPIAGameServiceImpl implements GameService {
     }
 
     @Override
+    public Game getGame(Integer gameId) {
+        return gameRepository.findById(gameId).orElse(null);
+    }
+
+    @Override
     public List<Game> getGames() {
         return gameRepository.findAllByBlackPlayerUUIDIsNullAndGameTypeEquals(
                 GameType.PLAYER_IA_CLASSIC
@@ -80,8 +85,9 @@ public class ClassicPIAGameServiceImpl implements GameService {
     }
 
     @Override
-    public List<Pair<MoveType, Pair<Integer, Integer>>> getPossibleMoves(Game game, Piece piece, UUID playerUUID) {
-        return null;
+    public List<Pair<MoveType, Pair<Integer, Integer>>> getPossibleMoves(Game game, Piece piece, UUID uuid) {
+        boolean isWhite = game.getWhitePlayerUUID().equals(uuid);
+        return getPiecePossibleMoves(game, piece, isWhite);
     }
 
     @Override

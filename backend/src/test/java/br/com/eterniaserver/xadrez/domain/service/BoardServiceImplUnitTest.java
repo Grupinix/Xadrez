@@ -17,8 +17,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class BoardServiceImplUnitTest {
 
     private static final int PAWN_START_INDEX = 8;
-    private static final int WHITE_MAIN_Y_POSITION = 7;
-    private static final int BLACK_MAIN_Y_POSITION = 0;
+    private static final int WHITE_MAIN_X_POSITION = 7;
+    private static final int BLACK_MAIN_X_POSITION = 0;
 
     @Mock
     private BoardRepository boardRepository;
@@ -58,12 +58,12 @@ class BoardServiceImplUnitTest {
         Assertions.assertEquals(PieceType.QUEEN, blackPiece.getPieceType());
 
         Assertions.assertEquals(PieceType.QUEEN, whitePiece.getPieceType());
-        Assertions.assertEquals(WHITE_MAIN_Y_POSITION, whitePiece.getPositionY());
-        Assertions.assertEquals(queenIndex, whitePiece.getPositionX());
+        Assertions.assertEquals(WHITE_MAIN_X_POSITION, whitePiece.getPositionX());
+        Assertions.assertEquals(queenIndex, whitePiece.getPositionY());
 
         Assertions.assertEquals(PieceType.QUEEN, blackPiece.getPieceType());
-        Assertions.assertEquals(BLACK_MAIN_Y_POSITION, blackPiece.getPositionY());
-        Assertions.assertEquals(queenIndex, blackPiece.getPositionX());
+        Assertions.assertEquals(BLACK_MAIN_X_POSITION, blackPiece.getPositionX());
+        Assertions.assertEquals(queenIndex, blackPiece.getPositionY());
     }
 
     @Test
@@ -76,12 +76,12 @@ class BoardServiceImplUnitTest {
         Piece blackPiece = board.getBlackPieces().get(kingIndex);
 
         Assertions.assertEquals(PieceType.KING, whitePiece.getPieceType());
-        Assertions.assertEquals(WHITE_MAIN_Y_POSITION, whitePiece.getPositionY());
-        Assertions.assertEquals(kingIndex, whitePiece.getPositionX());
+        Assertions.assertEquals(WHITE_MAIN_X_POSITION, whitePiece.getPositionX());
+        Assertions.assertEquals(kingIndex, whitePiece.getPositionY());
 
         Assertions.assertEquals(PieceType.KING, blackPiece.getPieceType());
-        Assertions.assertEquals(BLACK_MAIN_Y_POSITION, blackPiece.getPositionY());
-        Assertions.assertEquals(kingIndex, blackPiece.getPositionX());
+        Assertions.assertEquals(BLACK_MAIN_X_POSITION, blackPiece.getPositionX());
+        Assertions.assertEquals(kingIndex, blackPiece.getPositionY());
     }
 
 }

@@ -12,12 +12,20 @@ import BaseFooter from "./layouts/BaseFooter.vue";
 </template>
 
 <style>
+html {
+  height: 100%;
+}
 #app {
   text-align: center;
+  height: 100%;
 }
 body {
   margin: 0;
   background-color: #e2e2e2;
+  height: 100%;
+}
+.pointer {
+  cursor: pointer;
 }
 .router-view {
   margin: 0;
@@ -25,11 +33,11 @@ body {
 .el-header {
   margin: 0;
   padding: 0;
-  height: 100%;
 }
 .el-footer {
   margin: 0;
   padding: 0;
+  height: 256px;
 }
 .el-main {
   margin: 0;

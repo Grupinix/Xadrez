@@ -11,16 +11,16 @@
       </el-button>
     </el-col>
     <el-col :xs="{ span: 24 }">
-      <el-button color="#626aef" size="large">CONFIGURAÇÕES</el-button>
+      <el-button color="#626aef" size="large" disabled>CONFIGURAÇÕES</el-button>
     </el-col>
     <el-col :xs="{ span: 24 }">
-      <el-button color="#626aef" size="large">CRIAR SALA</el-button>
+      <el-button color="#626aef" size="large" disabled>CRIAR SALA</el-button>
     </el-col>
     <el-col :xs="{ span: 24 }">
-      <el-button color="#626aef" size="large">SALAS</el-button>
+      <el-button color="#626aef" size="large" disabled>SALAS</el-button>
     </el-col>
     <el-col :xs="{ span: 24 }">
-      <el-button color="#626aef" size="large">RANK</el-button>
+      <el-button color="#626aef" size="large" disabled>RANK</el-button>
     </el-col>
   </el-row>
 </template>
@@ -68,15 +68,15 @@ export default {
       const gameId = iaGameDto.id;
 
       await GameService.check(gameType, gameId)
-          .then(async (response) => {
-            const result = await response.json();
-            if (!result) {
-              self.isValid = false;
-            }
-          })
-          .catch(() => {
+        .then(async (response) => {
+          const result = await response.json();
+          if (!result) {
             self.isValid = false;
-          });
+          }
+        })
+        .catch(() => {
+          self.isValid = false;
+        });
 
       if (this.isValid && gameType === "PLAYER_IA_CLASSIC") {
         this.$router.push({ path: "/playervsia" });

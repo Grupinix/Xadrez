@@ -17,5 +17,6 @@ public class BoardDto {
     private List<PieceDto> whitePieces;
     private List<PieceDto> blackPieces;
     private List<HistoryDto> histories;
+    private Integer[][][] pieceMatrix;
 
 }

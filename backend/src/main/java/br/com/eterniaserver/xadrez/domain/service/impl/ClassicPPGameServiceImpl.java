@@ -27,6 +27,11 @@ public class ClassicPPGameServiceImpl implements GameService {
     }
 
     @Override
+    public Game getGame(Integer gameId) {
+        return null;
+    }
+
+    @Override
     public List<Game> getGames() {
         return gameRepository.findAllByBlackPlayerUUIDIsNullAndGameTypeEquals(
                 GameType.PLAYER_PLAYER_CLASSIC

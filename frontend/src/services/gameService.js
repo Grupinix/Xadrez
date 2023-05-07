@@ -11,6 +11,21 @@ export default {
     });
   },
 
+  get(type, gameId) {
+    return fetch(`${url}/get/${type}/${gameId}/`, {
+      method: "GET",
+      headers: headers,
+    });
+  },
+
+  getPiecePossibleMoves(type, gameId, uuid, pieceDto) {
+    return fetch(`${url}/getPiecePossibleMoves/${type}/${gameId}/${uuid}/`, {
+      method: "PUT",
+      headers: headers,
+      body: JSON.stringify(pieceDto),
+    });
+  },
+
   refreshTimer(type, gameId) {
     return fetch(`${url}/refresh/${type}/${gameId}/`, {
       method: "GET",
