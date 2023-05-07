@@ -38,7 +38,10 @@ jobs:
 
       - name: Build Test and Validate
         working-directory: ./backend
-        run: ./gradlew clean build test
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.ETERNIASERVER_XADREZ_SONAR_TOKEN }}
+        run: ./gradlew clean build test jacocoTestReport sonarqube --info --stacktrace
 
   deploy:
     name: Deploy
