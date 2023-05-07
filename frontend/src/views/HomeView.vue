@@ -25,100 +25,78 @@
   </el-row>
 </template>
 
-<script>
+<script setup>
+import { ref } from "vue";
+
+import router from "../router";
 import { ElMessage } from "element-plus";
 import GameService from "@/services/gameService";
 import PlayerService from "@/services/playerService";
 
-export default {
-  name: "HomeView",
+const isValid = ref(true);
+const vsIaLoading = ref(false);
+const playerDto = ref({});
 
-  components: {},
+function playVsIa() {
+  vsIaLoading.value = true;
+  playerDto.value = JSON.parse(localStorage.getItem("playerDto"));
 
-  data() {
-    return {
-      isValid: true,
-      vsIaLoading: false,
-    };
-  },
-
-  mounted() {
-    this.timer = setInterval(async () => {}, 500);
-  },
-
-  beforeUnmount() {
-    clearInterval(this.timer);
-  },
-
-  async created() {
-    const self = this;
-
-    const playerDto = JSON.parse(localStorage.getItem("playerDto"));
-    await PlayerService.verify(playerDto).then(async (response) => {
-      const result = await response.json();
-      if (!result) {
-        localStorage.removeItem("playerDto");
-        this.$router.push({ path: "/" });
-      }
+  GameService.create("PLAYER_IA_CLASSIC", playerDto.value)
+    .then((response) => {
+      response.json().then((data) => {
+        if (response.ok) {
+          localStorage.setItem("iaGameDto", JSON.stringify(data));
+          if (isValid.value) {
+            router.push({ path: "/playervsia" });
+          }
+        } else {
+          alertCreateFail();
+          isValid.value = false;
+          vsIaLoading.value = false;
+        }
+      });
+    })
+    .catch(() => {
+      alertCreateFail();
+      isValid.value = false;
+      vsIaLoading.value = false;
     });
+}
+
+function alertCreateFail() {
+  ElMessage.error("Credenciais inválidas.");
+}
+
+playerDto.value = JSON.parse(localStorage.getItem("playerDto"));
+PlayerService.verify(playerDto.value).then((response) => {
+  response.json().then((result) => {
+    if (!result) {
+      localStorage.removeItem("playerDto");
+      router.push({ path: "/" });
+    }
 
     const iaGameDto = JSON.parse(localStorage.getItem("iaGameDto"));
     if (iaGameDto) {
       const gameType = iaGameDto.gameType;
       const gameId = iaGameDto.id;
 
-      await GameService.check(gameType, gameId)
-        .then(async (response) => {
-          const result = await response.json();
-          if (!result) {
-            self.isValid = false;
-          }
+      GameService.check(gameType, gameId)
+        .then((response) => {
+          response.json().then((result) => {
+            if (!result) {
+              isValid.value = false;
+            }
+            if (isValid.value && gameType === "PLAYER_IA_CLASSIC") {
+              router.push({ path: "/playervsia" });
+            }
+          });
         })
         .catch(() => {
-          self.isValid = false;
+          isValid.value = false;
         });
-
-      if (this.isValid && gameType === "PLAYER_IA_CLASSIC") {
-        this.$router.push({ path: "/playervsia" });
-      }
     }
-  },
-
-  methods: {
-    async playVsIa() {
-      const self = this;
-
-      self.vsIaLoading = true;
-      const playerDto = JSON.parse(localStorage.getItem("playerDto"));
-      const gameType = "PLAYER_IA_CLASSIC";
-
-      await GameService.create(gameType, playerDto)
-        .then(async (response) => {
-          const data = await response.json();
-          if (response.ok) {
-            localStorage.setItem("iaGameDto", JSON.stringify(data));
-          } else {
-            self.alertCreateFail();
-            self.isValid = false;
-            self.vsIaLoading = false;
-          }
-        })
-        .catch(() => {
-          self.alertCreateFail();
-          self.isValid = false;
-          self.vsIaLoading = false;
-        });
-
-      if (self.isValid) {
-        this.$router.push({ path: "/playervsia" });
-      }
-    },
-
-    alertCreateFail() {
-      ElMessage.error("Credenciais inválidas.");
-    },
-  },
-};
+  });
+});
 </script>
 
 <style scoped>

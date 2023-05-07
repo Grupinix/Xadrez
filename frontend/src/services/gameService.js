@@ -18,6 +18,14 @@ export default {
     });
   },
 
+  movePiece(type, gameId, uuid, pieceId, moveDto) {
+    return fetch(`${url}/move/${type}/${gameId}/${uuid}/${pieceId}/`, {
+      method: "POST",
+      headers: headers,
+      body: JSON.stringify(moveDto),
+    });
+  },
+
   getPiecePossibleMoves(type, gameId, uuid, pieceDto) {
     return fetch(`${url}/getPiecePossibleMoves/${type}/${gameId}/${uuid}/`, {
       method: "PUT",

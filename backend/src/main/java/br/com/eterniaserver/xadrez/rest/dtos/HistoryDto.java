@@ -14,6 +14,7 @@ public class HistoryDto {
 
     private Integer id;
     private PieceType pieceType;
+    private Boolean isWhite;
     private Integer oldPositionX;
     private Integer oldPositionY;
     private Integer newPositionX;

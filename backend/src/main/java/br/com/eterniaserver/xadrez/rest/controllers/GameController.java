@@ -3,16 +3,16 @@ package br.com.eterniaserver.xadrez.rest.controllers;
 import br.com.eterniaserver.xadrez.domain.entities.Game;
 import br.com.eterniaserver.xadrez.domain.entities.Piece;
 import br.com.eterniaserver.xadrez.domain.enums.GameType;
-import br.com.eterniaserver.xadrez.domain.enums.MoveType;
+import br.com.eterniaserver.xadrez.domain.repositories.PieceRepository;
 import br.com.eterniaserver.xadrez.domain.service.GameService;
 import br.com.eterniaserver.xadrez.domain.service.impl.ClassicPIAGameServiceImpl;
 import br.com.eterniaserver.xadrez.domain.service.impl.ClassicPPGameServiceImpl;
 import br.com.eterniaserver.xadrez.rest.dtos.GameDto;
+import br.com.eterniaserver.xadrez.rest.dtos.MoveDto;
 import br.com.eterniaserver.xadrez.rest.dtos.PlayerDto;
 
 import lombok.RequiredArgsConstructor;
 
-import org.springframework.data.util.Pair;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,6 +26,7 @@ public class GameController {
 
     private final ClassicPIAGameServiceImpl classicPIAGameService;
     private final ClassicPPGameServiceImpl classicPPGameService;
+    private final PieceRepository pieceRepository;
 
     private GameService getGameService(GameType gameType) {
         return switch (gameType) {
@@ -46,12 +47,26 @@ public class GameController {
         return getGameService(type).getGame(gameId).getGameDto();
     }
 
+    @PostMapping("move/{type}/{gameId}/{uuid}/{pieceId}/")
+    @ResponseStatus(HttpStatus.OK)
+    private GameDto movePiece(@PathVariable GameType type,
+                              @PathVariable Integer gameId,
+                              @PathVariable UUID uuid,
+                              @PathVariable Integer pieceId,
+                              @RequestBody MoveDto move) {
+        GameService gameService = getGameService(type);
+        Game game = gameService.getGame(gameId);
+        Piece piece = pieceRepository.findById(pieceId).orElseThrow();
+
+        return gameService.movePiece(game, uuid, piece, move).getGameDto();
+    }
+
     @PutMapping("getPiecePossibleMoves/{type}/{gameId}/{uuid}/")
     @ResponseStatus(HttpStatus.OK)
-    public List<Pair<MoveType, Pair<Integer, Integer>>> getPiecePossibleMoves(@PathVariable GameType type,
-                                                                              @PathVariable Integer gameId,
-                                                                              @PathVariable UUID uuid,
-                                                                              @RequestBody Piece piece) {
+    public List<MoveDto> getPiecePossibleMoves(@PathVariable GameType type,
+                                               @PathVariable Integer gameId,
+                                               @PathVariable UUID uuid,
+                                               @RequestBody Piece piece) {
 
         GameService gameService = getGameService(type);
         Game game = gameService.getGame(gameId);

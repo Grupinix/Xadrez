@@ -1,5 +1,6 @@
 package br.com.eterniaserver.xadrez.domain.service.impl;
 
+import br.com.eterniaserver.xadrez.domain.enums.GameDifficulty;
 import br.com.eterniaserver.xadrez.domain.service.PlayerService;
 import br.com.eterniaserver.xadrez.rest.dtos.PlayerDto;
 import lombok.AllArgsConstructor;
@@ -16,16 +17,17 @@ import java.util.UUID;
 public class PlayerServiceImpl implements PlayerService {
 
     private static final Map<UUID, PlayerDto> uuidIdentifierMap = new HashMap<>();
+    private static final Map<UUID, GameDifficulty> uuidGameDifficultyMap = new HashMap<>();
 
     @Override
     public PlayerDto register(String identifier) throws ResponseStatusException {
         if (identifier.length() != 8) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "O identificador precisa ter 8 caracteres!");
         }
 
         UUID uuid = UUID.randomUUID();
 
-        PlayerDto playerDto = new PlayerDto(uuid, identifier);
+        PlayerDto playerDto = new PlayerDto(uuid, GameDifficulty.EASY, identifier);
         uuidIdentifierMap.put(uuid, playerDto);
 
         return playerDto;
@@ -36,7 +38,7 @@ public class PlayerServiceImpl implements PlayerService {
         PlayerDto playerDto = uuidIdentifierMap.get(uuid);
 
         if (playerDto == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Jogador não encontrado!");
         }
 
         return playerDto;
@@ -54,4 +56,15 @@ public class PlayerServiceImpl implements PlayerService {
 
         return savedPlayerDto.equals(playerDto);
     }
+
+    @Override
+    public void setGameDifficulty(UUID uuid, GameDifficulty gameDifficulty) {
+        uuidGameDifficultyMap.put(uuid, gameDifficulty);
+    }
+
+    @Override
+    public GameDifficulty getGameDifficulty(UUID uuid) {
+        return uuidGameDifficultyMap.get(uuid);
+    }
+
 }
