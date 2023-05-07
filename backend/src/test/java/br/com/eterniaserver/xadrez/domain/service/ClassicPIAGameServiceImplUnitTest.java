@@ -56,6 +56,27 @@ class ClassicPIAGameServiceImplUnitTest {
     }
 
     @Test
+    void testGetInvalidGame() {
+        Integer gameId = 1;
+        Assertions.assertThrows(ResponseStatusException.class, () ->  gameService.getGame(gameId));
+    }
+
+    @Test
+    void testGetGame() {
+        UUID uuid = UUID.randomUUID();
+        Integer gameId = 1;
+
+        Game game = gameService.createGame(uuid);
+        game.setId(1);
+
+        Mockito.when(gameRepository.findById(gameId)).thenReturn(Optional.of(game));
+
+        Game getGame = gameService.getGame(gameId);
+
+        Assertions.assertEquals(game, getGame);
+    }
+
+    @Test
     void testCreateGame() {
         UUID uuid = UUID.randomUUID();
 

@@ -43,8 +43,10 @@ public class ClassicPIAGameServiceImpl implements GameService {
     }
 
     @Override
-    public Game getGame(Integer gameId) {
-        return gameRepository.findById(gameId).orElse(null);
+    public Game getGame(Integer gameId) throws ResponseStatusException {
+        return gameRepository.findById(gameId).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Partida não encontrada")
+        );
     }
 
     @Override
@@ -113,15 +115,36 @@ public class ClassicPIAGameServiceImpl implements GameService {
                           Piece piece,
                           MoveDto moveTypePairPair) throws ResponseStatusException {
 
+        boolean isWhite = checkTurn(game, playerUUID);
+        Board board = game.getBoard();
+        MoveType moveType = moveTypePairPair.getFirst();
+        PositionDto position = moveTypePairPair.getSecond();
+        History history = createHistory(board, piece, position, isWhite);
+
+        if (moveType == MoveType.CAPTURE) {
+            handleCapture(board, position, history, isWhite);
+        }
+
+        piece.setPositionX(position.getFirst());
+        piece.setPositionY(position.getSecond());
+        game.setWhiteTurn(!game.getWhiteTurn());
+        game.setTimer(System.currentTimeMillis());
+        board.getHistories().add(history);
+
+        saveEntities(game, history, piece, board);
+
+        return game;
+    }
+
+    private boolean checkTurn(Game game, UUID playerUUID) throws ResponseStatusException {
         boolean isWhite = game.getWhitePlayerUUID().equals(playerUUID);
         if (isWhite != game.getWhiteTurn()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Não é turno do jogador");
         }
+        return isWhite;
+    }
 
-        Board board = game.getBoard();
-        MoveType moveType = moveTypePairPair.getFirst();
-        PositionDto position = moveTypePairPair.getSecond();
-
+    private History createHistory(Board board, Piece piece, PositionDto position, boolean isWhite) {
         History history = new History();
         history.setOldPositionX(piece.getPositionX());
         history.setOldPositionY(piece.getPositionY());
@@ -130,58 +153,64 @@ public class ClassicPIAGameServiceImpl implements GameService {
         history.setBoard(board);
         history.setIsWhite(isWhite);
         history.setPieceType(piece.getPieceType());
+        return history;
+    }
 
-        if (moveType == MoveType.CAPTURE) {
-            Integer[][][] pieceMatrix = board.getPieceMatrix();
-            Integer[] pieceInPos = pieceMatrix[position.getFirst()][position.getSecond()];
+    private void handleCapture(Board board,
+                               PositionDto position,
+                               History history,
+                               boolean isWhite) throws ResponseStatusException {
 
-            if (pieceInPos == null || pieceInPos[0] == null || pieceInPos[0] == 0) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Não há peça na posição");
-            }
+        Integer[][][] pieceMatrix = board.getPieceMatrix();
+        Integer[] pieceInPos = pieceMatrix[position.getFirst()][position.getSecond()];
 
-            Integer capturedPieceId = pieceInPos[0];
-            Integer capturedPieceIsWhite = pieceInPos[1];
-
-            if (capturedPieceIsWhite == 1 && isWhite || capturedPieceIsWhite == 0 && !isWhite) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Não pode capturar sua própria peça");
-            }
-
-            List<Piece> pieceList = isWhite ? board.getBlackPieces() : board.getWhitePieces();
-            Pair<Integer, Piece> piecePair = null;
-            for (int i = 0; i < pieceList.size(); i++) {
-                Piece p = pieceList.get(i);
-                if (p != null && p.getId().equals(capturedPieceId)) {
-                    piecePair = Pair.of(i, p);
-                }
-            }
-
-            if (piecePair == null) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Erro ao encontrar a peça capturada");
-            }
-
-            int removeIndex = piecePair.getFirst();
-            Piece capturedPiece = piecePair.getSecond();
-
-            history.setKilledPiece(capturedPiece.getPieceType());
-            pieceList.remove(removeIndex);
-            pieceRepository.delete(capturedPiece);
+        if (pieceInPos == null || pieceInPos[0] == null || pieceInPos[0] == 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Não há peça na posição");
         }
 
-        piece.setPositionX(position.getFirst());
-        piece.setPositionY(position.getSecond());
+        Integer capturedPieceId = pieceInPos[0];
+        Integer capturedPieceIsWhite = pieceInPos[1];
 
-        game.setWhiteTurn(!game.getWhiteTurn());
-        game.setTimer(System.currentTimeMillis());
+        if (capturedPieceIsWhite == 1 && isWhite || capturedPieceIsWhite == 0 && !isWhite) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Não pode capturar sua própria peça");
+        }
 
-        board.getHistories().add(history);
+        removeCapturedPiece(board, capturedPieceId, history, isWhite);
 
+    }
+
+    private void removeCapturedPiece(Board board,
+                                     Integer capturedPieceId,
+                                     History history,
+                                     boolean isWhite) throws ResponseStatusException {
+
+        List<Piece> pieceList = isWhite ? board.getBlackPieces() : board.getWhitePieces();
+        Pair<Integer, Piece> piecePair = null;
+        for (int i = 0; i < pieceList.size(); i++) {
+            Piece p = pieceList.get(i);
+            if (p != null && p.getId().equals(capturedPieceId)) {
+                piecePair = Pair.of(i, p);
+            }
+        }
+
+        if (piecePair == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Erro ao encontrar a peça capturada");
+        }
+
+        int removeIndex = piecePair.getFirst();
+        Piece capturedPiece = piecePair.getSecond();
+        history.setKilledPiece(capturedPiece.getPieceType());
+        pieceList.remove(removeIndex);
+
+        pieceRepository.delete(capturedPiece);
+
+    }
+
+    private void saveEntities(Game game, History history, Piece piece, Board board) {
         gameRepository.save(game);
         historyRepository.save(history);
         pieceRepository.save(piece);
         boardRepository.save(board);
-
-        return game;
-
     }
 
 }

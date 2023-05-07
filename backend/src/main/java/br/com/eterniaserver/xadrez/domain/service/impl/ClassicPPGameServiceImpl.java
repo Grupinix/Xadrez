@@ -27,7 +27,7 @@ public class ClassicPPGameServiceImpl implements GameService {
     }
 
     @Override
-    public Game getGame(Integer gameId) {
+    public Game getGame(Integer gameId) throws ResponseStatusException {
         return null;
     }
 

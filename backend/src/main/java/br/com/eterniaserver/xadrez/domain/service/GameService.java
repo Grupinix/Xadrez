@@ -186,7 +186,7 @@ public interface GameService {
 
     List<Game> getAllGames();
 
-    Game getGame(Integer gameId);
+    Game getGame(Integer gameId) throws ResponseStatusException;
 
     List<Game> getGames();
 
