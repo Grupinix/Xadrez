@@ -238,7 +238,7 @@ public class GameIaImpl implements GameIa {
 
     public int evalutionPerPositioning(BoardDto boardDto, boolean isWhite) {
         Integer[][][] boardMatrix = boardDto.getPieceMatrix();
-        int isWhiteInt = isWhite ? 1 : 0;
+        int isWhiteInt = isWhite ? 0 : 1;
 
         int value = 0;
         for (int i = 0; i <= 7; i++) {
@@ -247,7 +247,7 @@ public class GameIaImpl implements GameIa {
                 if (piece == null || piece[0] == null) {
                     continue;
                 }
-                if (piece[1] == isWhiteInt) {
+                if (piece[1] != isWhiteInt) {
                     List<PieceDto> pieceDtoList = isWhite ? boardDto.getWhitePieces() : boardDto.getBlackPieces();
                     for (PieceDto pieceDto : pieceDtoList) {
                         if ((i >= 3 && i <= 4) && (j >= 3 && j <= 4)) {
