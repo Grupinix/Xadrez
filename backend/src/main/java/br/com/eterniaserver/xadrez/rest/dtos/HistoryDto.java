@@ -21,4 +21,17 @@ public class HistoryDto {
     private Integer newPositionY;
     private PieceType killedPiece;
 
+    public HistoryDto copy() {
+        return HistoryDto.builder()
+                         .id(getId())
+                         .pieceType(getPieceType())
+                         .isWhite(getIsWhite())
+                         .oldPositionX(getOldPositionX())
+                         .oldPositionY(getOldPositionY())
+                         .newPositionX(getNewPositionX())
+                         .newPositionY(getNewPositionY())
+                         .killedPiece(getKilledPiece())
+                         .build();
+    }
+
 }

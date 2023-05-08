@@ -5,7 +5,9 @@ import br.com.eterniaserver.xadrez.domain.entities.Piece;
 import br.com.eterniaserver.xadrez.domain.enums.GameStatus;
 import br.com.eterniaserver.xadrez.domain.enums.MoveType;
 
+import br.com.eterniaserver.xadrez.rest.dtos.GameDto;
 import br.com.eterniaserver.xadrez.rest.dtos.MoveDto;
+import br.com.eterniaserver.xadrez.rest.dtos.PieceDto;
 import br.com.eterniaserver.xadrez.rest.dtos.PositionDto;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -15,8 +17,8 @@ import java.util.UUID;
 
 public interface GameService {
 
-    default List<MoveDto> getPiecePossibleMoves(Game game,
-                                                Piece piece,
+    default List<MoveDto> getPiecePossibleMoves(GameDto game,
+                                                PieceDto piece,
                                                 boolean isWhite) {
 
         List<PositionDto> moves = new ArrayList<>();
@@ -102,11 +104,11 @@ public interface GameService {
         int multiplier = isWhite ? -1 : 1;
 
         if ((rowCol[0] == 1 && !isWhite) || (rowCol[0] == 6 && isWhite)) {
-            addMovesInDirection(pieceMatrix, rowCol, moves, 1, new int[] {multiplier, 0}, isWhite);
-            addMovesInDirection(pieceMatrix, rowCol, moves, 1, new int[] {2 * multiplier, 0}, isWhite);
+            addMovesInDirection(pieceMatrix, rowCol, moves, 1, new int[] {multiplier, 0}, isWhite, true);
+            addMovesInDirection(pieceMatrix, rowCol, moves, 1, new int[] {2 * multiplier, 0}, isWhite, true);
         }
         else {
-            addMovesInDirection(pieceMatrix, rowCol, moves, 1, new int[] {multiplier, 0}, isWhite);
+            addMovesInDirection(pieceMatrix, rowCol, moves, 1, new int[] {multiplier, 0}, isWhite, true);
         }
 
         addPawnCapture(pieceMatrix, rowCol, moves, true, isWhite);
@@ -136,6 +138,16 @@ public interface GameService {
                                      int length,
                                      int[] riCi,
                                      boolean isWhite) {
+        addMovesInDirection(pieceMatrix, rowCol, moves, length, riCi, isWhite, false);
+    }
+
+    private void addMovesInDirection(Integer[][][] pieceMatrix,
+                                     int[] rowCol,
+                                     List<PositionDto> moves,
+                                     int length,
+                                     int[] riCi,
+                                     boolean isWhite,
+                                     boolean isPawn) {
 
         int row = rowCol[0];
         int col = rowCol[1];
@@ -151,7 +163,7 @@ public interface GameService {
 
             Integer[] pieceInMatrix = pieceMatrix[newRow][newCol];
             if (pieceInMatrix != null && pieceInMatrix[0] != null && pieceInMatrix[0] != 0) {
-                if (pieceInMatrix[1] == 1 && !isWhite || pieceInMatrix[1] == 0 && isWhite) {
+                if ((pieceInMatrix[1] == 1 && !isWhite || pieceInMatrix[1] == 0 && isWhite) && !isPawn) {
                     moves.add(new PositionDto(newRow, newCol));
                 }
                 break;
@@ -198,7 +210,7 @@ public interface GameService {
 
     Game enterGame(UUID blackUUID, Integer gameId);
 
-    List<MoveDto> getPossibleMoves(Game game, Piece piece, UUID playerUUID);
+    List<MoveDto> getPossibleMoves(GameDto game, PieceDto piece, UUID playerUUID);
 
     GameStatus getGameStatus(Integer gameId);
 
