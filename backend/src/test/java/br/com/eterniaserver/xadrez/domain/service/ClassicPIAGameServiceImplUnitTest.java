@@ -6,6 +6,7 @@ import br.com.eterniaserver.xadrez.domain.entities.Piece;
 import br.com.eterniaserver.xadrez.domain.enums.GameDifficulty;
 import br.com.eterniaserver.xadrez.domain.enums.GameType;
 import br.com.eterniaserver.xadrez.domain.enums.MoveType;
+import br.com.eterniaserver.xadrez.domain.ia.impl.GameIaImpl;
 import br.com.eterniaserver.xadrez.domain.repositories.BoardRepository;
 import br.com.eterniaserver.xadrez.domain.repositories.GameRepository;
 import br.com.eterniaserver.xadrez.domain.repositories.HistoryRepository;
@@ -41,6 +42,8 @@ class ClassicPIAGameServiceImplUnitTest {
     private PieceRepository pieceRepository;
     @Mock
     private HistoryRepository historyRepository;
+    @Mock
+    private GameIaImpl gameIa;
 
     private GameService gameService;
 
@@ -51,7 +54,8 @@ class ClassicPIAGameServiceImplUnitTest {
                 gameRepository,
                 historyRepository,
                 pieceRepository,
-                boardRepository
+                boardRepository,
+                gameIa
         );
     }
 
@@ -160,7 +164,7 @@ class ClassicPIAGameServiceImplUnitTest {
             int positionX = pawn.getPositionX();
             int positionY = pawn.getPositionY();
 
-            List<MoveDto> moves = gameService.getPossibleMoves(game, pawn, white);
+            List<MoveDto> moves = gameService.getPossibleMoves(game.getGameDto(), pawn.getPieceDto(), white);
 
             Assertions.assertEquals(2, moves.size());
             Assertions.assertEquals(MoveType.NORMAL, moves.get(0).getFirst());
@@ -182,7 +186,7 @@ class ClassicPIAGameServiceImplUnitTest {
             int expectedX = pawn2.getPositionX();
             int expectedY = pawn2.getPositionY();
 
-            List<MoveDto> moves = gameService.getPossibleMoves(game, pawn, white);
+            List<MoveDto> moves = gameService.getPossibleMoves(game.getGameDto(), pawn.getPieceDto(), white);
 
             Assertions.assertEquals(2, moves.size());
             Assertions.assertEquals(MoveType.NORMAL, moves.get(0).getFirst());
@@ -202,7 +206,7 @@ class ClassicPIAGameServiceImplUnitTest {
             int expectedX = pawn.getPositionX();
             int expectedY = pawn.getPositionY();
 
-            List<MoveDto> moves = gameService.getPossibleMoves(game, pawn2, black);
+            List<MoveDto> moves = gameService.getPossibleMoves(game.getGameDto(), pawn2.getPieceDto(), black);
 
             Assertions.assertEquals(2, moves.size());
             Assertions.assertEquals(MoveType.NORMAL, moves.get(0).getFirst());
@@ -215,7 +219,7 @@ class ClassicPIAGameServiceImplUnitTest {
         void testWhiteQueenStartMoves() {
             Piece queen = game.getBoard().getWhitePieces().get(3);
 
-            List<MoveDto> moves = gameService.getPossibleMoves(game, queen, white);
+            List<MoveDto> moves = gameService.getPossibleMoves(game.getGameDto(), queen.getPieceDto(), white);
 
             Assertions.assertEquals(0, moves.size());
         }
@@ -225,7 +229,7 @@ class ClassicPIAGameServiceImplUnitTest {
             game.getBoard().getWhitePieces().remove(11);
             Piece queen = game.getBoard().getWhitePieces().get(3);
 
-            List<MoveDto> moves = gameService.getPossibleMoves(game, queen, white);
+            List<MoveDto> moves = gameService.getPossibleMoves(game.getGameDto(), queen.getPieceDto(), white);
 
             Assertions.assertEquals(6, moves.size());
             Assertions.assertEquals(MoveType.NORMAL, moves.get(0).getFirst());
@@ -242,7 +246,7 @@ class ClassicPIAGameServiceImplUnitTest {
             Piece queen = game.getBoard().getWhitePieces().get(3);
             queen.setPositionX(6);
 
-            List<MoveDto> moves = gameService.getPossibleMoves(game, queen, white);
+            List<MoveDto> moves = gameService.getPossibleMoves(game.getGameDto(), queen.getPieceDto(), white);
 
             Assertions.assertEquals(13, moves.size());
             Assertions.assertEquals(MoveType.NORMAL, moves.get(0).getFirst());
@@ -264,7 +268,7 @@ class ClassicPIAGameServiceImplUnitTest {
         void testWhiteBishopStartMove() {
             Piece bishop = game.getBoard().getWhitePieces().get(2);
 
-            List<MoveDto> moves = gameService.getPossibleMoves(game, bishop, white);
+            List<MoveDto> moves = gameService.getPossibleMoves(game.getGameDto(), bishop.getPieceDto(), white);
 
             Assertions.assertEquals(0, moves.size());
         }
@@ -273,7 +277,7 @@ class ClassicPIAGameServiceImplUnitTest {
         void testWhiteHorseStartMove() {
             Piece horse = game.getBoard().getWhitePieces().get(1);
 
-            List<MoveDto> moves = gameService.getPossibleMoves(game, horse, white);
+            List<MoveDto> moves = gameService.getPossibleMoves(game.getGameDto(), horse.getPieceDto(), white);
 
             Assertions.assertEquals(2, moves.size());
         }
@@ -282,7 +286,7 @@ class ClassicPIAGameServiceImplUnitTest {
         void testWhiteTowerStartMove() {
             Piece tower = game.getBoard().getWhitePieces().get(0);
 
-            List<MoveDto> moves = gameService.getPossibleMoves(game, tower, white);
+            List<MoveDto> moves = gameService.getPossibleMoves(game.getGameDto(), tower.getPieceDto(), white);
 
             Assertions.assertEquals(0, moves.size());
         }
@@ -291,7 +295,7 @@ class ClassicPIAGameServiceImplUnitTest {
         void testWhiteKingStartMove() {
             Piece king = game.getBoard().getWhitePieces().get(4);
 
-            List<MoveDto> moves = gameService.getPossibleMoves(game, king, white);
+            List<MoveDto> moves = gameService.getPossibleMoves(game.getGameDto(), king.getPieceDto(), white);
 
             Assertions.assertEquals(0, moves.size());
         }
@@ -321,6 +325,7 @@ class ClassicPIAGameServiceImplUnitTest {
         @Test
         void testMoveWhiteToPosition() {
             Piece pawn = game.getBoard().getWhitePieces().get(8);
+            game.setId(0);
             int positionX = pawn.getPositionX();
             int positionY = pawn.getPositionY();
 
@@ -382,6 +387,7 @@ class ClassicPIAGameServiceImplUnitTest {
 
         @Test
         void testMoveWhiteToCaptureAnotherPawn() {
+            game.setId(0);
             Piece pawn = game.getBoard().getWhitePieces().get(8);
             pawn.setPositionX(2);
 
@@ -408,6 +414,7 @@ class ClassicPIAGameServiceImplUnitTest {
         @Test
         void testMoveBlackToPosition() {
             game.setWhiteTurn(false);
+            game.setId(0);
             Piece pawn = game.getBoard().getBlackPieces().get(8);
             int positionX = pawn.getPositionX();
             int positionY = pawn.getPositionY();
@@ -473,6 +480,7 @@ class ClassicPIAGameServiceImplUnitTest {
         @Test
         void testMoveBlackToCaptureAnotherPawn() {
             game.setWhiteTurn(false);
+            game.setId(0);
             Piece pawn = game.getBoard().getBlackPieces().get(8);
             pawn.setPositionX(5);
 

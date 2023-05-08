@@ -1,11 +1,13 @@
 package br.com.eterniaserver.xadrez.rest.dtos;
 
+import br.com.eterniaserver.xadrez.domain.entities.Piece;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Data
 @AllArgsConstructor
@@ -18,5 +20,15 @@ public class BoardDto {
     private List<PieceDto> blackPieces;
     private List<HistoryDto> histories;
     private Integer[][][] pieceMatrix;
+
+    public BoardDto copy() {
+        return BoardDto.builder()
+                       .id(getId())
+                       .whitePieces(getWhitePieces().stream().map(PieceDto::copy).toList())
+                       .blackPieces(getBlackPieces().stream().map(PieceDto::copy).toList())
+                       .histories(getHistories().stream().map(HistoryDto::copy).toList())
+                       .pieceMatrix(getPieceMatrix().clone())
+                       .build();
+    }
 
 }

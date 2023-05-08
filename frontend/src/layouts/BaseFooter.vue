@@ -17,11 +17,6 @@
     </p>
   </section>
 </template>
-<script>
-import { defineComponent } from "vue";
-
-export default defineComponent({ name: "BaseFooter" });
-</script>
 <style scoped>
 section {
   background-color: #f1f1f1;

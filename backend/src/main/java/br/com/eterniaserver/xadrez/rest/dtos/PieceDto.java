@@ -18,4 +18,14 @@ public class PieceDto {
     private Integer positionX;
     private Integer positionY;
 
+    public PieceDto copy() {
+        return PieceDto.builder()
+                       .id(getId())
+                       .whitePiece(getWhitePiece())
+                       .pieceType(getPieceType())
+                       .positionX(getPositionX())
+                       .positionY(getPositionY())
+                       .build();
+    }
+
 }

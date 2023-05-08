@@ -26,4 +26,19 @@ public class GameDto {
     private Integer blackMoves;
     private Long timer;
 
+    public GameDto copy() {
+        return GameDto.builder()
+                       .id(getId())
+                       .gameType(getGameType())
+                       .gameDifficulty(getGameDifficulty())
+                       .board(getBoard().copy())
+                       .whiteTurn(getWhiteTurn())
+                       .whitePlayerUUID(getWhitePlayerUUID())
+                       .whiteMoves(getWhiteMoves())
+                       .blackPlayerUUID(getBlackPlayerUUID())
+                       .blackMoves(getBlackMoves())
+                       .timer(getTimer())
+                       .build();
+    }
+
 }

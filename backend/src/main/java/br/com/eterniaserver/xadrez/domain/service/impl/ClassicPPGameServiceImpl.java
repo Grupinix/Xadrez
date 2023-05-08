@@ -6,7 +6,9 @@ import br.com.eterniaserver.xadrez.domain.enums.GameStatus;
 import br.com.eterniaserver.xadrez.domain.enums.GameType;
 import br.com.eterniaserver.xadrez.domain.repositories.GameRepository;
 import br.com.eterniaserver.xadrez.domain.service.GameService;
+import br.com.eterniaserver.xadrez.rest.dtos.GameDto;
 import br.com.eterniaserver.xadrez.rest.dtos.MoveDto;
+import br.com.eterniaserver.xadrez.rest.dtos.PieceDto;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -58,7 +60,7 @@ public class ClassicPPGameServiceImpl implements GameService {
     }
 
     @Override
-    public List<MoveDto> getPossibleMoves(Game game, Piece piece, UUID playerUUID) {
+    public List<MoveDto> getPossibleMoves(GameDto game, PieceDto piece, UUID playerUUID) {
         return null;
     }
 
