@@ -7,12 +7,12 @@
         </span>
       </template>
 
-      <el-form :model="model" :rules="rules" ref="ruleForm">
+      <el-form ref="ruleForm" :model="model" :rules="rules">
         <el-form-item prop="identifier">
           <el-input
+            v-model="model.identifier"
             placeholder="Identificador..."
             :prefix-icon="lock"
-            v-model="model.identifier"
           ></el-input>
         </el-form-item>
 
@@ -28,20 +28,24 @@
   </el-row>
 </template>
 
-<script setup>
-import { ref, shallowRef } from "vue";
+<script setup lang="ts">
+import { reactive, ref, shallowRef } from "vue";
+import type { FormInstance, FormRules } from "element-plus";
 
 import router from "../router";
 import { Lock } from "@element-plus/icons-vue";
 import { ElMessage } from "element-plus";
-import PlayerService from "@/services/playerService";
+import PlayerService from "../services/playerService";
 
-const playerDto = ref({});
-const loading = ref(false);
+const loading = ref<boolean>(false);
 const lock = shallowRef(Lock);
-const ruleForm = ref({});
-const model = ref({ identifier: "" });
-const rules = ref({
+const ruleForm = ref<FormInstance>()
+const model = reactive<PlayerDto>({
+  identifier: "",
+  uuid: "",
+  gameDifficulty: "",
+});
+const rules = reactive<FormRules>({
   identifier: [
     {
       required: true,
@@ -58,6 +62,10 @@ const rules = ref({
 });
 
 function register() {
+  if (!ruleForm.value) {
+    return;
+  }
+
   loading.value = true;
   ruleForm.value.validate((valid, fields) => {
       console.log(fields);
@@ -75,24 +83,21 @@ function register() {
         return;
       }
 
-      const identifier = model.value.identifier;
+      const identifier = model.identifier;
       PlayerService.register(identifier)
         .then((response) => {
           response.json().then((data) => {
             if (response.ok) {
-              isValid = true;
               localStorage.setItem("playerDto", JSON.stringify(data));
               router.push({ path: "/inicio" });
             } else {
               alertRegisterFail();
-              isValid = false;
               loading.value = false;
             }
           });
         })
         .catch(() => {
           alertRegisterFail();
-          isValid = false;
           loading.value = false;
         });
     });
@@ -100,23 +105,6 @@ function register() {
 
 function alertRegisterFail() {
   ElMessage.error("Credenciais inválidas.");
-}
-
-playerDto.value = JSON.parse(localStorage.getItem("playerDto"));
-if (playerDto.value) {
-  PlayerService.verify(playerDto)
-    .then((response) => {
-      response.json().then((result) => {
-        if (result) {
-          router.push({ path: "/inicio" });
-        } else {
-          localStorage.removeItem("playerDto");
-        }
-      });
-    })
-    .catch(() => {
-      localStorage.removeItem("playerDto");
-    });
 }
 </script>
 

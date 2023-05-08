@@ -8,12 +8,15 @@ import br.com.eterniaserver.xadrez.domain.enums.GameDifficulty;
 import br.com.eterniaserver.xadrez.domain.enums.GameStatus;
 import br.com.eterniaserver.xadrez.domain.enums.GameType;
 import br.com.eterniaserver.xadrez.domain.enums.MoveType;
+import br.com.eterniaserver.xadrez.domain.ia.GameIa;
+import br.com.eterniaserver.xadrez.domain.ia.impl.EasyGameIaImpl;
 import br.com.eterniaserver.xadrez.domain.repositories.BoardRepository;
 import br.com.eterniaserver.xadrez.domain.repositories.GameRepository;
 import br.com.eterniaserver.xadrez.domain.repositories.HistoryRepository;
 import br.com.eterniaserver.xadrez.domain.repositories.PieceRepository;
 import br.com.eterniaserver.xadrez.domain.service.BoardService;
 import br.com.eterniaserver.xadrez.domain.service.GameService;
+import br.com.eterniaserver.xadrez.domain.service.PlayerService;
 import br.com.eterniaserver.xadrez.rest.dtos.MoveDto;
 import br.com.eterniaserver.xadrez.rest.dtos.PositionDto;
 import lombok.AllArgsConstructor;
@@ -26,16 +29,32 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 @Service("classicPIAGameService")
 @AllArgsConstructor
 public class ClassicPIAGameServiceImpl implements GameService {
 
     private final BoardService boardService;
+    private final PlayerService playerService;
+
     private final GameRepository gameRepository;
     private final HistoryRepository historyRepository;
     private final PieceRepository pieceRepository;
     private final BoardRepository boardRepository;
+
+    private EasyGameIaImpl easyGameIa;
+
+    public GameIa getGameIa(UUID uuid) {
+        GameDifficulty gameDifficulty = playerService.getGameDifficulty(uuid);
+
+        return switch (gameDifficulty) {
+            case EASY -> easyGameIa;
+            case NORMAL -> null;
+            case HARD -> null;
+            default -> null;
+        };
+    }
 
     @Override
     public List<Game> getAllGames() {
@@ -133,7 +152,13 @@ public class ClassicPIAGameServiceImpl implements GameService {
 
         saveEntities(game, history, piece, board);
 
+        callIaMove(playerUUID, game.getId());
+
         return game;
+    }
+
+    private void callIaMove(final UUID uuid, final int gameId) {
+        CompletableFuture.runAsync(() -> getGameIa(uuid).movePiece(gameId));
     }
 
     private boolean checkTurn(Game game, UUID playerUUID) throws ResponseStatusException {
