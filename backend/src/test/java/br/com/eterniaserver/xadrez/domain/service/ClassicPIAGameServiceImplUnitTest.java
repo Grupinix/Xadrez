@@ -6,6 +6,7 @@ import br.com.eterniaserver.xadrez.domain.entities.Piece;
 import br.com.eterniaserver.xadrez.domain.enums.GameDifficulty;
 import br.com.eterniaserver.xadrez.domain.enums.GameType;
 import br.com.eterniaserver.xadrez.domain.enums.MoveType;
+import br.com.eterniaserver.xadrez.domain.ia.impl.EasyGameIaImpl;
 import br.com.eterniaserver.xadrez.domain.repositories.BoardRepository;
 import br.com.eterniaserver.xadrez.domain.repositories.GameRepository;
 import br.com.eterniaserver.xadrez.domain.repositories.HistoryRepository;
@@ -32,6 +33,8 @@ import java.util.UUID;
 class ClassicPIAGameServiceImplUnitTest {
 
     @Mock
+    private PlayerService playerService;
+    @Mock
     private BoardService boardService;
     @Mock
     private GameRepository gameRepository;
@@ -41,6 +44,8 @@ class ClassicPIAGameServiceImplUnitTest {
     private PieceRepository pieceRepository;
     @Mock
     private HistoryRepository historyRepository;
+    @Mock
+    private EasyGameIaImpl easyGameIa;
 
     private GameService gameService;
 
@@ -48,10 +53,12 @@ class ClassicPIAGameServiceImplUnitTest {
     void init() {
         gameService = new ClassicPIAGameServiceImpl(
                 boardService,
+                playerService,
                 gameRepository,
                 historyRepository,
                 pieceRepository,
-                boardRepository
+                boardRepository,
+                easyGameIa
         );
     }
 
@@ -321,6 +328,7 @@ class ClassicPIAGameServiceImplUnitTest {
         @Test
         void testMoveWhiteToPosition() {
             Piece pawn = game.getBoard().getWhitePieces().get(8);
+            game.setId(0);
             int positionX = pawn.getPositionX();
             int positionY = pawn.getPositionY();
 
@@ -382,6 +390,7 @@ class ClassicPIAGameServiceImplUnitTest {
 
         @Test
         void testMoveWhiteToCaptureAnotherPawn() {
+            game.setId(0);
             Piece pawn = game.getBoard().getWhitePieces().get(8);
             pawn.setPositionX(2);
 
@@ -408,6 +417,7 @@ class ClassicPIAGameServiceImplUnitTest {
         @Test
         void testMoveBlackToPosition() {
             game.setWhiteTurn(false);
+            game.setId(0);
             Piece pawn = game.getBoard().getBlackPieces().get(8);
             int positionX = pawn.getPositionX();
             int positionY = pawn.getPositionY();
@@ -473,6 +483,7 @@ class ClassicPIAGameServiceImplUnitTest {
         @Test
         void testMoveBlackToCaptureAnotherPawn() {
             game.setWhiteTurn(false);
+            game.setId(0);
             Piece pawn = game.getBoard().getBlackPieces().get(8);
             pawn.setPositionX(5);
 
