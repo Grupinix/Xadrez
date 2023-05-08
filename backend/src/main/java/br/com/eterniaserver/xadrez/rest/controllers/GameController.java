@@ -70,7 +70,7 @@ public class GameController {
 
         GameService gameService = getGameService(type);
         Game game = gameService.getGame(gameId);
-        return getGameService(type).getPossibleMoves(game, piece, uuid);
+        return getGameService(type).getPossibleMoves(game.getGameDto(), piece.getPieceDto(), uuid);
 
     }
 
