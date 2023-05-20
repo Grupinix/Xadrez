@@ -1,7 +1,9 @@
 package br.com.eterniaserver.xadrez.domain.ia.impl;
 
+import br.com.eterniaserver.xadrez.Constants;
 import br.com.eterniaserver.xadrez.domain.entities.Game;
 import br.com.eterniaserver.xadrez.domain.entities.Piece;
+import br.com.eterniaserver.xadrez.domain.enums.GameStatus;
 import br.com.eterniaserver.xadrez.domain.enums.PieceType;
 import br.com.eterniaserver.xadrez.domain.ia.GameIa;
 import br.com.eterniaserver.xadrez.domain.repositories.GameRepository;
@@ -35,7 +37,7 @@ public class GameIaImpl implements GameIa {
         GameDto gameDto = game.getGameDto();
 
         Pair<PieceDto, MoveDto> move = miniMax(
-                gameService, gameDto.getBoard(), gameDto, 0, 1, 2
+                gameService, gameDto.getBoard(), gameDto, Constants.WHITE_COLOR, Constants.BLACK_COLOR, 4
         );
         PieceDto pieceDto = move.getFirst();
         MoveDto moveDto = move.getSecond();
@@ -45,25 +47,13 @@ public class GameIaImpl implements GameIa {
         gameService.movePiece(game, null, piece, moveDto);
     }
 
-    public Map<PieceDto, List<MoveDto>> getPlayerLegalMoves(GameService gameService, GameDto game, int playerColor) {
-        Map<PieceDto, List<MoveDto>> moveDtoMap = new HashMap<>();
-        List<PieceDto> pieceDtoList = playerColor == 0 ? game.getBoard().getWhitePieces() : game.getBoard().getBlackPieces();
-        UUID playerUUID = playerColor == 0 ? game.getWhitePlayerUUID() : null;
-
-        for (PieceDto piece : pieceDtoList) {
-            moveDtoMap.put(piece, gameService.getPossibleMoves(game, piece, playerUUID));
-        }
-
-        return moveDtoMap;
-    }
-
     public Pair<PieceDto, MoveDto> miniMax(GameService gameService,
                                            BoardDto boardDto,
                                            GameDto gameDto,
                                            int currentColor,
                                            int opponentColor,
                                            int depth) {
-        Map<PieceDto, List<MoveDto>> legalMovesMap = getPlayerLegalMoves(gameService, gameDto, opponentColor);
+        Map<PieceDto, List<MoveDto>> legalMovesMap = gameService.getPlayerLegalMoves(gameDto, opponentColor);
         int highestValue = Integer.MIN_VALUE;
         Pair<PieceDto, MoveDto> bestMove = null;
         Pair<PieceDto, MoveDto> lastMove = null;
@@ -75,15 +65,13 @@ public class GameIaImpl implements GameIa {
 
                 GameDto tempGame = gameDto.copy();
                 tempGame.setBoard(b);
-                int bestBoardValue = evalutionFunction(b, opponentColor != 1);
+                int bestBoardValue = evalutionFunction(gameService, b, opponentColor);
                 int value = minimaxValue(gameService, b, gameDto, opponentColor, currentColor, depth - 1, bestBoardValue);
 
-                if (currentColor == 0) {
-                    lastMove = Pair.of(pieceDtoListEntry.getKey(), legalMove);
-                    if (value > highestValue) {
-                        highestValue = value;
-                        bestMove = Pair.of(pieceDtoListEntry.getKey(), legalMove);
-                    }
+                lastMove = Pair.of(pieceDtoListEntry.getKey(), legalMove);
+                if (value > highestValue) {
+                    highestValue = value;
+                    bestMove = Pair.of(pieceDtoListEntry.getKey(), legalMove);
                 }
             }
         }
@@ -104,73 +92,56 @@ public class GameIaImpl implements GameIa {
 
         int actualMove = bestBoardValue;
         int lastValue;
-        if (currentColor == 0) {
-            GameDto tempGame = gameDto.copy();
-            tempGame.setBoard(boardDto);
-            Map<PieceDto, List<MoveDto>> legalMovesMap = getPlayerLegalMoves(gameService, tempGame, opponentColor);
-            int highestValue = Integer.MIN_VALUE;
-            int oldValue= Integer.MIN_VALUE;
-            int value;
-            for (Map.Entry<PieceDto, List<MoveDto>> pieceDtoListEntry : legalMovesMap.entrySet()) {
-                List<MoveDto> legalMoves = pieceDtoListEntry.getValue();
-                for (MoveDto legalMove : legalMoves) {
-                    BoardDto b = boardDto.copy();
-                    movePieceOnBoard(b, pieceDtoListEntry.getKey(), legalMove);
-                    value = evalutionFunction(b, opponentColor != 1);
-                    tempGame.setBoard(b);
-                    if (depth >= 2) {
-                        int moveValue = actualMove + evalutionFunction(b, opponentColor != 1);
-                        value = minimaxValue(gameService, b, gameDto, opponentColor, currentColor, depth - 1, moveValue);
-                        if (value > oldValue) {
-                            oldValue = value;
-                            bestBoardValue = value;
-                        }
+        GameDto tempGame = gameDto.copy();
+        tempGame.setBoard(boardDto);
+        Map<PieceDto, List<MoveDto>> legalMovesMap = gameService.getPlayerLegalMoves(tempGame, currentColor);
+        int highestValue = Integer.MIN_VALUE;
+        int oldValue = Integer.MAX_VALUE;
+        for (Map.Entry<PieceDto, List<MoveDto>> pieceDtoListEntry : legalMovesMap.entrySet()) {
+            List<MoveDto> legalMoves = pieceDtoListEntry.getValue();
+            for (MoveDto legalMove : legalMoves) {
+                BoardDto b = boardDto.copy();
+                movePieceOnBoard(b, pieceDtoListEntry.getKey(), legalMove);
+                int value = evalutionFunction(gameService, b, opponentColor);
+                tempGame.setBoard(b);
+                if (depth >= 2) {
+                    int moveValue;
+                    if (currentColor == Constants.WHITE_COLOR) {
+                        moveValue = actualMove + value;
                     }
-                    else if (value > highestValue) {
-                        if (highestValue != Integer.MIN_VALUE) {
-                            bestBoardValue = bestBoardValue - oldValue;
-                        }
+                    else {
+                        moveValue = actualMove - value;
+                    }
+
+                    value = minimaxValue(gameService, b, gameDto, opponentColor, currentColor, depth - 1, moveValue);
+                    if (currentColor == Constants.WHITE_COLOR && value > oldValue) {
                         oldValue = value;
-                        highestValue = value;
-                        bestBoardValue = bestBoardValue + value;
+                        bestBoardValue = value;
+                    }
+                    else if (value < oldValue) {
+                        oldValue = value;
+                        bestBoardValue = value;
                     }
                 }
-            }
-            lastValue = bestBoardValue;
-        }
-        else {
-            GameDto tempGame = gameDto.copy();
-            tempGame.setBoard(boardDto);
-            Map<PieceDto, List<MoveDto>> legalMovesMap = getPlayerLegalMoves(gameService, tempGame, opponentColor);
-            int highestValue = Integer.MIN_VALUE;
-            int oldValue = Integer.MAX_VALUE;
-            for (Map.Entry<PieceDto, List<MoveDto>> pieceDtoListEntry : legalMovesMap.entrySet()) {
-                List<MoveDto> legalMoves = pieceDtoListEntry.getValue();
-                for (MoveDto legalMove : legalMoves) {
-                    BoardDto b = boardDto.copy();
-                    movePieceOnBoard(b, pieceDtoListEntry.getKey(), legalMove);
-                    tempGame.setBoard(b);
-                    int value = evalutionFunction(b, opponentColor != 1);
-                    if (depth >= 2) {
-                        int moveValue = actualMove - evalutionFunction(b, opponentColor != 1);
-                        value = minimaxValue(gameService, b, gameDto, opponentColor, currentColor, depth - 1, moveValue);
-                        if (value < oldValue) {
-                            oldValue = value;
-                            bestBoardValue = value;
-                        }
+                else if (currentColor == Constants.WHITE_COLOR && value > highestValue) {
+                    if (highestValue != Integer.MIN_VALUE) {
+                        bestBoardValue = bestBoardValue - oldValue;
                     }
-                    else if (value > highestValue) {
-                        if (highestValue != Integer.MIN_VALUE) {
-                            bestBoardValue = bestBoardValue + oldValue;
-                        }
-                        oldValue = value;
-                        highestValue = value;
-                        bestBoardValue = bestBoardValue - value;
+                    oldValue = value;
+                    highestValue = value;
+                    bestBoardValue = bestBoardValue + value;
+                }
+                else if (value > highestValue) {
+                    if (highestValue != Integer.MIN_VALUE) {
+                        bestBoardValue = bestBoardValue + oldValue;
                     }
+                    oldValue = value;
+                    highestValue = value;
+                    bestBoardValue = bestBoardValue - value;
                 }
             }
-            lastValue = bestBoardValue;
         }
+        lastValue = bestBoardValue;
 
         return lastValue;
     }
@@ -182,36 +153,36 @@ public class GameIaImpl implements GameIa {
         Integer[][][] pieceMatrix = boardDto.getPieceMatrix();
         Integer[] possibleKilled = pieceMatrix[x][y];
 
+        List<PieceDto> whiteList = new ArrayList<>(boardDto.getWhitePieces());
+        List<PieceDto> blackList = new ArrayList<>(boardDto.getBlackPieces());
+        List<PieceDto> enemyList = pieceDto.getWhitePiece() ? blackList : whiteList;
+
         if (!pieceDto.getWhitePiece() && possibleKilled != null && possibleKilled[0] != null) {
             Pair<Integer, PieceDto> found = null;
-            for (int i = 0; i < boardDto.getBlackPieces().size(); i++) {
-                if (boardDto.getBlackPieces().get(i).getId().equals(possibleKilled[0])) {
-                    found = Pair.of(i, boardDto.getBlackPieces().get(i));
+            for (int i = 0; i < enemyList.size(); i++) {
+                if (enemyList.get(i).getId().equals(possibleKilled[0])) {
+                    found = Pair.of(i, enemyList.get(i));
                     break;
                 }
             }
             if (found != null) {
-                boardDto.getBlackPieces().remove(found.getFirst().intValue());
-            }
-        }
-        else if (possibleKilled != null && possibleKilled[0] != null) {
-            Pair<Integer, PieceDto> found = null;
-            for (int i = 0; i < boardDto.getWhitePieces().size(); i++) {
-                if (boardDto.getWhitePieces().get(i).getId().equals(possibleKilled[0])) {
-                    found = Pair.of(i, boardDto.getWhitePieces().get(i));
-                    break;
+                int index = found.getFirst();
+                enemyList.remove(index);
+                if (pieceDto.getWhitePiece()) {
+                    boardDto.setBlackPieces(enemyList);
+                }
+                else {
+                    boardDto.setWhitePieces(enemyList);
                 }
             }
-            if (found != null) {
-                boardDto.getWhitePieces().remove(found.getFirst().intValue());
-            }
         }
+
         pieceDto.setPositionX(x);
         pieceDto.setPositionY(y);
     }
 
-    public int countPiecesByType(BoardDto boardDto, boolean whiteTurn, PieceType pieceType) {
-        List<PieceDto> pieces = whiteTurn ? boardDto.getWhitePieces() : boardDto.getBlackPieces();
+    public int countPiecesByType(BoardDto boardDto, int color, PieceType pieceType) {
+        List<PieceDto> pieces = color == Constants.WHITE_COLOR ? boardDto.getWhitePieces() : boardDto.getBlackPieces();
         int count = 0;
         for (PieceDto piece : pieces) {
             if (piece.getPieceType() == pieceType) {
@@ -222,36 +193,65 @@ public class GameIaImpl implements GameIa {
     }
 
 
-    public int evalutionFunction(BoardDto boardDto, boolean whiteTurn) {
+    public int evalutionFunction(GameService gameService, BoardDto boardDto, int color) {
 
         int boardValue = 0;
         int numhorse, numrook, numqueen, numking, numpawn, numbishop;
 
-        boolean tempWhiteTurn = whiteTurn;
+        int tempColor = color;
+        color = color == Constants.BLACK_COLOR ? Constants.WHITE_COLOR : Constants.BLACK_COLOR;
 
-        whiteTurn = !whiteTurn;
-        numpawn = countPiecesByType(boardDto, whiteTurn, PieceType.PAWN);
+        numpawn = countPiecesByType(boardDto, color, PieceType.PAWN);
         boardValue = boardValue + 100 * (8 - numpawn);
-        numhorse = countPiecesByType(boardDto, whiteTurn, PieceType.HORSE);
+        numhorse = countPiecesByType(boardDto, color, PieceType.HORSE);
         boardValue = boardValue + 300 * (2 - numhorse);
-        numbishop = countPiecesByType(boardDto, whiteTurn, PieceType.BISHOP);
+        numbishop = countPiecesByType(boardDto, color, PieceType.BISHOP);
         boardValue = boardValue + 325 * (2 - numbishop);
-        numrook = countPiecesByType(boardDto, whiteTurn, PieceType.TOWER);
+        numrook = countPiecesByType(boardDto, color, PieceType.TOWER);
         boardValue = boardValue + 500 * (2 - numrook);
-        numqueen = countPiecesByType(boardDto, whiteTurn, PieceType.QUEEN);
+        numqueen = countPiecesByType(boardDto, color, PieceType.QUEEN);
         boardValue = boardValue + 900 * (1 - numqueen);
-        numking = countPiecesByType(boardDto, whiteTurn, PieceType.KING);
+        numking = countPiecesByType(boardDto, color, PieceType.KING);
         boardValue = boardValue + 3000 * (1 - numking);
-        whiteTurn = tempWhiteTurn;
+        color = tempColor;
 
-        boardValue = boardValue + evalutionPerPositioning(boardDto, whiteTurn);
+        boardValue = boardValue + evalutionPerPositioning(boardDto, color);
+        boardValue = boardValue + extraPointsForCheck(gameService, boardDto, color);
 
         return boardValue;
     }
 
-    public int evalutionPerPositioning(BoardDto boardDto, boolean whiteTurn) {
+    public int extraPointsForCheck(GameService gameService, BoardDto boardDto, int color) {
+        int score = 0;
+        boolean whiteTurn = color == Constants.WHITE_COLOR;
+
+        GameStatus gameStatus = gameService.getGameStatus(boardDto, whiteTurn);
+        if (gameStatus == GameStatus.NORMAL) {
+            return score;
+        }
+
+        if (color == Constants.WHITE_COLOR) {
+            if (gameStatus == GameStatus.WHITE_CHECK) {
+                score = 200;
+            }
+            else if (gameStatus == GameStatus.WHITE_WINS) {
+                score = 5000;
+            }
+        }
+        else {
+            if (gameStatus == GameStatus.BLACK_CHECK) {
+                score = 200;
+            }
+            else if (gameStatus == GameStatus.BLACK_WINS) {
+                score = 5000;
+            }
+        }
+
+        return score;
+    }
+
+    public int evalutionPerPositioning(BoardDto boardDto, int color) {
         Integer[][][] boardMatrix = boardDto.getPieceMatrix();
-        int whiteTurnInt = whiteTurn ? 0 : 1;
 
         int value = 0;
         for (int i = 0; i < 8; i++) {
@@ -260,27 +260,25 @@ public class GameIaImpl implements GameIa {
                 if (piece == null || piece[0] == null) {
                     continue;
                 }
-                if (piece[1] != whiteTurnInt) {
-                    List<PieceDto> pieceDtoList = whiteTurn ? boardDto.getWhitePieces() : boardDto.getBlackPieces();
-                    for (PieceDto pieceDto : pieceDtoList) {
-                        if ((i >= 3 && i <= 4) && (j >= 3 && j <= 4)) {
-                            value = switch (pieceDto.getPieceType()) {
-                                case BISHOP, HORSE -> value + 40;
-                                case KING -> value - 30;
-                                case PAWN -> value + 10;
-                                case QUEEN -> value + 60;
-                                case TOWER -> value + 50;
-                            };
-                        }
-                        else if ((i >= 2 && i <= 5) && (j >= 2 && j <= 5)) {
-                            value = switch (pieceDto.getPieceType()) {
-                                case BISHOP, HORSE -> value + 30;
-                                case KING -> value - 20;
-                                case PAWN -> value + 5;
-                                case QUEEN -> value + 50;
-                                case TOWER -> value + 40;
-                            };
-                        }
+
+                if (piece[1] == color) {
+                    if ((i >= 3 && i <= 4) && (j >= 3 && j <= 4)) {
+                        value = switch (PieceType.getFromOrdinal(piece[2])) {
+                            case BISHOP, HORSE -> value + 40;
+                            case KING -> value - 30;
+                            case PAWN -> value + 10;
+                            case QUEEN -> value + 60;
+                            case TOWER -> value + 50;
+                        };
+                    }
+                    else if ((i >= 2 && i <= 5) && (j >= 2 && j <= 5)) {
+                        value = switch (PieceType.getFromOrdinal(piece[2])) {
+                            case BISHOP, HORSE -> value + 30;
+                            case KING -> value - 20;
+                            case PAWN -> value + 5;
+                            case QUEEN -> value + 50;
+                            case TOWER -> value + 40;
+                        };
                     }
                 }
             }

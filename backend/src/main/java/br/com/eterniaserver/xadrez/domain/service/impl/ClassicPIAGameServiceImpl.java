@@ -1,11 +1,11 @@
 package br.com.eterniaserver.xadrez.domain.service.impl;
 
+import br.com.eterniaserver.xadrez.Constants;
 import br.com.eterniaserver.xadrez.domain.entities.Board;
 import br.com.eterniaserver.xadrez.domain.entities.Game;
 import br.com.eterniaserver.xadrez.domain.entities.History;
 import br.com.eterniaserver.xadrez.domain.entities.Piece;
 import br.com.eterniaserver.xadrez.domain.enums.GameDifficulty;
-import br.com.eterniaserver.xadrez.domain.enums.GameStatus;
 import br.com.eterniaserver.xadrez.domain.enums.GameType;
 import br.com.eterniaserver.xadrez.domain.enums.MoveType;
 import br.com.eterniaserver.xadrez.domain.ia.impl.GameIaImpl;
@@ -109,11 +109,6 @@ public class ClassicPIAGameServiceImpl implements GameService {
     }
 
     @Override
-    public GameStatus getGameStatus(Integer gameId) {
-        return null;
-    }
-
-    @Override
     @Transactional
     public Game movePiece(Game game,
                           UUID playerUUID,
@@ -181,10 +176,10 @@ public class ClassicPIAGameServiceImpl implements GameService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Não há peça na posição");
         }
 
-        Integer capturedPieceId = pieceInPos[0];
-        Integer capturedPieceIsWhite = pieceInPos[1];
+        int capturedPieceId = pieceInPos[0];
+        boolean capturedPieceIsWhite = pieceInPos[1] == Constants.WHITE_COLOR;
 
-        if (capturedPieceIsWhite == 1 && isWhite || capturedPieceIsWhite == 0 && !isWhite) {
+        if (capturedPieceIsWhite && isWhite || !capturedPieceIsWhite && !isWhite) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Não pode capturar sua própria peça");
         }
 

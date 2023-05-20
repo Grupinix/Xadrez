@@ -11,8 +11,5 @@
         <module name="br.com.eterniaserver.xadrez-backend.main" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="backend" target="17" />
-    </bytecodeTargetLevel>
   </component>
 </project>

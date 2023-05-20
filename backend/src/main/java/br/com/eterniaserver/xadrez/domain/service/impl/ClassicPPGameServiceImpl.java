@@ -2,7 +2,6 @@ package br.com.eterniaserver.xadrez.domain.service.impl;
 
 import br.com.eterniaserver.xadrez.domain.entities.Game;
 import br.com.eterniaserver.xadrez.domain.entities.Piece;
-import br.com.eterniaserver.xadrez.domain.enums.GameStatus;
 import br.com.eterniaserver.xadrez.domain.enums.GameType;
 import br.com.eterniaserver.xadrez.domain.repositories.GameRepository;
 import br.com.eterniaserver.xadrez.domain.service.GameService;
@@ -61,11 +60,6 @@ public class ClassicPPGameServiceImpl implements GameService {
 
     @Override
     public List<MoveDto> getPossibleMoves(GameDto game, PieceDto piece, UUID playerUUID) {
-        return null;
-    }
-
-    @Override
-    public GameStatus getGameStatus(Integer gameId) {
         return null;
     }
 

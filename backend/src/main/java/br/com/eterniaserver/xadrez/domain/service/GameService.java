@@ -1,10 +1,13 @@
 package br.com.eterniaserver.xadrez.domain.service;
 
+import br.com.eterniaserver.xadrez.Constants;
 import br.com.eterniaserver.xadrez.domain.entities.Game;
 import br.com.eterniaserver.xadrez.domain.entities.Piece;
 import br.com.eterniaserver.xadrez.domain.enums.GameStatus;
 import br.com.eterniaserver.xadrez.domain.enums.MoveType;
 
+import br.com.eterniaserver.xadrez.domain.enums.PieceType;
+import br.com.eterniaserver.xadrez.rest.dtos.BoardDto;
 import br.com.eterniaserver.xadrez.rest.dtos.GameDto;
 import br.com.eterniaserver.xadrez.rest.dtos.MoveDto;
 import br.com.eterniaserver.xadrez.rest.dtos.PieceDto;
@@ -12,7 +15,10 @@ import br.com.eterniaserver.xadrez.rest.dtos.PositionDto;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface GameService {
@@ -41,7 +47,8 @@ public interface GameService {
             if (pieceInMatrix == null || pieceInMatrix[0] == null || pieceInMatrix[0] == 0) {
                 possibleMoves.add(new MoveDto(MoveType.NORMAL, move));
             }
-            else if (pieceInMatrix[1] == 1 && !isWhite || pieceInMatrix[1] == 0 && isWhite) {
+            else if (pieceInMatrix[1] == Constants.WHITE_COLOR && !isWhite
+                    || pieceInMatrix[1] == Constants.BLACK_COLOR && isWhite) {
                 possibleMoves.add(new MoveDto(MoveType.CAPTURE, move));
             }
         }
@@ -163,7 +170,8 @@ public interface GameService {
 
             Integer[] pieceInMatrix = pieceMatrix[newRow][newCol];
             if (pieceInMatrix != null && pieceInMatrix[0] != null && pieceInMatrix[0] != 0) {
-                if ((pieceInMatrix[1] == 1 && !isWhite || pieceInMatrix[1] == 0 && isWhite) && !isPawn) {
+                if ((pieceInMatrix[1] == Constants.WHITE_COLOR && !isWhite
+                        || pieceInMatrix[1] == Constants.BLACK_COLOR && isWhite) && !isPawn) {
                     moves.add(new PositionDto(newRow, newCol));
                 }
                 break;
@@ -190,7 +198,8 @@ public interface GameService {
 
             Integer[] leftPiece = pieceMatrix[x][y];
             boolean hasPiece = leftPiece != null && leftPiece[0] != null;
-            if (hasPiece && (leftPiece[1] == 1 && !isWhite || leftPiece[1] == 0 && isWhite)) {
+            if (hasPiece && (leftPiece[1] == Constants.WHITE_COLOR && !isWhite
+                    || leftPiece[1] == Constants.BLACK_COLOR && isWhite)) {
                 moves.add(new PositionDto(x, y));
             }
         }
@@ -212,8 +221,41 @@ public interface GameService {
 
     List<MoveDto> getPossibleMoves(GameDto game, PieceDto piece, UUID playerUUID);
 
-    GameStatus getGameStatus(Integer gameId);
+    default GameStatus getGameStatus(BoardDto boardDto, boolean isWhiteTurn) {
+        List<PieceDto> whitePieces = boardDto.getWhitePieces();
+        List<PieceDto> blackPieces = boardDto.getBlackPieces();
+
+        Optional<PieceDto> whiteKingOptional = whitePieces.stream()
+                                                          .filter(piece -> piece.getPieceType() == PieceType.KING)
+                                                          .findFirst();
+        Optional<PieceDto> blackKingOptional = blackPieces.stream()
+                                                          .filter(piece -> piece.getPieceType() == PieceType.KING)
+                                                          .findFirst();
+
+        if (whiteKingOptional.isEmpty()) {
+            return GameStatus.BLACK_WINS;
+        }
+        else if (blackKingOptional.isEmpty()) {
+            return GameStatus.WHITE_WINS;
+        }
+
+        return GameStatus.NORMAL;
+    }
 
     Game movePiece(Game game, UUID playerUUID, Piece piece, MoveDto moveTypePairPair) throws ResponseStatusException;
+
+    default Map<PieceDto, List<MoveDto>> getPlayerLegalMoves(GameDto gameDto, int playerColor) {
+        BoardDto boardDto = gameDto.getBoard();
+
+        Map<PieceDto, List<MoveDto>> moveDtoMap = new HashMap<>();
+        List<PieceDto> pieceDtoList = playerColor == 0 ? boardDto.getWhitePieces() : boardDto.getBlackPieces();
+        UUID playerUUID = playerColor == 0 ? gameDto.getWhitePlayerUUID() : null;
+
+        for (PieceDto piece : pieceDtoList) {
+            moveDtoMap.put(piece, getPossibleMoves(gameDto, piece, playerUUID));
+        }
+
+        return moveDtoMap;
+    }
 
 }

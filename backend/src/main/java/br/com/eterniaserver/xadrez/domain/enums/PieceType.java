@@ -7,6 +7,18 @@ public enum PieceType {
     HORSE,
     KING,
     QUEEN,
-    TOWER,
+    TOWER;
+
+    public static PieceType getFromOrdinal(int ord) {
+        return switch (ord) {
+            case 0 -> PAWN;
+            case 1 -> BISHOP;
+            case 2 -> HORSE;
+            case 3 -> KING;
+            case 4 -> QUEEN;
+            case 5 -> TOWER;
+            default -> null;
+        };
+    }
 
 }
