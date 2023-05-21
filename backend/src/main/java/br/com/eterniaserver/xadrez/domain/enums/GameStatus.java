@@ -6,8 +6,7 @@ public enum GameStatus {
     BLACK_WINS,
     WHITE_CHECK,
     BLACK_CHECK,
-    WHITE_WINS_MATTE,
-    BLACK_WINS_MATTE,
-    TIE
+    TIE,
+    NORMAL
 
 }

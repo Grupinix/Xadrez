@@ -1,5 +1,6 @@
 package br.com.eterniaserver.xadrez.domain.entities;
 
+import br.com.eterniaserver.xadrez.Constants;
 import br.com.eterniaserver.xadrez.rest.dtos.BoardDto;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -30,10 +31,14 @@ public class Board {
         Integer[][][] pieceMatrix = new Integer[8][8][1];
 
         for (Piece piece : getWhitePieces()) {
-            pieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[] {piece.getId(), 1};
+            pieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[] {
+                    piece.getId(), Constants.WHITE_COLOR, piece.getPieceType().ordinal()
+            };
         }
         for (Piece piece : getBlackPieces()) {
-            pieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[] {piece.getId(), 0};
+            pieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[] {
+                    piece.getId(), Constants.BLACK_COLOR, piece.getPieceType().ordinal()
+            };
         }
 
         return pieceMatrix;

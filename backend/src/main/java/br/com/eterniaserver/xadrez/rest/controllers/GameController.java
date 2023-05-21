@@ -2,6 +2,7 @@ package br.com.eterniaserver.xadrez.rest.controllers;
 
 import br.com.eterniaserver.xadrez.domain.entities.Game;
 import br.com.eterniaserver.xadrez.domain.entities.Piece;
+import br.com.eterniaserver.xadrez.domain.enums.GameStatus;
 import br.com.eterniaserver.xadrez.domain.enums.GameType;
 import br.com.eterniaserver.xadrez.domain.repositories.PieceRepository;
 import br.com.eterniaserver.xadrez.domain.service.GameService;
@@ -78,6 +79,17 @@ public class GameController {
     @ResponseStatus(HttpStatus.OK)
     public void refreshGameTimer(@PathVariable GameType type, @PathVariable Integer gameId) {
         getGameService(type).refreshGameTimer(gameId);
+    }
+
+    @GetMapping("status/{type}/{gameId}/")
+    @ResponseStatus(HttpStatus.OK)
+    public GameStatus getGameStatus(@PathVariable GameType type, @PathVariable Integer gameId) {
+        GameService gameService = getGameService(type);
+        Game game = gameService.getGame(gameId);
+
+        boolean isWhiteTurn = game.getWhiteTurn();
+
+        return gameService.getGameStatus(game.getBoard().getBoardDto(), isWhiteTurn);
     }
 
     @GetMapping("list/")

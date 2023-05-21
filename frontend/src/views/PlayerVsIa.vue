@@ -43,7 +43,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from "vue";
-import { ElLoading } from "element-plus";
+import { ElLoading, ElMessage } from 'element-plus'
 
 import router from "../router";
 import GameService from "../services/gameService";
@@ -62,6 +62,7 @@ import QUEEN_WHITE from "../assets/pieces/QUEEN_WHITE.webp";
 import TOWER_BLACK from "../assets/pieces/TOWER_BLACK.webp";
 import TOWER_WHITE from "../assets/pieces/TOWER_WHITE.webp";
 
+const gameStatus = ref<string>("");
 const timer = ref<number>();
 const selectedPiece = ref<GameMatrixPiece>();
 const playerDto = ref<PlayerDto>(PlayerService.getPlayerDtoFromStorage());
@@ -185,6 +186,33 @@ function setPossiblesMoves(listOfMoves: MoveDto[]) {
   }
 }
 
+function verifyGameStatus() {
+  const gameId = iaGameDto.value.id;
+  const gameType = iaGameDto.value.gameType;
+
+  const loading = ElLoading.service({
+    lock: true,
+    text: "Carregando",
+    background: "rgba(0,0,0,0.8)",
+  });
+
+  GameService.getGameStatus(gameType, gameId)
+    .then((response) => {
+      response.json().then((result) => {
+        gameStatus.value = result;
+        ElMessage({
+          message: "STATUS DO JOGO " + gameStatus.value,
+          type: "warning",
+        });
+        loading.close();
+      });
+    })
+    .catch(() => {
+      loading.close();
+      removeIaGameAndRedirect();
+    });
+}
+
 function movePiece(piece: GameMatrixPiece) {
   const uuid = playerDto.value.uuid;
   const isWhite = uuid === iaGameDto.value.whitePlayerUUID;
@@ -198,21 +226,30 @@ function movePiece(piece: GameMatrixPiece) {
   const gameId = iaGameDto.value.id;
   const pieceId = selectedPiece.value.id;
 
+  const loading = ElLoading.service({
+    lock: true,
+    text: "Carregando",
+    background: "rgba(0,0,0,0.8)",
+  });
+
+  setPieceSelected(0);
+
   GameService.movePiece(gameType, gameId, uuid, pieceId, move)
     .then((response) => {
       response.json().then((result) => {
         if (result) {
           iaGameDto.value = result;
           localStorage.setItem("iaGameDto", JSON.stringify(result));
+          verifyGameStatus();
           clearGameMatrix();
           fillGameMatrix(result.board.whitePieces);
           fillGameMatrix(result.board.blackPieces);
-          setPieceSelected(0);
+          loading.close();
         }
       });
     })
     .catch(() => {
-      setPieceSelected(0);
+      loading.close();
     });
 }
 
@@ -233,13 +270,7 @@ function getPossibleMoves(piece: GameMatrixPiece) {
     return;
   }
   else if (selected && selected.id && selected.id !== 0) {
-    const loading = ElLoading.service({
-      lock: true,
-      text: "Carregando",
-      background: "rgba(0,0,0,0.8)",
-    });
     movePiece(piece);
-    loading.close();
     return;
   }
 
@@ -286,6 +317,9 @@ function getPossibleMoves(piece: GameMatrixPiece) {
           loading.close();
         }
       });
+    }).catch(() => {
+      setPieceSelected(0);
+      loading.close();
     });
   }
 }
@@ -316,6 +350,7 @@ else {
           removeIaGameAndRedirect();
         }
         else {
+          verifyGameStatus();
           fillGameMatrix(iaGameDto.value.board.whitePieces);
           fillGameMatrix(iaGameDto.value.board.blackPieces);
           loading.close();

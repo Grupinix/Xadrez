@@ -34,6 +34,13 @@ export default {
     });
   },
 
+  getGameStatus(type: string, gameId: number): Promise<Response> {
+    return fetch(`${url}/status/${type}/${gameId}/`, {
+      method: "GET",
+      headers: headers,
+    });
+  },
+
   refreshTimer(type: string, gameId: number): Promise<Response> {
     return fetch(`${url}/refresh/${type}/${gameId}/`, {
       method: "GET",
