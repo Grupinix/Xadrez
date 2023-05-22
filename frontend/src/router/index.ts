@@ -33,6 +33,15 @@ const router = createRouter({
         requiresIaGameDto: true,
       },
     },
+    {
+      path: "/settings",
+      name: "settings",
+      component: () => import("../views/SettingsView.vue"),
+      meta: {
+        requiresPlayerDto: true,
+        requiresIaGameDto: false,
+      },
+    },
   ],
 });
 

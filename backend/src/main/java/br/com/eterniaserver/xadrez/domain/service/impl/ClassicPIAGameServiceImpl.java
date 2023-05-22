@@ -15,6 +15,7 @@ import br.com.eterniaserver.xadrez.domain.repositories.HistoryRepository;
 import br.com.eterniaserver.xadrez.domain.repositories.PieceRepository;
 import br.com.eterniaserver.xadrez.domain.service.BoardService;
 import br.com.eterniaserver.xadrez.domain.service.GameService;
+import br.com.eterniaserver.xadrez.domain.service.PlayerService;
 import br.com.eterniaserver.xadrez.rest.dtos.GameDto;
 import br.com.eterniaserver.xadrez.rest.dtos.MoveDto;
 import br.com.eterniaserver.xadrez.rest.dtos.PieceDto;
@@ -39,6 +40,7 @@ public class ClassicPIAGameServiceImpl implements GameService {
     private final HistoryRepository historyRepository;
     private final PieceRepository pieceRepository;
     private final BoardRepository boardRepository;
+    private final PlayerService playerService;
 
     private final GameIaImpl gameIa;
 
@@ -71,8 +73,10 @@ public class ClassicPIAGameServiceImpl implements GameService {
         Board board = boardService.createBoard();
         Game game = new Game();
 
+        GameDifficulty gameDifficulty = playerService.getGameDifficulty(whiteUUID);
+
         game.setGameType(GameType.PLAYER_IA_CLASSIC);
-        game.setGameDifficulty(GameDifficulty.NORMAL);
+        game.setGameDifficulty(gameDifficulty);
         game.setBoard(board);
         game.setWhiteTurn(true);
         game.setWhitePlayerUUID(whiteUUID);
