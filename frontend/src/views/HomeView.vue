@@ -11,7 +11,13 @@
       </el-button>
     </el-col>
     <el-col :xs="{ span: 24 }">
-      <el-button color="#626aef" size="large" disabled>CONFIGURAÇÕES</el-button>
+      <el-button
+        color="#626aef"
+        size="large"
+        @click="loadSettings"
+      >
+        CONFIGURAÇÕES
+      </el-button>
     </el-col>
     <el-col :xs="{ span: 24 }">
       <el-button color="#626aef" size="large" disabled>CRIAR SALA</el-button>
@@ -33,7 +39,7 @@ import { ElMessage } from "element-plus";
 import GameService from "../services/gameService";
 import PlayerService from "../services/playerService";
 
-const vsIaLoading = ref(false);
+const vsIaLoading = ref<boolean>(false);
 const playerDto = ref<PlayerDto>(PlayerService.getPlayerDtoFromStorage());
 
 function playVsIa() {
@@ -58,6 +64,10 @@ function playVsIa() {
       alertCreateFail();
       vsIaLoading.value = false;
     });
+}
+
+function loadSettings() {
+  router.push({ path: "/settings" });
 }
 
 function alertCreateFail() {
