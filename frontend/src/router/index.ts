@@ -27,7 +27,7 @@ const router = createRouter({
     {
       path: "/playervsia",
       name: "playervsia",
-      component: () => import("../views/PlayerVsIa.vue"),
+      component: () => import("../views/PlayerVsIaView.vue"),
       meta: {
         requiresPlayerDto: true,
         requiresIaGameDto: true,

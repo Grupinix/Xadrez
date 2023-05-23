@@ -60,7 +60,11 @@ public class PlayerServiceImpl implements PlayerService {
 
     @Override
     public GameDifficulty getGameDifficulty(UUID uuid) {
-        return uuidGameDifficultyMap.get(uuid);
+        GameDifficulty gameDifficulty = uuidGameDifficultyMap.getOrDefault(uuid, GameDifficulty.NORMAL);
+
+        uuidGameDifficultyMap.put(uuid, gameDifficulty);
+
+        return gameDifficulty;
     }
 
 }
