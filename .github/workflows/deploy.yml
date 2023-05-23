@@ -25,7 +25,7 @@ jobs:
       - name: "Build Backend Image"
         run: |
           docker build -f ./docker/spring/Dockerfile . --tag ghcr.io/grupinix/xadrez-spring:latest
-          docker push ghcr.io/Grupinix/xadrez-spring:latest
+          docker push ghcr.io/grupinix/xadrez-spring:latest
 
   push-frontend-image:
     name: Push Frontend Docker Image
@@ -45,4 +45,4 @@ jobs:
       - name: "Build Backend Image"
         run: |
           docker build -f ./docker/vue/Dockerfile . --tag ghcr.io/grupinix/xadrez-vue:latest
-          docker push ghcr.io/Grupinix/xadrez-vue:latest
+          docker push ghcr.io/grupinix/xadrez-vue:latest
