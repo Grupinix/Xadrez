@@ -1,0 +1,48 @@
+name: Deploy Images to GHCR
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  push-backend-image:
+    name: Push Backend Docker Image
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: "Checkout GitHub Action"
+        uses: actions/checkout@main
+
+      - name: "Login to GitHub Container Registry"
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{github.actor}}
+          password: ${{secrets.GITHUB_TOKEN}}
+
+      - name: "Build Backend Image"
+        run: |
+          docker build -f ./docker/spring/Dockerfile . --tag ghcr.io/Grupinix/xadrez-spring:latest
+          docker push ghcr.io/Grupinix/xadrez-spring:latest
+
+  push-frontend-image:
+    name: Push Frontend Docker Image
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: "Checkout GitHub Action"
+        uses: actions/checkout@main
+
+      - name: "Login to GitHub Container Registry"
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{github.actor}}
+          password: ${{secrets.GITHUB_TOKEN}}
+
+      - name: "Build Backend Image"
+        run: |
+          docker build -f ./docker/vue/Dockerfile . --tag ghcr.io/Grupinix/xadrez-vue:latest
+          docker push ghcr.io/Grupinix/xadrez-vue:latest
