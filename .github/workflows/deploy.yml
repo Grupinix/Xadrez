@@ -71,7 +71,7 @@ jobs:
         with:
           context: ./docker/spring/
           push: true
-          platforms: linux/amd64,linux/arm/v7,linux/arm64/v8
+          platforms: linux/amd64,linux/arm64/v8
           tags: ghcr.io/grupinix/xadrez-spring:latest
 
   push-frontend-image:
@@ -101,5 +101,5 @@ jobs:
         with:
           context: ./docker/vue/
           push: true
-          platforms: linux/amd64,linux/arm/v7,linux/arm64/v8
+          platforms: linux/amd64,linux/arm64/v8
           tags: ghcr.io/grupinix/xadrez-vue:latest
