@@ -16,6 +16,7 @@ RUN gradle clean build -x test --no-daemon
 FROM amazoncorretto:17-alpine AS xadrez-spring
 
 LABEL maintainer="yurinogueira@id.uff.br"
+LABEL org.opencontainers.image.source="https://github.com/Grupinix/Xadrez"
 LABEL vendor="Grupinix"
 
 RUN addgroup -S spring && adduser -S spring -G spring
