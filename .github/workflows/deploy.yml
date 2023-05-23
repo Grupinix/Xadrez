@@ -8,36 +8,36 @@ on:
 
 jobs:
   build:
-    name: Build and analyze
+    name: "Build and analyze"
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: "Checkout"
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
-      - name: Set up JDK 17
+      - name: "Set up JDK 17"
         uses: actions/setup-java@v3
         with:
           distribution: "temurin"
           java-version: 17
 
-      - name: Cache SonarCloud packages
+      - name: "Cache SonarCloud packages"
         uses: actions/cache@v3
         with:
           path: ~/.sonar/cache
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
 
-      - name: Cache Gradle packages
+      - name: "Cache Gradle packages"
         uses: actions/cache@v3
         with:
           path: ~/.gradle/caches
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
           restore-keys: ${{ runner.os }}-gradle
 
-      - name: Build Test and Validate
+      - name: "Build Test and Validate"
         working-directory: ./backend
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -53,10 +53,10 @@ jobs:
       - name: "Checkout GitHub Action"
         uses: actions/checkout@main
 
-      - name: Set up QEMU
+      - name: "Set up QEMU"
         uses: docker/setup-qemu-action@v2
-      -
-        name: Set up Docker Buildx
+
+      - name: "Set up Docker Buildx"
         uses: docker/setup-buildx-action@v2
 
       - name: "Login to GitHub Container Registry"
@@ -66,16 +66,17 @@ jobs:
           username: ${{github.actor}}
           password: ${{secrets.GITHUB_TOKEN}}
 
-      - name: Build and push
+      - name: "Build and push"
         uses: docker/build-push-action@v4
         with:
-          context: ./docker/spring/
+          context: .
+          file: ./docker/spring/Dockerfile
           push: true
           platforms: linux/amd64,linux/arm64/v8
           tags: ghcr.io/grupinix/xadrez-spring:latest
 
   push-frontend-image:
-    name: Push Frontend Docker Image
+    name: "Push Frontend Docker Image"
     needs: build
     runs-on: ubuntu-latest
 
@@ -83,10 +84,10 @@ jobs:
       - name: "Checkout GitHub Action"
         uses: actions/checkout@main
 
-      - name: Set up QEMU
+      - name: "Set up QEMU"
         uses: docker/setup-qemu-action@v2
       -
-        name: Set up Docker Buildx
+        name: "Set up Docker Buildx"
         uses: docker/setup-buildx-action@v2
 
       - name: "Login to GitHub Container Registry"
@@ -96,10 +97,11 @@ jobs:
           username: ${{github.actor}}
           password: ${{secrets.GITHUB_TOKEN}}
 
-      - name: Build and push
+      - name: "Build and push"
         uses: docker/build-push-action@v4
         with:
-          context: ./docker/vue/
+          context: .
+          file: ./docker/vue/Dockerfile
           push: true
           platforms: linux/amd64,linux/arm64/v8
           tags: ghcr.io/grupinix/xadrez-vue:latest
