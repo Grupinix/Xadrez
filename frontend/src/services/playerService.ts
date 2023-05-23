@@ -26,8 +26,16 @@ export default {
     });
   },
 
+  setGameDifficulty(difficulty: string, playerDto: PlayerDto): Promise<Response> {
+    return fetch(`${url}/setDifficulty/${difficulty}/`, {
+      method: "PUT",
+      headers: headers,
+      body: JSON.stringify(playerDto),
+    });
+  },
+
   getPlayerDtoFromStorage(): PlayerDto {
     const playerDtoStringed = localStorage.getItem("playerDto") || "";
     return JSON.parse(playerDtoStringed);
-  }
+  },
 };

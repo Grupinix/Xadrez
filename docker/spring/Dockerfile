@@ -1,5 +1,6 @@
 # Build the jar
 FROM gradle:7-jdk17 AS xadrez-spring-builder
+LABEL org.opencontainers.image.source="https://github.com/Grupinix/Xadrez"
 
 WORKDIR /usr/src/spring
 

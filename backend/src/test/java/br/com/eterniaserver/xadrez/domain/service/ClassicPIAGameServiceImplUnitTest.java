@@ -44,6 +44,8 @@ class ClassicPIAGameServiceImplUnitTest {
     private HistoryRepository historyRepository;
     @Mock
     private GameIaImpl gameIa;
+    @Mock
+    private PlayerService playerService;
 
     private GameService gameService;
 
@@ -55,6 +57,7 @@ class ClassicPIAGameServiceImplUnitTest {
                 historyRepository,
                 pieceRepository,
                 boardRepository,
+                playerService,
                 gameIa
         );
     }
@@ -83,6 +86,8 @@ class ClassicPIAGameServiceImplUnitTest {
     @Test
     void testCreateGame() {
         UUID uuid = UUID.randomUUID();
+
+        Mockito.when(playerService.getGameDifficulty(uuid)).thenReturn(GameDifficulty.NORMAL);
 
         Game game = gameService.createGame(uuid);
 

@@ -1,51 +1,12 @@
-name: Deploy to Prod
+name: "Deploy to AWS"
 
 on:
-  push:
-    branches:
-      - main
+  release:
+  workflow_dispatch:
 
 jobs:
-  build:
-    name: Build and analyze
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-
-      - name: Set up JDK 17
-        uses: actions/setup-java@v3
-        with:
-          distribution: "temurin"
-          java-version: 17
-
-      - name: Cache SonarCloud packages
-        uses: actions/cache@v3
-        with:
-          path: ~/.sonar/cache
-          key: ${{ runner.os }}-sonar
-          restore-keys: ${{ runner.os }}-sonar
-
-      - name: Cache Gradle packages
-        uses: actions/cache@v3
-        with:
-          path: ~/.gradle/caches
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
-          restore-keys: ${{ runner.os }}-gradle
-
-      - name: Build Test and Validate
-        working-directory: ./backend
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.ETERNIASERVER_XADREZ_SONAR_TOKEN }}
-        run: ./gradlew clean build test jacocoTestReport sonarqube --info --stacktrace
-
-  deploy:
-    name: Deploy
-    needs: build
+  release-new:
+    name: "Deploy to AWS"
     runs-on: ubuntu-latest
 
     steps:
@@ -66,12 +27,9 @@ jobs:
           SSH_PROD_KEY: ${{ secrets.PROD_SSH_KEY }}
           SSH_PROD_HOST: ${{ secrets.PROD_SSH_HOST }}
 
-      - name: Clear docker
-        run: ssh prod 'cd Xadrez && docker compose down && docker image prune -af && docker system prune -af'
+      - name: "Clear Docker Images"
+        run: ssh prod 'docker compose down && docker system prune -af'
 
-      - name: Check out the source
-        run: ssh prod 'eval `ssh-agent` && ssh-add && cd Xadrez && git fetch && git pull'
-
-      - name: Start the server
+      - name: "Start Server"
         if: ${{ always() }}
-        run: ssh prod 'cd Xadrez && docker compose up -d'
+        run: ssh prod 'docker compose up -d'

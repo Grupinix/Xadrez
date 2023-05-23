@@ -3,6 +3,7 @@ package br.com.eterniaserver.xadrez.domain.ia.impl;
 import br.com.eterniaserver.xadrez.Constants;
 import br.com.eterniaserver.xadrez.domain.entities.Game;
 import br.com.eterniaserver.xadrez.domain.entities.Piece;
+import br.com.eterniaserver.xadrez.domain.enums.GameDifficulty;
 import br.com.eterniaserver.xadrez.domain.enums.GameStatus;
 import br.com.eterniaserver.xadrez.domain.enums.PieceType;
 import br.com.eterniaserver.xadrez.domain.ia.GameIa;
@@ -33,11 +34,13 @@ public class GameIaImpl implements GameIa {
             return;
         }
 
+        GameDifficulty gameDifficulty = optionalGame.get().getGameDto().getGameDifficulty();
         Game game = optionalGame.get();
         GameDto gameDto = game.getGameDto();
+        int depth = gameDifficulty.ordinal() + 1;
 
         Pair<PieceDto, MoveDto> move = miniMax(
-                gameService, gameDto.getBoard(), gameDto, Constants.WHITE_COLOR, Constants.BLACK_COLOR, 4
+                gameService, gameDto.getBoard(), gameDto, Constants.WHITE_COLOR, Constants.BLACK_COLOR, depth
         );
         PieceDto pieceDto = move.getFirst();
         MoveDto moveDto = move.getSecond();
