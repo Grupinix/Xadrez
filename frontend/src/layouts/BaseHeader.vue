@@ -1,20 +1,15 @@
 <template>
-  <section>
+  <section class="app-header-image-block">
     <router-link to="/">
-      <el-image :src="LOGO"></el-image>
+      <el-image class="app-header-image" :src="LOGO"></el-image>
     </router-link>
   </section>
 </template>
+
 <script setup lang="ts">
-import LOGO from "../assets/logo.webp";
+  import { ref } from "vue";
+  import ThemeService from "../services/themeService";
+
+  const theme = ref<string>(ThemeService.getThemeName());
+  const LOGO = `./themes/${theme.value}/logo.webp`;
 </script>
-<style scoped>
-section {
-  background-color: #0d5469;
-  text-align: start;
-  height: 100%;
-}
-.el-image {
-  height: 100%;
-}
-</style>

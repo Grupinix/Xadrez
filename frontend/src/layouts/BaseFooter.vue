@@ -1,14 +1,15 @@
 <template>
-  <section>
-    <p>
-      Xadrez <b>UFF</b>
+  <section class="app-footer-block">
+    <p class="app-footer-block-text">
+      Xadrez <b class="app-footer-block-text-bold">UFF</b>
       <br />
       <br />
-      Copyright © 2023 <b>Grupinix</b>
+      Copyright © 2023 <b class="app-footer-block-text-bold">Grupinix</b>
       <br />
       <br />
       <br />
       <el-link
+        class="app-footer-block-project-link"
         href="https://github.com/Grupinix/Xadrez"
         target="_blank"
       >
@@ -17,13 +18,3 @@
     </p>
   </section>
 </template>
-<style scoped>
-section {
-  background-color: #f1f1f1;
-  height: 100%;
-}
-p {
-  padding-top: 64px;
-  padding-bottom: 64px;
-}
-</style>
