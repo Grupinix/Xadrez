@@ -282,18 +282,26 @@ public interface GameService {
             PieceDto king = isWhite ? blackKing : whiteKing;
             for (PieceDto pieceDto : pieceDtos) {
                 List<MoveDto> possibleMoves = getPossibleMoves(gameDto, pieceDto, gameDto.getWhitePlayerUUID());
-                for (MoveDto possibleMove : possibleMoves) {
-                    if (possibleMove.getFirst() == MoveType.CAPTURE) {
-                        int x = possibleMove.getSecond().getFirst();
-                        int y = possibleMove.getSecond().getSecond();
-                        if (x == king.getPositionX() && y == king.getPositionY()) {
-                            return GameStatus.WHITE_CHECK;
-                        }
-                    }
+                GameStatus actualMovesStatus = verifyKingInCheck(possibleMoves, king, isWhite);
+                if (actualMovesStatus != GameStatus.NORMAL) {
+                    return actualMovesStatus;
                 }
             }
         }
 
+        return GameStatus.NORMAL;
+    }
+
+    private GameStatus verifyKingInCheck(List<MoveDto> possibleMoves, PieceDto king, boolean isWhite) {
+        for (MoveDto possibleMove : possibleMoves) {
+            if (possibleMove.getFirst() == MoveType.CAPTURE) {
+                int x = possibleMove.getSecond().getFirst();
+                int y = possibleMove.getSecond().getSecond();
+                if (x == king.getPositionX() && y == king.getPositionY()) {
+                    return isWhite ? GameStatus.WHITE_CHECK : GameStatus.BLACK_CHECK;
+                }
+            }
+        }
 
         return GameStatus.NORMAL;
     }
