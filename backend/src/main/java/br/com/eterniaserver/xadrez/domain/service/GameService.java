@@ -245,7 +245,7 @@ public interface GameService {
         GameStatus isInCheck = isCheck(gameDto, whiteKingOptional.get(), blackKingOptional.get());
         if (isInCheck != GameStatus.NORMAL) {
             if (isMatte(gameDto, whiteKingOptional.get(), blackKingOptional.get(), isWhiteTurn)) {
-                return isWhiteTurn ? GameStatus.WHITE_WINS : GameStatus.BLACK_WINS;
+                return isInCheck == GameStatus.WHITE_CHECK ? GameStatus.WHITE_WINS : GameStatus.BLACK_WINS;
             }
             return isInCheck;
         }
@@ -281,7 +281,8 @@ public interface GameService {
             List<PieceDto> pieceDtos = isWhite ? boardDto.getWhitePieces() : boardDto.getBlackPieces();
             PieceDto king = isWhite ? blackKing : whiteKing;
             for (PieceDto pieceDto : pieceDtos) {
-                List<MoveDto> possibleMoves = getPossibleMoves(gameDto, pieceDto, gameDto.getWhitePlayerUUID());
+                UUID playerUUID = isWhite ? gameDto.getWhitePlayerUUID() : gameDto.getBlackPlayerUUID();
+                List<MoveDto> possibleMoves = getPossibleMoves(gameDto, pieceDto, playerUUID);
                 GameStatus actualMovesStatus = verifyKingInCheck(possibleMoves, king, isWhite);
                 if (actualMovesStatus != GameStatus.NORMAL) {
                     return actualMovesStatus;
