@@ -318,7 +318,7 @@ public interface GameService {
         List<PieceDto> blackList = new ArrayList<>(boardDto.getBlackPieces());
         List<PieceDto> enemyList = pieceDto.getWhitePiece() ? blackList : whiteList;
 
-        if (!pieceDto.getWhitePiece() && possibleKilled != null && possibleKilled[0] != null) {
+        if (possibleKilled != null && possibleKilled[0] != null) {
             Pair<Integer, PieceDto> found = null;
             for (int i = 0; i < enemyList.size(); i++) {
                 if (enemyList.get(i).getId().equals(possibleKilled[0])) {

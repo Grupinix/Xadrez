@@ -1,5 +1,6 @@
 package br.com.eterniaserver.xadrez.domain.service;
 
+import br.com.eterniaserver.xadrez.Constants;
 import br.com.eterniaserver.xadrez.domain.entities.Game;
 import br.com.eterniaserver.xadrez.domain.entities.Piece;
 import br.com.eterniaserver.xadrez.domain.enums.GameStatus;
@@ -549,6 +550,160 @@ class GameServiceUnitTest {
         GameStatus actualStatus = gameService.getGameStatus(gameDto, true);
 
         Assertions.assertEquals(expectedStatus, actualStatus);
+    }
+
+    @Test
+    void testMovePawnInBoard() {
+        PieceDto whiteKing = PieceDto.builder()
+                .pieceType(PieceType.KING)
+                .positionX(7)
+                .positionY(7)
+                .whitePiece(true)
+                .build();
+        PieceDto blackPawn = PieceDto.builder()
+                .pieceType(PieceType.PAWN)
+                .positionX(5)
+                .positionY(5)
+                .whitePiece(false)
+                .build();
+        PieceDto blackKing = PieceDto.builder()
+                .pieceType(PieceType.KING)
+                .positionX(2)
+                .positionY(5)
+                .whitePiece(false)
+                .build();
+        BoardDto boardDto = BoardDto.builder()
+                .whitePieces(List.of(whiteKing))
+                .blackPieces(List.of(blackKing, blackPawn))
+                .histories(List.of())
+                .pieceMatrix(new Integer[8][8][2])
+                .build();
+        GameDto gameDto = GameDto.builder()
+                .board(boardDto)
+                .whitePlayerUUID(whitePlayerUUID)
+                .blackPlayerUUID(blackPlayerUUID)
+                .whiteTurn(true)
+                .build();
+
+        MoveDto pawnMove = MoveDto.builder()
+                .first(MoveType.NORMAL)
+                .second(PositionDto.builder()
+                        .first(6)
+                        .second(5)
+                        .build()
+                )
+                .build();
+
+        gameService.movePieceOnBoardDto(gameDto.getBoard(), blackPawn, pawnMove);
+
+        Assertions.assertEquals(pawnMove.getSecond().getFirst(), blackPawn.getPositionX());
+        Assertions.assertEquals(pawnMove.getSecond().getSecond(), blackPawn.getPositionY());
+    }
+
+    @Test
+    void testMovePawnInBoardToCapture() {
+        PieceDto whiteKing = PieceDto.builder()
+                .pieceType(PieceType.KING)
+                .positionX(6)
+                .positionY(6)
+                .id(1)
+                .whitePiece(true)
+                .build();
+        PieceDto blackPawn = PieceDto.builder()
+                .pieceType(PieceType.PAWN)
+                .positionX(5)
+                .positionY(6)
+                .whitePiece(false)
+                .build();
+        PieceDto blackKing = PieceDto.builder()
+                .pieceType(PieceType.KING)
+                .positionX(2)
+                .positionY(5)
+                .whitePiece(false)
+                .build();
+        Integer[][][] pieceMatrix = new Integer[8][8][2];
+        pieceMatrix[6][6][0] = 1;
+        pieceMatrix[6][6][1] = Constants.WHITE_COLOR;
+        pieceMatrix[5][6][0] = PieceType.KING.ordinal();
+        BoardDto boardDto = BoardDto.builder()
+                .whitePieces(List.of(whiteKing))
+                .blackPieces(List.of(blackKing, blackPawn))
+                .histories(List.of())
+                .pieceMatrix(pieceMatrix)
+                .build();
+        GameDto gameDto = GameDto.builder()
+                .board(boardDto)
+                .whitePlayerUUID(whitePlayerUUID)
+                .blackPlayerUUID(blackPlayerUUID)
+                .whiteTurn(true)
+                .build();
+
+        MoveDto pawnMove = MoveDto.builder()
+                .first(MoveType.CAPTURE)
+                .second(PositionDto.builder()
+                        .first(6)
+                        .second(6)
+                        .build()
+                )
+                .build();
+
+        gameService.movePieceOnBoardDto(gameDto.getBoard(), blackPawn, pawnMove);
+
+        Assertions.assertEquals(pawnMove.getSecond().getFirst(), blackPawn.getPositionX());
+        Assertions.assertEquals(pawnMove.getSecond().getSecond(), blackPawn.getPositionY());
+
+        Assertions.assertEquals(0, boardDto.getWhitePieces().size());
+    }
+
+    @Test
+    void testMovePawnInBoardToCaptureNotFound() {
+        PieceDto whiteKing = PieceDto.builder()
+                .pieceType(PieceType.KING)
+                .positionX(6)
+                .positionY(6)
+                .id(1)
+                .whitePiece(true)
+                .build();
+        PieceDto blackPawn = PieceDto.builder()
+                .pieceType(PieceType.PAWN)
+                .positionX(5)
+                .positionY(6)
+                .whitePiece(false)
+                .build();
+        PieceDto blackKing = PieceDto.builder()
+                .pieceType(PieceType.KING)
+                .positionX(2)
+                .positionY(5)
+                .whitePiece(false)
+                .build();
+        BoardDto boardDto = BoardDto.builder()
+                .whitePieces(List.of(whiteKing))
+                .blackPieces(List.of(blackKing, blackPawn))
+                .histories(List.of())
+                .pieceMatrix(new Integer[8][8][2])
+                .build();
+        GameDto gameDto = GameDto.builder()
+                .board(boardDto)
+                .whitePlayerUUID(whitePlayerUUID)
+                .blackPlayerUUID(blackPlayerUUID)
+                .whiteTurn(true)
+                .build();
+
+        MoveDto pawnMove = MoveDto.builder()
+                .first(MoveType.CAPTURE)
+                .second(PositionDto.builder()
+                        .first(6)
+                        .second(6)
+                        .build()
+                )
+                .build();
+
+        gameService.movePieceOnBoardDto(gameDto.getBoard(), blackPawn, pawnMove);
+
+        Assertions.assertEquals(pawnMove.getSecond().getFirst(), blackPawn.getPositionX());
+        Assertions.assertEquals(pawnMove.getSecond().getSecond(), blackPawn.getPositionY());
+
+        Assertions.assertEquals(1, boardDto.getWhitePieces().size());
     }
 
 }
