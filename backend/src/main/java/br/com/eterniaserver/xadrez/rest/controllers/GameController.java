@@ -89,7 +89,7 @@ public class GameController {
 
         boolean isWhiteTurn = game.getWhiteTurn();
 
-        return gameService.getGameStatus(game.getBoard().getBoardDto(), isWhiteTurn);
+        return gameService.getGameStatus(game.getGameDto(), isWhiteTurn);
     }
 
     @GetMapping("list/")
