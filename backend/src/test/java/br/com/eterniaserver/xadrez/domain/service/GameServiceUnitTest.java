@@ -21,6 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -814,6 +815,428 @@ class GameServiceUnitTest {
         Assertions.assertEquals(pawnMove.getSecond().getSecond(), blackPawn.getPositionY());
 
         Assertions.assertEquals(1, boardDto.getWhitePieces().size());
+    }
+
+    @Test
+    void testGetPlayerLegalMovesWhenNoWhiteKing() {
+        PieceDto blackKing = PieceDto.builder()
+                .pieceType(PieceType.KING)
+                .positionX(2)
+                .positionY(5)
+                .id(1)
+                .whitePiece(false)
+                .build();
+        PieceDto blackPawn = PieceDto.builder()
+                .pieceType(PieceType.PAWN)
+                .positionX(5)
+                .positionY(6)
+                .id(2)
+                .whitePiece(false)
+                .build();
+
+        BoardDto boardDto = BoardDto.builder()
+                .whitePieces(List.of())
+                .blackPieces(List.of(blackKing, blackPawn))
+                .histories(List.of())
+                .pieceMatrix(new Integer[8][8][3])
+                .build();
+
+        GameDto gameDto = GameDto.builder()
+                .board(boardDto)
+                .whitePlayerUUID(whitePlayerUUID)
+                .blackPlayerUUID(blackPlayerUUID)
+                .whiteTurn(true)
+                .build();
+
+        Map<PieceDto, List<MoveDto>> legalMoves = gameService.getPlayerLegalMoves(gameDto, Constants.WHITE_COLOR);
+
+        Assertions.assertEquals(0, legalMoves.size());
+    }
+
+    @Test
+    void testGetPlayerLegalMovesWhenNoBlackKing() {
+        PieceDto whiteKing = PieceDto.builder()
+                .pieceType(PieceType.KING)
+                .positionX(2)
+                .positionY(5)
+                .id(1)
+                .whitePiece(true)
+                .build();
+        PieceDto whitePawn = PieceDto.builder()
+                .pieceType(PieceType.PAWN)
+                .positionX(5)
+                .positionY(6)
+                .id(2)
+                .whitePiece(true)
+                .build();
+
+        BoardDto boardDto = BoardDto.builder()
+                .whitePieces(List.of(whiteKing, whitePawn))
+                .blackPieces(List.of())
+                .histories(List.of())
+                .pieceMatrix(new Integer[8][8][3])
+                .build();
+
+        GameDto gameDto = GameDto.builder()
+                .board(boardDto)
+                .whitePlayerUUID(whitePlayerUUID)
+                .blackPlayerUUID(blackPlayerUUID)
+                .whiteTurn(false)
+                .build();
+
+        Map<PieceDto, List<MoveDto>> legalMoves = gameService.getPlayerLegalMoves(gameDto, Constants.WHITE_COLOR);
+
+        Assertions.assertEquals(0, legalMoves.size());
+    }
+
+    @Test
+    void testPlayerLegalMovesWhitePawnMoves() {
+        PieceDto whiteKing = PieceDto.builder()
+                .pieceType(PieceType.KING)
+                .positionX(2)
+                .positionY(5)
+                .id(1)
+                .whitePiece(true)
+                .build();
+        PieceDto blackKing = PieceDto.builder()
+                .pieceType(PieceType.KING)
+                .positionX(6)
+                .positionY(6)
+                .id(3)
+                .whitePiece(false)
+                .build();
+        PieceDto whitePawn = PieceDto.builder()
+                .pieceType(PieceType.PAWN)
+                .positionX(5)
+                .positionY(6)
+                .id(2)
+                .whitePiece(true)
+                .build();
+
+        BoardDto boardDto = BoardDto.builder()
+                .whitePieces(List.of(whiteKing, whitePawn))
+                .blackPieces(List.of(blackKing))
+                .histories(List.of())
+                .pieceMatrix(new Integer[8][8][3])
+                .build();
+
+        GameDto gameDto = GameDto.builder()
+                .board(boardDto)
+                .whitePlayerUUID(whitePlayerUUID)
+                .blackPlayerUUID(blackPlayerUUID)
+                .whiteTurn(false)
+                .build();
+
+        MoveDto move = MoveDto.builder()
+                .first(MoveType.NORMAL)
+                .second(PositionDto.builder()
+                        .first(5)
+                        .second(6)
+                        .build()
+                )
+                .build();
+
+        Mockito.when(whiteMovesMock.stream()).then(i -> Stream.of(move));
+
+        Map<PieceDto, List<MoveDto>> legalMoves = gameService.getPlayerLegalMoves(gameDto, Constants.WHITE_COLOR);
+
+        Assertions.assertEquals(1, legalMoves.get(whitePawn).size());
+        Assertions.assertEquals(MoveType.NORMAL, legalMoves.get(whitePawn).get(0).getFirst());
+    }
+
+    @Test
+    void testPlayerLegalMovesBlackPawnMoves() {
+        PieceDto whiteKing = PieceDto.builder()
+                .pieceType(PieceType.KING)
+                .positionX(2)
+                .positionY(5)
+                .id(1)
+                .whitePiece(true)
+                .build();
+        PieceDto blackKing = PieceDto.builder()
+                .pieceType(PieceType.KING)
+                .positionX(6)
+                .positionY(6)
+                .id(3)
+                .whitePiece(false)
+                .build();
+        PieceDto blackPawn = PieceDto.builder()
+                .pieceType(PieceType.PAWN)
+                .positionX(5)
+                .positionY(6)
+                .id(2)
+                .whitePiece(false)
+                .build();
+
+        BoardDto boardDto = BoardDto.builder()
+                .whitePieces(List.of(whiteKing))
+                .blackPieces(List.of(blackKing, blackPawn))
+                .histories(List.of())
+                .pieceMatrix(new Integer[8][8][3])
+                .build();
+
+        GameDto gameDto = GameDto.builder()
+                .board(boardDto)
+                .whitePlayerUUID(whitePlayerUUID)
+                .blackPlayerUUID(blackPlayerUUID)
+                .whiteTurn(true)
+                .build();
+
+        MoveDto move = MoveDto.builder()
+                .first(MoveType.NORMAL)
+                .second(PositionDto.builder()
+                        .first(5)
+                        .second(6)
+                        .build()
+                )
+                .build();
+
+        Mockito.when(blackMovesMock.stream()).then(i -> Stream.of(move));
+
+        Map<PieceDto, List<MoveDto>> legalMoves = gameService.getPlayerLegalMoves(gameDto, Constants.BLACK_COLOR);
+
+        Assertions.assertEquals(1, legalMoves.get(blackPawn).size());
+        Assertions.assertEquals(MoveType.NORMAL, legalMoves.get(blackPawn).get(0).getFirst());
+    }
+
+    @Test
+    void testPlayerLegalMovesBlackWhenCheckMatte() {
+        PieceDto whiteKing = PieceDto.builder()
+                .pieceType(PieceType.KING)
+                .positionX(2)
+                .positionY(5)
+                .id(1)
+                .whitePiece(true)
+                .build();
+        PieceDto blackKing = PieceDto.builder()
+                .pieceType(PieceType.KING)
+                .positionX(6)
+                .positionY(6)
+                .id(3)
+                .whitePiece(false)
+                .build();
+        PieceDto blackPawn = PieceDto.builder()
+                .pieceType(PieceType.PAWN)
+                .positionX(1)
+                .positionY(6)
+                .id(2)
+                .whitePiece(false)
+                .build();
+
+        BoardDto boardDto = BoardDto.builder()
+                .whitePieces(List.of(whiteKing))
+                .blackPieces(List.of(blackKing, blackPawn))
+                .histories(List.of())
+                .pieceMatrix(new Integer[8][8][3])
+                .build();
+
+        GameDto gameDto = GameDto.builder()
+                .board(boardDto)
+                .whitePlayerUUID(whitePlayerUUID)
+                .blackPlayerUUID(blackPlayerUUID)
+                .whiteTurn(true)
+                .build();
+
+        MoveDto move = MoveDto.builder()
+                .first(MoveType.CAPTURE)
+                .second(PositionDto.builder()
+                        .first(2)
+                        .second(5)
+                        .build()
+                )
+                .build();
+
+        Mockito.when(blackMovesMock.stream()).then(i -> Stream.of(move));
+
+        Map<PieceDto, List<MoveDto>> legalMoves = gameService.getPlayerLegalMoves(gameDto, Constants.WHITE_COLOR);
+
+        Assertions.assertEquals(1, legalMoves.size());
+        Assertions.assertEquals(0, legalMoves.get(whiteKing).size());
+    }
+
+    @Test
+    void testPlayerLegalMovesBlackWhenCheck() {
+        PieceDto whiteKing = PieceDto.builder()
+                .pieceType(PieceType.KING)
+                .positionX(2)
+                .positionY(5)
+                .id(1)
+                .whitePiece(true)
+                .build();
+        PieceDto blackKing = PieceDto.builder()
+                .pieceType(PieceType.KING)
+                .positionX(6)
+                .positionY(6)
+                .id(3)
+                .whitePiece(false)
+                .build();
+        PieceDto blackPawn = PieceDto.builder()
+                .pieceType(PieceType.PAWN)
+                .positionX(1)
+                .positionY(6)
+                .id(2)
+                .whitePiece(false)
+                .build();
+
+        BoardDto boardDto = BoardDto.builder()
+                .whitePieces(List.of(whiteKing))
+                .blackPieces(List.of(blackKing, blackPawn))
+                .histories(List.of())
+                .pieceMatrix(new Integer[8][8][3])
+                .build();
+
+        GameDto gameDto = GameDto.builder()
+                .board(boardDto)
+                .whitePlayerUUID(whitePlayerUUID)
+                .blackPlayerUUID(blackPlayerUUID)
+                .whiteTurn(true)
+                .build();
+
+        MoveDto move = MoveDto.builder()
+                .first(MoveType.CAPTURE)
+                .second(PositionDto.builder()
+                        .first(2)
+                        .second(5)
+                        .build()
+                )
+                .build();
+
+        MoveDto moveKing = MoveDto.builder()
+                .first(MoveType.NORMAL)
+                .second(PositionDto.builder()
+                        .first(6)
+                        .second(6)
+                        .build()
+                )
+                .build();
+
+        Mockito.when(blackMovesMock.stream()).then(i -> Stream.of(move)).then(i -> Stream.of());
+        Mockito.when(whiteMovesMock.stream()).then(i -> Stream.of(moveKing));
+
+        Map<PieceDto, List<MoveDto>> legalMoves = gameService.getPlayerLegalMoves(gameDto, Constants.WHITE_COLOR);
+
+        Assertions.assertEquals(1, legalMoves.size());
+        Assertions.assertEquals(1, legalMoves.get(whiteKing).size());
+    }
+
+    @Test
+    void testPlayerLegalMovesWhiteWhenCheckMatte() {
+        PieceDto whiteKing = PieceDto.builder()
+                .pieceType(PieceType.KING)
+                .positionX(2)
+                .positionY(5)
+                .id(1)
+                .whitePiece(true)
+                .build();
+        PieceDto blackKing = PieceDto.builder()
+                .pieceType(PieceType.KING)
+                .positionX(6)
+                .positionY(6)
+                .id(3)
+                .whitePiece(false)
+                .build();
+        PieceDto whitePawn = PieceDto.builder()
+                .pieceType(PieceType.PAWN)
+                .positionX(7)
+                .positionY(5)
+                .id(2)
+                .whitePiece(false)
+                .build();
+
+        BoardDto boardDto = BoardDto.builder()
+                .whitePieces(List.of(whiteKing, whitePawn))
+                .blackPieces(List.of(blackKing))
+                .histories(List.of())
+                .pieceMatrix(new Integer[8][8][3])
+                .build();
+
+        GameDto gameDto = GameDto.builder()
+                .board(boardDto)
+                .whitePlayerUUID(whitePlayerUUID)
+                .blackPlayerUUID(blackPlayerUUID)
+                .whiteTurn(true)
+                .build();
+
+        MoveDto move = MoveDto.builder()
+                .first(MoveType.CAPTURE)
+                .second(PositionDto.builder()
+                        .first(6)
+                        .second(6)
+                        .build()
+                )
+                .build();
+
+        Mockito.when(whiteMovesMock.stream()).then(i -> Stream.of(move));
+
+        Map<PieceDto, List<MoveDto>> legalMoves = gameService.getPlayerLegalMoves(gameDto, Constants.BLACK_COLOR);
+
+        Assertions.assertEquals(1, legalMoves.size());
+        Assertions.assertEquals(0, legalMoves.get(blackKing).size());
+    }
+
+    @Test
+    void testPlayerLegalMovesWhiteWhenCheck() {
+        PieceDto whiteKing = PieceDto.builder()
+                .pieceType(PieceType.KING)
+                .positionX(2)
+                .positionY(5)
+                .id(1)
+                .whitePiece(true)
+                .build();
+        PieceDto blackKing = PieceDto.builder()
+                .pieceType(PieceType.KING)
+                .positionX(6)
+                .positionY(6)
+                .id(3)
+                .whitePiece(false)
+                .build();
+        PieceDto whitePawn = PieceDto.builder()
+                .pieceType(PieceType.PAWN)
+                .positionX(7)
+                .positionY(5)
+                .id(2)
+                .whitePiece(false)
+                .build();
+
+        BoardDto boardDto = BoardDto.builder()
+                .whitePieces(List.of(whiteKing, whitePawn))
+                .blackPieces(List.of(blackKing))
+                .histories(List.of())
+                .pieceMatrix(new Integer[8][8][3])
+                .build();
+
+        GameDto gameDto = GameDto.builder()
+                .board(boardDto)
+                .whitePlayerUUID(whitePlayerUUID)
+                .blackPlayerUUID(blackPlayerUUID)
+                .whiteTurn(true)
+                .build();
+
+        MoveDto move = MoveDto.builder()
+                .first(MoveType.CAPTURE)
+                .second(PositionDto.builder()
+                        .first(5)
+                        .second(5)
+                        .build()
+                )
+                .build();
+
+        MoveDto moveKing = MoveDto.builder()
+                .first(MoveType.NORMAL)
+                .second(PositionDto.builder()
+                        .first(6)
+                        .second(6)
+                        .build()
+                )
+                .build();
+
+        Mockito.when(whiteMovesMock.stream()).then(i -> Stream.of(move)).then(i -> Stream.of());
+        Mockito.when(blackMovesMock.stream()).then(i -> Stream.of(moveKing));
+
+        Map<PieceDto, List<MoveDto>> legalMoves = gameService.getPlayerLegalMoves(gameDto, Constants.BLACK_COLOR);
+
+        Assertions.assertEquals(1, legalMoves.size());
+        Assertions.assertEquals(1, legalMoves.get(blackKing).size());
     }
 
 }

@@ -358,7 +358,7 @@ public interface GameService {
         boolean isWhiteTurn = playerColor == Constants.WHITE_COLOR;
         GameStatus gameStatus = getGameStatus(gameDto, isWhiteTurn);
         List<PieceDto> pieceDtoList = playerColor == 0 ? boardDto.getWhitePieces() : boardDto.getBlackPieces();
-        UUID playerUUID = playerColor == 0 ? gameDto.getWhitePlayerUUID() : null;
+        UUID playerUUID = playerColor == 0 ? gameDto.getWhitePlayerUUID() : gameDto.getBlackPlayerUUID();
 
         for (PieceDto piece : pieceDtoList) {
             moveDtoMap.put(piece, getPossibleMoves(gameDto, piece, playerUUID));
