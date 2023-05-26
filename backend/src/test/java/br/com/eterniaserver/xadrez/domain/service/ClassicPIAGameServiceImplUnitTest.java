@@ -138,6 +138,8 @@ class ClassicPIAGameServiceImplUnitTest {
         Mockito.when(gameRepository.findById(gameId)).thenReturn(Optional.empty());
 
         gameService.refreshGameTimer(gameId);
+
+        Mockito.verify(gameRepository, Mockito.times(1)).findById(gameId);
     }
 
     @Test
