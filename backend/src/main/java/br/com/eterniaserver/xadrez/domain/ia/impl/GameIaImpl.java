@@ -112,12 +112,15 @@ public class GameIaImpl implements GameIa {
                         moveValue = actualMove - value;
                     }
 
-                    value = minimaxValue(gameService, tempGame, opponentColor, currentColor, depth - 1, moveValue);
-                    if (currentColor == Constants.WHITE_COLOR && value > oldValue) {
-                        oldValue = value;
-                        bestBoardValue = value;
-                    }
-                    else if (value < oldValue) {
+                    value = minimaxValue(
+                            gameService,
+                            tempGame,
+                            opponentColor,
+                            currentColor,
+                            depth - 1,
+                            moveValue
+                    );
+                    if ((currentColor == Constants.WHITE_COLOR && value > oldValue) || value < oldValue) {
                         oldValue = value;
                         bestBoardValue = value;
                     }
@@ -161,7 +164,12 @@ public class GameIaImpl implements GameIa {
         BoardDto boardDto = gameDto.getBoard();
 
         int boardValue = 0;
-        int numhorse, numrook, numqueen, numking, numpawn, numbishop;
+        int numhorse;
+        int numrook;
+        int numqueen;
+        int numking;
+        int numpawn;
+        int numbishop;
 
         int tempColor = color;
         color = color == Constants.BLACK_COLOR ? Constants.WHITE_COLOR : Constants.BLACK_COLOR;

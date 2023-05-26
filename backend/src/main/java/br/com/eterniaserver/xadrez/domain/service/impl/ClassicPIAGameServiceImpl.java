@@ -46,7 +46,7 @@ public class ClassicPIAGameServiceImpl implements GameService {
 
     @Override
     public List<Game> getAllGames() {
-        return gameRepository.findAllByBlackPlayerUUIDIsNull();
+        return null;
     }
 
     @Override
@@ -58,9 +58,7 @@ public class ClassicPIAGameServiceImpl implements GameService {
 
     @Override
     public List<Game> getGames() {
-        return gameRepository.findAllByBlackPlayerUUIDIsNullAndGameTypeEquals(
-                GameType.PLAYER_IA_CLASSIC
-        );
+        return null;
     }
 
     @Override
@@ -150,7 +148,7 @@ public class ClassicPIAGameServiceImpl implements GameService {
 
     private boolean checkTurn(Game game, UUID playerUUID) throws ResponseStatusException {
         boolean isWhite = game.getWhitePlayerUUID().equals(playerUUID);
-        if (isWhite != game.getWhiteTurn()) {
+        if (!game.getWhiteTurn().equals(isWhite)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Não é turno do jogador");
         }
         return isWhite;
