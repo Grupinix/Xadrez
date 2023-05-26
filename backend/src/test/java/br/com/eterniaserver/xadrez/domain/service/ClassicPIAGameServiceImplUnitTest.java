@@ -43,8 +43,6 @@ class ClassicPIAGameServiceImplUnitTest {
     @Mock
     private HistoryRepository historyRepository;
     @Mock
-    private GameIaImpl gameIa;
-    @Mock
     private PlayerService playerService;
 
     private GameService gameService;
@@ -57,8 +55,7 @@ class ClassicPIAGameServiceImplUnitTest {
                 historyRepository,
                 pieceRepository,
                 boardRepository,
-                playerService,
-                gameIa
+                playerService
         );
     }
 
