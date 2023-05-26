@@ -6,7 +6,6 @@ import br.com.eterniaserver.xadrez.domain.entities.Piece;
 import br.com.eterniaserver.xadrez.domain.enums.GameDifficulty;
 import br.com.eterniaserver.xadrez.domain.enums.GameType;
 import br.com.eterniaserver.xadrez.domain.enums.MoveType;
-import br.com.eterniaserver.xadrez.domain.ia.impl.GameIaImpl;
 import br.com.eterniaserver.xadrez.domain.repositories.BoardRepository;
 import br.com.eterniaserver.xadrez.domain.repositories.GameRepository;
 import br.com.eterniaserver.xadrez.domain.repositories.HistoryRepository;
