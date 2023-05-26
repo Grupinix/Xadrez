@@ -122,7 +122,7 @@ class GameServiceUnitTest {
                 .whitePieces(List.of(whiteKing))
                 .blackPieces(List.of())
                 .histories(List.of())
-                .pieceMatrix(new Integer[8][8][2])
+                .pieceMatrix(new Integer[8][8][3])
                 .build();
         GameDto gameDto = GameDto.builder()
                 .board(boardDto)
@@ -144,7 +144,7 @@ class GameServiceUnitTest {
                 .whitePieces(List.of())
                 .blackPieces(List.of(blackKing))
                 .histories(List.of())
-                .pieceMatrix(new Integer[8][8][2])
+                .pieceMatrix(new Integer[8][8][3])
                 .build();
         GameDto gameDto = GameDto.builder()
                 .board(boardDto)
@@ -180,7 +180,7 @@ class GameServiceUnitTest {
                 .whitePieces(List.of(whiteKing, whitePawn))
                 .blackPieces(List.of(blackKing))
                 .histories(List.of())
-                .pieceMatrix(new Integer[8][8][2])
+                .pieceMatrix(new Integer[8][8][3])
                 .build();
         GameDto gameDto = GameDto.builder()
                 .board(boardDto)
@@ -237,7 +237,7 @@ class GameServiceUnitTest {
                 .whitePieces(List.of(whiteKing))
                 .blackPieces(List.of(blackKing, blackPawn))
                 .histories(List.of())
-                .pieceMatrix(new Integer[8][8][2])
+                .pieceMatrix(new Integer[8][8][3])
                 .build();
         GameDto gameDto = GameDto.builder()
                 .board(boardDto)
@@ -288,7 +288,7 @@ class GameServiceUnitTest {
                 .whitePieces(List.of(whiteKing))
                 .blackPieces(List.of(blackKing))
                 .histories(List.of())
-                .pieceMatrix(new Integer[8][8][2])
+                .pieceMatrix(new Integer[8][8][3])
                 .build();
         GameDto gameDto = GameDto.builder()
                 .board(boardDto)
@@ -327,7 +327,7 @@ class GameServiceUnitTest {
                 .whitePieces(List.of(whiteKing, whitePawn))
                 .blackPieces(List.of(blackKing))
                 .histories(List.of())
-                .pieceMatrix(new Integer[8][8][2])
+                .pieceMatrix(new Integer[8][8][3])
                 .build();
         GameDto gameDto = GameDto.builder()
                 .board(boardDto)
@@ -376,7 +376,7 @@ class GameServiceUnitTest {
                 .whitePieces(List.of(whiteKing))
                 .blackPieces(List.of(blackKing, blackPawn))
                 .histories(List.of())
-                .pieceMatrix(new Integer[8][8][2])
+                .pieceMatrix(new Integer[8][8][3])
                 .build();
         GameDto gameDto = GameDto.builder()
                 .board(boardDto)
@@ -419,7 +419,7 @@ class GameServiceUnitTest {
                 .whitePieces(List.of(whiteKing))
                 .blackPieces(List.of(blackKing))
                 .histories(List.of())
-                .pieceMatrix(new Integer[8][8][2])
+                .pieceMatrix(new Integer[8][8][3])
                 .build();
         GameDto gameDto = GameDto.builder()
                 .board(boardDto)
@@ -458,7 +458,7 @@ class GameServiceUnitTest {
                 .whitePieces(List.of(whiteKing, whitePawn))
                 .blackPieces(List.of(blackKing))
                 .histories(List.of())
-                .pieceMatrix(new Integer[8][8][2])
+                .pieceMatrix(new Integer[8][8][3])
                 .build();
         GameDto gameDto = GameDto.builder()
                 .board(boardDto)
@@ -518,7 +518,7 @@ class GameServiceUnitTest {
                 .whitePieces(List.of(whiteKing))
                 .blackPieces(List.of(blackKing, blackPawn))
                 .histories(List.of())
-                .pieceMatrix(new Integer[8][8][2])
+                .pieceMatrix(new Integer[8][8][3])
                 .build();
         GameDto gameDto = GameDto.builder()
                 .board(boardDto)
@@ -576,7 +576,7 @@ class GameServiceUnitTest {
                 .whitePieces(List.of(whiteKing))
                 .blackPieces(List.of(blackKing, blackPawn))
                 .histories(List.of())
-                .pieceMatrix(new Integer[8][8][2])
+                .pieceMatrix(new Integer[8][8][3])
                 .build();
         GameDto gameDto = GameDto.builder()
                 .board(boardDto)
@@ -601,7 +601,62 @@ class GameServiceUnitTest {
     }
 
     @Test
-    void testMovePawnInBoardToCapture() {
+    void testMoveWhitePawnInBoardToCapture() {
+        PieceDto whiteKing = PieceDto.builder()
+                .pieceType(PieceType.KING)
+                .positionX(6)
+                .positionY(6)
+                .whitePiece(true)
+                .build();
+        PieceDto whitePawn = PieceDto.builder()
+                .pieceType(PieceType.PAWN)
+                .positionX(4)
+                .positionY(4)
+                .whitePiece(true)
+                .build();
+        PieceDto blackKing = PieceDto.builder()
+                .pieceType(PieceType.KING)
+                .positionX(5)
+                .positionY(5)
+                .id(1)
+                .whitePiece(false)
+                .build();
+        Integer[][][] pieceMatrix = new Integer[8][8][3];
+        pieceMatrix[5][5][0] = 1;
+        pieceMatrix[5][5][1] = Constants.BLACK_COLOR;
+        pieceMatrix[5][5][2] = PieceType.KING.ordinal();
+        BoardDto boardDto = BoardDto.builder()
+                .whitePieces(List.of(whiteKing, whitePawn))
+                .blackPieces(List.of(blackKing))
+                .histories(List.of())
+                .pieceMatrix(pieceMatrix)
+                .build();
+        GameDto gameDto = GameDto.builder()
+                .board(boardDto)
+                .whitePlayerUUID(whitePlayerUUID)
+                .blackPlayerUUID(blackPlayerUUID)
+                .whiteTurn(true)
+                .build();
+
+        MoveDto pawnMove = MoveDto.builder()
+                .first(MoveType.CAPTURE)
+                .second(PositionDto.builder()
+                        .first(5)
+                        .second(5)
+                        .build()
+                )
+                .build();
+
+        gameService.movePieceOnBoardDto(gameDto.getBoard(), whitePawn, pawnMove);
+
+        Assertions.assertEquals(pawnMove.getSecond().getFirst(), whitePawn.getPositionX());
+        Assertions.assertEquals(pawnMove.getSecond().getSecond(), whitePawn.getPositionY());
+
+        Assertions.assertEquals(0, boardDto.getBlackPieces().size());
+    }
+
+    @Test
+    void testMoveBlackPawnInBoardToCapture() {
         PieceDto whiteKing = PieceDto.builder()
                 .pieceType(PieceType.KING)
                 .positionX(6)
@@ -621,10 +676,10 @@ class GameServiceUnitTest {
                 .positionY(5)
                 .whitePiece(false)
                 .build();
-        Integer[][][] pieceMatrix = new Integer[8][8][2];
+        Integer[][][] pieceMatrix = new Integer[8][8][3];
         pieceMatrix[6][6][0] = 1;
         pieceMatrix[6][6][1] = Constants.WHITE_COLOR;
-        pieceMatrix[5][6][0] = PieceType.KING.ordinal();
+        pieceMatrix[5][6][2] = PieceType.KING.ordinal();
         BoardDto boardDto = BoardDto.builder()
                 .whitePieces(List.of(whiteKing))
                 .blackPieces(List.of(blackKing, blackPawn))
@@ -680,7 +735,62 @@ class GameServiceUnitTest {
                 .whitePieces(List.of(whiteKing))
                 .blackPieces(List.of(blackKing, blackPawn))
                 .histories(List.of())
-                .pieceMatrix(new Integer[8][8][2])
+                .pieceMatrix(new Integer[8][8][3])
+                .build();
+        GameDto gameDto = GameDto.builder()
+                .board(boardDto)
+                .whitePlayerUUID(whitePlayerUUID)
+                .blackPlayerUUID(blackPlayerUUID)
+                .whiteTurn(true)
+                .build();
+
+        MoveDto pawnMove = MoveDto.builder()
+                .first(MoveType.CAPTURE)
+                .second(PositionDto.builder()
+                        .first(6)
+                        .second(6)
+                        .build()
+                )
+                .build();
+
+        gameService.movePieceOnBoardDto(gameDto.getBoard(), blackPawn, pawnMove);
+
+        Assertions.assertEquals(pawnMove.getSecond().getFirst(), blackPawn.getPositionX());
+        Assertions.assertEquals(pawnMove.getSecond().getSecond(), blackPawn.getPositionY());
+
+        Assertions.assertEquals(1, boardDto.getWhitePieces().size());
+    }
+
+    @Test
+    void testMovePawnInBoardToCaptureIdNotMatch() {
+        PieceDto whiteKing = PieceDto.builder()
+                .pieceType(PieceType.KING)
+                .positionX(6)
+                .positionY(6)
+                .id(1)
+                .whitePiece(true)
+                .build();
+        PieceDto blackPawn = PieceDto.builder()
+                .pieceType(PieceType.PAWN)
+                .positionX(5)
+                .positionY(6)
+                .whitePiece(false)
+                .build();
+        PieceDto blackKing = PieceDto.builder()
+                .pieceType(PieceType.KING)
+                .positionX(2)
+                .positionY(5)
+                .whitePiece(false)
+                .build();
+        Integer[][][] pieceMatrix = new Integer[8][8][3];
+        pieceMatrix[6][6][0] = 2;
+        pieceMatrix[6][6][1] = Constants.WHITE_COLOR;
+        pieceMatrix[5][6][2] = PieceType.KING.ordinal();
+        BoardDto boardDto = BoardDto.builder()
+                .whitePieces(List.of(whiteKing))
+                .blackPieces(List.of(blackKing, blackPawn))
+                .histories(List.of())
+                .pieceMatrix(pieceMatrix)
                 .build();
         GameDto gameDto = GameDto.builder()
                 .board(boardDto)
