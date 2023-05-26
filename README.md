@@ -1,8 +1,20 @@
 <a name="readme-top"></a>
 
+
 [![Contributors][contributors-shield]][contributors-url]
 [![Issues][issues-shield]][issues-url]
 
+<br>
+
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=Grupinix_Xadrez&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=Grupinix_Xadrez)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=Grupinix_Xadrez&metric=coverage)](https://sonarcloud.io/summary/new_code?id=Grupinix_Xadrez)
+[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=Grupinix_Xadrez&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=Grupinix_Xadrez)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=Grupinix_Xadrez&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=Grupinix_Xadrez)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=Grupinix_Xadrez&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=Grupinix_Xadrez)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=Grupinix_Xadrez&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=Grupinix_Xadrez)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=Grupinix_Xadrez&metric=bugs)](https://sonarcloud.io/summary/new_code?id=Grupinix_Xadrez)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=Grupinix_Xadrez&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=Grupinix_Xadrez)
+[![SonarCloud](https://sonarcloud.io/images/project_badges/sonarcloud-white.svg)](https://sonarcloud.io/summary/new_code?id=Grupinix_Xadrez)
 
 <!-- PROJECT LOGO -->
 <br />
@@ -190,9 +202,9 @@ In order to build and run the project, it's recommended that you use an IDE. We 
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/github_username/repo_name.svg?style=for-the-badge
+[contributors-shield]: https://img.shields.io/github/contributors/Grupinix/Xadrez?logo=GitHub&style=for-the-badge
 [contributors-url]: https://github.com/Grupinix/Xadrez/graphs/contributors
-[issues-shield]: https://img.shields.io/github/issues/github_username/repo_name.svg?style=for-the-badge
+[issues-shield]: https://img.shields.io/github/issues/Grupinix/Xadrez?logo=GitHub&style=for-the-badge
 [issues-url]: https://github.com/Grupinix/Xadrez/issues
 
 [xadrez-screenshot]: frontend/public/game-screenshot.png
