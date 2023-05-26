@@ -13,10 +13,7 @@ services:
       - POSTGRES_USER=postgres
 
   xadrez-spring:
-    build:
-      context: .
-      dockerfile: ./docker/spring/Dockerfile
-    image: xadrez-spring
+    image: ghcr.io/grupinix/xadrez-spring:latest
     container_name: xadrez-spring
     restart: always
     depends_on:
@@ -27,10 +24,7 @@ services:
       - POSTGRES_USER=postgres
 
   xadrez-vue:
-    build:
-      context: .
-      dockerfile: ./docker/vue/Dockerfile
-    image: xadrez-vue
+    image: ghcr.io/grupinix/xadrez-vue:latest
     container_name: xadrez-vue
     restart: always
     volumes:
