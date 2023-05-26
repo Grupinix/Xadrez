@@ -4,6 +4,7 @@ import br.com.eterniaserver.xadrez.domain.entities.Game;
 import br.com.eterniaserver.xadrez.domain.entities.Piece;
 import br.com.eterniaserver.xadrez.domain.enums.GameStatus;
 import br.com.eterniaserver.xadrez.domain.enums.GameType;
+import br.com.eterniaserver.xadrez.domain.ia.GameIa;
 import br.com.eterniaserver.xadrez.domain.repositories.PieceRepository;
 import br.com.eterniaserver.xadrez.domain.service.GameService;
 import br.com.eterniaserver.xadrez.domain.service.impl.ClassicPIAGameServiceImpl;
@@ -15,25 +16,46 @@ import br.com.eterniaserver.xadrez.rest.dtos.PlayerDto;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 @RestController
 @RequestMapping("/api/game/")
 @RequiredArgsConstructor
 public class GameController {
 
+    private final ConcurrentMap<Integer, Integer> iaGamesMap = new ConcurrentHashMap<>();
     private final ClassicPIAGameServiceImpl classicPIAGameService;
     private final ClassicPPGameServiceImpl classicPPGameService;
     private final PieceRepository pieceRepository;
+    private final GameIa gameIa;
 
     private GameService getGameService(GameType gameType) {
         return switch (gameType) {
             case PLAYER_IA_CLASSIC -> classicPIAGameService;
             case PLAYER_PLAYER_CLASSIC -> classicPPGameService;
         };
+    }
+
+    @Scheduled(cron = "*/2 * * * * *")
+    public void runIaMove() {
+        List<Integer> loadedGames = new ArrayList<>();
+
+        for (Map.Entry<Integer, Integer> entry : iaGamesMap.entrySet()) {
+            gameIa.movePiece(entry.getKey());
+            loadedGames.add(entry.getKey());
+        }
+
+        for (Integer gameId : loadedGames) {
+            iaGamesMap.remove(gameId);
+        }
     }
 
     @GetMapping("check/{type}/{gameId}/")
@@ -58,6 +80,8 @@ public class GameController {
         GameService gameService = getGameService(type);
         Game game = gameService.getGame(gameId);
         Piece piece = pieceRepository.findById(pieceId).orElseThrow();
+
+        iaGamesMap.put(gameId, gameId);
 
         return gameService.movePiece(game, uuid, piece, move).getGameDto();
     }

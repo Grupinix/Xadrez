@@ -244,7 +244,7 @@ class GameServiceUnitTest {
                 .board(boardDto)
                 .whitePlayerUUID(whitePlayerUUID)
                 .blackPlayerUUID(blackPlayerUUID)
-                .whiteTurn(true)
+                .whiteTurn(false)
                 .build();
 
         MoveDto pawnCaptureWhiteKing = MoveDto.builder()
@@ -383,7 +383,7 @@ class GameServiceUnitTest {
                 .board(boardDto)
                 .whitePlayerUUID(whitePlayerUUID)
                 .blackPlayerUUID(blackPlayerUUID)
-                .whiteTurn(true)
+                .whiteTurn(false)
                 .build();
 
         MoveDto pawnCaptureWhiteKing = MoveDto.builder()
@@ -525,7 +525,7 @@ class GameServiceUnitTest {
                 .board(boardDto)
                 .whitePlayerUUID(whitePlayerUUID)
                 .blackPlayerUUID(blackPlayerUUID)
-                .whiteTurn(true)
+                .whiteTurn(false)
                 .build();
 
         MoveDto pawnCaptureWhiteKing = MoveDto.builder()

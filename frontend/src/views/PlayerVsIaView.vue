@@ -42,8 +42,8 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, onMounted, onUnmounted } from "vue";
-  import { ElLoading, ElMessage } from 'element-plus'
+  import { ref, onMounted, onUnmounted, h } from "vue";
+  import { ElLoading, ElMessage, ElMessageBox } from "element-plus";
 
   import router from "../router";
   import GameService from "../services/gameService";
@@ -68,6 +68,7 @@
 
   const gameStatus = ref<string>("");
   const timer = ref<number>();
+  const whiteTurn = ref<boolean>(true);
   const selectedPiece = ref<GameMatrixPiece>();
   const playerDto = ref<PlayerDto>(PlayerService.getPlayerDtoFromStorage());
   const iaGameDto = ref<GameDto>(GameService.getIaGameDtoFromStorage());
@@ -90,15 +91,20 @@
   onMounted(() => {
     timer.value = window.setInterval(async () => {
       iaGameDto.value = GameService.getIaGameDtoFromStorage();
-      if (iaGameDto.value && iaGameDto.value.id) {
+      if (iaGameDto.value && iaGameDto.value.id && !whiteTurn.value) {
         GameService.get(iaGameDto.value.gameType, iaGameDto.value.id)
           .then((response) => {
             response.json().then((result) => {
               if (result) {
                 iaGameDto.value = result;
+                if (iaGameDto.value.whiteTurn) {
+                  whiteTurn.value = true;
+                }
                 localStorage.setItem("iaGameDto", JSON.stringify(result));
+                clearGameMatrix();
                 fillGameMatrix(iaGameDto.value.board.whitePieces);
                 fillGameMatrix(iaGameDto.value.board.blackPieces);
+                verifyGameStatus();
               }
               else {
                 removeIaGameAndRedirect();
@@ -190,6 +196,41 @@
     }
   }
 
+  function openEndBox() {
+    const msg = gameStatus.value === "BLACK_WINS" ?
+      "Você perdeu! " : "Você ganhou! ";
+    const msgGame = "Continue jogando e se divirta!";
+
+    ElMessageBox({
+      title: "FIM DE JOGO!",
+      message: h("p", null, [
+        h("span", null, msg),
+        h("i", { style: 'color: teal' }, msgGame),
+      ]),
+      confirmButtonText: "OK",
+      beforeClose: (action, instance, done) => {
+        instance.confirmButtonLoading = true
+        instance.confirmButtonText = "Carregando..."
+        setTimeout(() => {
+          localStorage.removeItem("iaGameDto");
+          router.push({ path: "/inicio" });
+          done();
+        }, 1000);
+      },
+    });
+  }
+
+  function showCheckMessage() {
+    const msgType = gameStatus.value === "WHITE_CHECK" ? "success" : "warning";
+    const msg = gameStatus.value === "WHITE_CHECK" ?
+      "O Rei Preto está em cheque!" : "O Rei Branco está em cheque!";
+
+    ElMessage({
+      message: msg,
+      type: msgType,
+    });
+  }
+
   function verifyGameStatus() {
     const gameId = iaGameDto.value.id;
     const gameType = iaGameDto.value.gameType;
@@ -204,10 +245,12 @@
       .then((response) => {
         response.json().then((result) => {
           gameStatus.value = result;
-          ElMessage({
-            message: "STATUS DO JOGO " + gameStatus.value,
-            type: "warning",
-          });
+          if (result === "WHITE_WINS" || result === "BLACK_WINS") {
+            openEndBox();
+          }
+          else if (result === "WHITE_CHECK" || result === "BLACK_CHECK") {
+            showCheckMessage();
+          }
           loading.close();
         });
       })
@@ -250,6 +293,7 @@
             fillGameMatrix(result.board.whitePieces);
             fillGameMatrix(result.board.blackPieces);
             loading.close();
+            whiteTurn.value = false;
           }
         });
       })
@@ -259,6 +303,22 @@
   }
 
   function getPossibleMoves(piece: GameMatrixPiece) {
+    if (!whiteTurn.value) {
+      return;
+    }
+
+    if (gameStatus.value === "BLACK_CHECK") {
+      const kingPiece = iaGameDto.value.board.whitePieces.find(
+        p => p.pieceType === "KING"
+      );
+      if (!kingPiece || kingPiece.id !== piece.id) {
+        ElMessage({
+          message: "Você está em cheque, só pode mover o Rei!",
+          type: "error",
+        });
+      }
+    }
+
     const selected = selectedPiece.value;
     if (selected && selected.id === piece.id) {
       selectedPiece.value = {

@@ -8,7 +8,6 @@ import br.com.eterniaserver.xadrez.domain.entities.Piece;
 import br.com.eterniaserver.xadrez.domain.enums.GameDifficulty;
 import br.com.eterniaserver.xadrez.domain.enums.GameType;
 import br.com.eterniaserver.xadrez.domain.enums.MoveType;
-import br.com.eterniaserver.xadrez.domain.ia.impl.GameIaImpl;
 import br.com.eterniaserver.xadrez.domain.repositories.BoardRepository;
 import br.com.eterniaserver.xadrez.domain.repositories.GameRepository;
 import br.com.eterniaserver.xadrez.domain.repositories.HistoryRepository;
@@ -41,8 +40,6 @@ public class ClassicPIAGameServiceImpl implements GameService {
     private final PieceRepository pieceRepository;
     private final BoardRepository boardRepository;
     private final PlayerService playerService;
-
-    private final GameIaImpl gameIa;
 
     @Override
     public List<Game> getAllGames() {
@@ -135,15 +132,7 @@ public class ClassicPIAGameServiceImpl implements GameService {
 
         saveEntities(game, history, piece, board);
 
-        if (playerUUID != null) {
-            callIaMove(playerUUID, game.getId());
-        }
-
         return game;
-    }
-
-    private void callIaMove(final UUID uuid, final int gameId) {
-        gameIa.movePiece(gameId, uuid, this);
     }
 
     private boolean checkTurn(Game game, UUID playerUUID) throws ResponseStatusException {
