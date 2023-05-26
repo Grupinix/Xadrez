@@ -76,7 +76,7 @@ class ClassicPIAGameServiceImplUnitTest {
 
     @Test
     void ensureThatGetGamesReturnNull() {
-        List<Game> games = gameService.getAllGames();
+        List<Game> games = gameService.getGames();
         Assertions.assertNull(games);
     }
 
