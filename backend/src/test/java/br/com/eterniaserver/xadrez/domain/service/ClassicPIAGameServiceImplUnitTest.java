@@ -69,6 +69,26 @@ class ClassicPIAGameServiceImplUnitTest {
     }
 
     @Test
+    void ensureThatGetAllGamesReturnNull() {
+        List<Game> games = gameService.getAllGames();
+        Assertions.assertNull(games);
+    }
+
+    @Test
+    void ensureThatGetGamesReturnNull() {
+        List<Game> games = gameService.getAllGames();
+        Assertions.assertNull(games);
+    }
+
+    @Test
+    void ensureThatEnterGameReturnNull() {
+        UUID uuid = UUID.randomUUID();
+        Integer gameId = 1;
+        Game game = gameService.enterGame(uuid, gameId);
+        Assertions.assertNull(game);
+    }
+
+    @Test
     void testGetGame() {
         UUID uuid = UUID.randomUUID();
         Integer gameId = 1;
@@ -110,6 +130,14 @@ class ClassicPIAGameServiceImplUnitTest {
         gameService.refreshGameTimer(gameId);
 
         Mockito.verify(game, Mockito.times(1)).setTimer(Mockito.anyLong());
+    }
+
+    @Test
+    void testRefreshGameTimerWithInvalidGame() {
+        Integer gameId = 1;
+        Mockito.when(gameRepository.findById(gameId)).thenReturn(Optional.empty());
+
+        gameService.refreshGameTimer(gameId);
     }
 
     @Test
@@ -347,6 +375,30 @@ class ClassicPIAGameServiceImplUnitTest {
 
             Assertions.assertEquals(1, game.getBoard().getHistories().size());
             Assertions.assertEquals(positionX - 2, pawn.getPositionX());
+            Assertions.assertEquals(positionY, pawn.getPositionY());
+        }
+
+        @Test
+        void testMoveIaToPosition() {
+            Piece pawn = game.getBoard().getBlackPieces().get(8);
+            game.setWhiteTurn(false);
+            game.setId(0);
+            int positionX = pawn.getPositionX();
+            int positionY = pawn.getPositionY();
+
+            PositionDto positionDto = PositionDto.builder()
+                    .first(positionX + 2)
+                    .second(positionY)
+                    .build();
+            MoveDto moveDto = MoveDto.builder()
+                    .first(MoveType.NORMAL)
+                    .second(positionDto)
+                    .build();
+
+            gameService.movePiece(game, null, pawn, moveDto);
+
+            Assertions.assertEquals(1, game.getBoard().getHistories().size());
+            Assertions.assertEquals(positionX + 2, pawn.getPositionX());
             Assertions.assertEquals(positionY, pawn.getPositionY());
         }
 

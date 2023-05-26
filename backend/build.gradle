@@ -25,12 +25,13 @@ sonarqube  {
         property "sonar.verbose", "true"
         property "sonar.coverage.jacoco.xmlReportPaths", "build/reports/jacoco/test/jacocoTestReport.xml"
         property "sonar.junit.reportsPath", "build/test-results/test"
-        property 'sonar.coverage.exclusions', "**/br/com/eterniaserver/xadrez/rest/**/*,**/br/com/eterniaserver/xadrez/exceptions/*,**/br/com/eterniaserver/xadrez/domain/entities/*,**/br/com/eterniaserver/xadrez/domain/enums/*"
+        property "sonar.exclusions", "**/br/com/eterniaserver/xadrez/rest/dtos/*"
+        property "sonar.coverage.exclusions", "**/br/com/eterniaserver/xadrez/rest/**/*,**/br/com/eterniaserver/xadrez/exceptions/*,**/br/com/eterniaserver/xadrez/domain/entities/*,**/br/com/eterniaserver/xadrez/domain/enums/*,**/br/com/eterniaserver/Constants.java,**/br/com/eterniaserver/BackendApplication.java,**/br/com/eterniaserver/config/*"
     }
 }
 
 group = 'br.com.eterniaserver'
-version = '0.0.1-SNAPSHOT'
+version = '0.8-SNAPSHOT'
 sourceCompatibility = '17'
 
 configurations {

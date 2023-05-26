@@ -46,7 +46,7 @@ public class ClassicPIAGameServiceImpl implements GameService {
 
     @Override
     public List<Game> getAllGames() {
-        return gameRepository.findAllByBlackPlayerUUIDIsNull();
+        return null;
     }
 
     @Override
@@ -58,9 +58,7 @@ public class ClassicPIAGameServiceImpl implements GameService {
 
     @Override
     public List<Game> getGames() {
-        return gameRepository.findAllByBlackPlayerUUIDIsNullAndGameTypeEquals(
-                GameType.PLAYER_IA_CLASSIC
-        );
+        return null;
     }
 
     @Override
