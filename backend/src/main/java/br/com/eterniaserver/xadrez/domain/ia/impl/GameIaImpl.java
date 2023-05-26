@@ -159,7 +159,6 @@ public class GameIaImpl implements GameIa {
         return count;
     }
 
-
     public int evalutionFunction(GameDto gameDto, int color) {
         BoardDto boardDto = gameDto.getBoard();
 
