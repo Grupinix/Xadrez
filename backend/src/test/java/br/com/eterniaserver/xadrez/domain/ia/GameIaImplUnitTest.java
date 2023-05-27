@@ -1,9 +1,12 @@
 package br.com.eterniaserver.xadrez.domain.ia;
 
 import br.com.eterniaserver.xadrez.Constants;
+import br.com.eterniaserver.xadrez.domain.entities.Piece;
 import br.com.eterniaserver.xadrez.domain.enums.GameStatus;
+import br.com.eterniaserver.xadrez.domain.enums.MoveType;
 import br.com.eterniaserver.xadrez.rest.dtos.BoardDto;
 import br.com.eterniaserver.xadrez.rest.dtos.GameDto;
+import br.com.eterniaserver.xadrez.rest.dtos.MoveDto;
 import br.com.eterniaserver.xadrez.rest.dtos.PieceDto;
 import br.com.eterniaserver.xadrez.domain.enums.GameType;
 import br.com.eterniaserver.xadrez.domain.enums.PieceType;
@@ -11,17 +14,24 @@ import br.com.eterniaserver.xadrez.domain.ia.impl.GameIaImpl;
 import br.com.eterniaserver.xadrez.domain.repositories.GameRepository;
 import br.com.eterniaserver.xadrez.domain.repositories.PieceRepository;
 import br.com.eterniaserver.xadrez.domain.service.impl.ClassicPIAGameServiceImpl;
+import br.com.eterniaserver.xadrez.domain.entities.Game;
+import br.com.eterniaserver.xadrez.domain.enums.GameDifficulty;
 
+import br.com.eterniaserver.xadrez.rest.dtos.PositionDto;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.springframework.data.util.Pair;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 @ExtendWith(MockitoExtension.class)
@@ -117,7 +127,45 @@ class GameIaImplUnitTest {
         Assertions.assertEquals(2, towerCount);
         Assertions.assertEquals(1, queenCount);
     }
+    @Test
+    void testMovePieceShouldNotInvokeMovePieceServiceWhenGameNotFound() {
+        // Configurar o comportamento do repositório mockado
+        Mockito.when(gameRepository.findById(boardDto.getId())).thenReturn(Optional.empty());
 
+        // Chamar o método movePiece
+        gameIa.movePiece(boardDto.getId());
+
+        // Verificar se o método movePiece do classicPIAGameService não foi chamado
+        Mockito.verify(classicPIAGameService, Mockito.never()).movePiece(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+    }
+
+    @Test
+    void testMovePieceShouldInvokeMovePieceServiceWhenGameFound() {
+        // Criar os dados de teste
+        Game game = Mockito.mock(Game.class);
+        Piece piece = Mockito.mock(Piece.class);
+        Mockito.when(game.getId()).thenReturn(1);
+        Mockito.when(game.getGameDto()).thenReturn(gameDto);
+        PieceDto pieceDto = boardDto.getWhitePieces().get(8);
+        MoveDto moveDto = new MoveDto();
+        moveDto.setFirst(MoveType.NORMAL);
+        moveDto.setSecond(new PositionDto(3,4)); //positiondto
+        Pair <PieceDto, MoveDto> move = Pair.of(pieceDto, moveDto);
+        gameDto.setGameDifficulty(GameDifficulty.EASY);
+        gameDto.setWhiteTurn(false);
+        // Configurar o comportamento do repositório mockado
+        Map<PieceDto, List<MoveDto>> legalmoves = new HashMap<>();
+        legalmoves.put(pieceDto, List.of(moveDto));
+        Mockito.when(classicPIAGameService.getGameStatus(Mockito.any(GameDto.class), Mockito.anyBoolean())).thenReturn(GameStatus.NORMAL);
+        Mockito.when(classicPIAGameService.getPlayerLegalMoves(gameDto, Constants.BLACK_COLOR)).thenReturn(legalmoves);
+        Mockito.when(gameRepository.findById(1)).thenReturn(Optional.of(game));
+        Mockito.when(pieceRepository.findById(pieceDto.getId())).thenReturn(Optional.of(piece));
+        // Chamar o método movePiece
+        gameIa.movePiece(game.getId());
+
+        // Verificar se o método movePiece do classicPIAGameService foi chamado
+        Mockito.verify(classicPIAGameService, Mockito.times(1)).movePiece(game, null, piece, move.getSecond());
+    }
     @Test
     void testEvaluationFunctionShouldReturnCorrectValueWhenValidParametersGiven() {
         int evaluation = gameIa.evaluationFunction(gameDto, Constants.WHITE_COLOR);
