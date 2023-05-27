@@ -104,7 +104,7 @@
                 clearGameMatrix();
                 fillGameMatrix(iaGameDto.value.board.whitePieces);
                 fillGameMatrix(iaGameDto.value.board.blackPieces);
-                verifyGameStatus();
+                verifyGameStatus(true);
               }
               else {
                 removeIaGameAndRedirect();
@@ -178,6 +178,18 @@
   }
 
   function setPieceSelected(pieceId: number) {
+    if (pieceId === 0) {
+      selectedPiece.value = {
+        id: null,
+        move: null,
+        whitePiece: null,
+        pieceType: null,
+        positionX: -1,
+        positionY: -1,
+        isPossibleMove: false,
+        isSelected: false,
+      };
+    }
     for (let i = 0; i < gameMatrix.value.length; i++) {
       for (let j = 0; j < gameMatrix.value[i].length; j++) {
         const matrixPiece = gameMatrix.value[i][j];
@@ -231,15 +243,18 @@
     });
   }
 
-  function verifyGameStatus() {
+  function verifyGameStatus(silent: boolean) {
     const gameId = iaGameDto.value.id;
-    const gameType = iaGameDto.value.gameType;
+    const gameType = iaGameDto.value.gameType
 
-    const loading = ElLoading.service({
-      lock: true,
-      text: "Carregando",
-      background: "rgba(0,0,0,0.8)",
-    });
+    let loading: { close: () => void; };
+    if (!silent) {
+      loading = ElLoading.service({
+        lock: true,
+        text: "Carregando",
+        background: "rgba(0,0,0,0.8)",
+      });
+    }
 
     GameService.getGameStatus(gameType, gameId)
       .then((response) => {
@@ -251,11 +266,15 @@
           else if (result === "WHITE_CHECK" || result === "BLACK_CHECK") {
             showCheckMessage();
           }
-          loading.close();
+          if (!silent) {
+            loading.close();
+          }
         });
       })
       .catch(() => {
-        loading.close();
+        if (!silent) {
+          loading.close();
+        }
         removeIaGameAndRedirect();
       });
   }
@@ -288,7 +307,7 @@
           if (result) {
             iaGameDto.value = result;
             localStorage.setItem("iaGameDto", JSON.stringify(result));
-            verifyGameStatus();
+            verifyGameStatus(false);
             clearGameMatrix();
             fillGameMatrix(result.board.whitePieces);
             fillGameMatrix(result.board.blackPieces);
@@ -307,30 +326,8 @@
       return;
     }
 
-    if (gameStatus.value === "BLACK_CHECK") {
-      const kingPiece = iaGameDto.value.board.whitePieces.find(
-        p => p.pieceType === "KING"
-      );
-      if (!kingPiece || kingPiece.id !== piece.id) {
-        ElMessage({
-          message: "Você está em cheque, só pode mover o Rei!",
-          type: "error",
-        });
-      }
-    }
-
     const selected = selectedPiece.value;
     if (selected && selected.id === piece.id) {
-      selectedPiece.value = {
-        id: null,
-        move: null,
-        whitePiece: null,
-        pieceType: null,
-        positionX: -1,
-        positionY: -1,
-        isPossibleMove: false,
-        isSelected: false,
-      }
       setPieceSelected(0);
       return;
     }
@@ -377,8 +374,19 @@
         response.json().then((result) => {
           if (piece.id !== null) {
             selectedPiece.value = piece;
-            setPieceSelected(piece.id);
-            setPossiblesMoves(result);
+            if (!result.length) {
+              if (gameStatus.value === "BLACK_CHECK") {
+                ElMessage({
+                  message: "Você está em cheque, só pode mover peças para salvar o Rei!",
+                  type: "error",
+                });
+                setPieceSelected(0);
+              }
+            }
+            else {
+              setPieceSelected(piece.id);
+              setPossiblesMoves(result);
+            }
             loading.close();
           }
         });
@@ -415,7 +423,7 @@
             removeIaGameAndRedirect();
           }
           else {
-            verifyGameStatus();
+            verifyGameStatus(false);
             fillGameMatrix(iaGameDto.value.board.whitePieces);
             fillGameMatrix(iaGameDto.value.board.blackPieces);
             loading.close();
