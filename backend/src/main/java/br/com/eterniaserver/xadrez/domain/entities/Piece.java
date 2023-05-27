@@ -4,15 +4,11 @@ import br.com.eterniaserver.xadrez.domain.enums.PieceType;
 import br.com.eterniaserver.xadrez.rest.dtos.PieceDto;
 import jakarta.persistence.*;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "piece")
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
 public class Piece {
 
     @Id

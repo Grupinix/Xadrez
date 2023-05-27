@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.UUID;
 
 @ExtendWith(MockitoExtension.class)
-public class GameIaImplUnitTest {
+class GameIaImplUnitTest {
 
     private GameIaImpl gameIa;
     @Mock
@@ -79,8 +79,22 @@ public class GameIaImplUnitTest {
                 new PieceDto(31, false, PieceType.PAWN, 1, 6),
                 new PieceDto(32, false, PieceType.PAWN, 1, 7)
         );
+
+        Integer[][][] pieceMatrix = new Integer[8][8][1];
+        for (PieceDto piece : whitePieces) {
+            pieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[] {
+                    piece.getId(), Constants.WHITE_COLOR, piece.getPieceType().ordinal()
+            };
+        }
+        for (PieceDto piece : blackPieces) {
+            pieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[] {
+                    piece.getId(), Constants.BLACK_COLOR, piece.getPieceType().ordinal()
+            };
+        }
+
         boardDto.setWhitePieces(whitePieces);
         boardDto.setBlackPieces(blackPieces);
+        boardDto.setPieceMatrix(pieceMatrix);
         boardDto.setHistories(new ArrayList<>());
         gameDto = new GameDto();
         gameDto.setId(1);
