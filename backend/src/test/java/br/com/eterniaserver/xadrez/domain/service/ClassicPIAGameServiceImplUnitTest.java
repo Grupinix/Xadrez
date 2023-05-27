@@ -12,7 +12,9 @@ import br.com.eterniaserver.xadrez.domain.repositories.HistoryRepository;
 import br.com.eterniaserver.xadrez.domain.repositories.PieceRepository;
 import br.com.eterniaserver.xadrez.domain.service.impl.BoardServiceImpl;
 import br.com.eterniaserver.xadrez.domain.service.impl.ClassicPIAGameServiceImpl;
+import br.com.eterniaserver.xadrez.rest.dtos.GameDto;
 import br.com.eterniaserver.xadrez.rest.dtos.MoveDto;
+import br.com.eterniaserver.xadrez.rest.dtos.PieceDto;
 import br.com.eterniaserver.xadrez.rest.dtos.PositionDto;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -190,12 +192,13 @@ class ClassicPIAGameServiceImplUnitTest {
 
         @Test
         void testPawnPossibleInitialMoves() {
-            Piece pawn = game.getBoard().getWhitePieces().get(8);
+            GameDto gameDto = game.getGameDto();
+            PieceDto pawn = gameDto.getBoard().getWhitePieces().get(8);
 
             int positionX = pawn.getPositionX();
             int positionY = pawn.getPositionY();
 
-            List<MoveDto> moves = gameService.getPossibleMoves(game.getGameDto(), pawn.getPieceDto(), white);
+            List<MoveDto> moves = gameService.getPossibleMoves(gameDto, pawn, white);
 
             Assertions.assertEquals(2, moves.size());
             Assertions.assertEquals(MoveType.NORMAL, moves.get(0).getFirst());

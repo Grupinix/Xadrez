@@ -1050,8 +1050,7 @@ class GameServiceUnitTest {
 
         Map<PieceDto, List<MoveDto>> legalMoves = gameService.getPlayerLegalMoves(gameDto, Constants.WHITE_COLOR);
 
-        Assertions.assertEquals(1, legalMoves.size());
-        Assertions.assertEquals(0, legalMoves.get(whiteKing).size());
+        Assertions.assertEquals(0, legalMoves.size());
     }
 
     @Test
@@ -1110,7 +1109,7 @@ class GameServiceUnitTest {
                 )
                 .build();
 
-        Mockito.when(blackMovesMock.stream()).then(i -> Stream.of(move)).then(i -> Stream.of());
+        Mockito.when(blackMovesMock.stream()).then(i -> Stream.of(move));
         Mockito.when(whiteMovesMock.stream()).then(i -> Stream.of(moveKing));
 
         Map<PieceDto, List<MoveDto>> legalMoves = gameService.getPlayerLegalMoves(gameDto, Constants.WHITE_COLOR);
@@ -1170,8 +1169,7 @@ class GameServiceUnitTest {
 
         Map<PieceDto, List<MoveDto>> legalMoves = gameService.getPlayerLegalMoves(gameDto, Constants.BLACK_COLOR);
 
-        Assertions.assertEquals(1, legalMoves.size());
-        Assertions.assertEquals(0, legalMoves.get(blackKing).size());
+        Assertions.assertEquals(0, legalMoves.size());
     }
 
     @Test
