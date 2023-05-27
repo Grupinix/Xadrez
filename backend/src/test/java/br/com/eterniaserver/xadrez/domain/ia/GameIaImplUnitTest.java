@@ -1,6 +1,7 @@
 package br.com.eterniaserver.xadrez.domain.ia;
 
 import br.com.eterniaserver.xadrez.Constants;
+import br.com.eterniaserver.xadrez.domain.enums.GameStatus;
 import br.com.eterniaserver.xadrez.rest.dtos.BoardDto;
 import br.com.eterniaserver.xadrez.rest.dtos.GameDto;
 import br.com.eterniaserver.xadrez.rest.dtos.PieceDto;
@@ -16,6 +17,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
@@ -82,12 +84,12 @@ class GameIaImplUnitTest {
 
         Integer[][][] pieceMatrix = new Integer[8][8][1];
         for (PieceDto piece : whitePieces) {
-            pieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[] {
+            pieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[]{
                     piece.getId(), Constants.WHITE_COLOR, piece.getPieceType().ordinal()
             };
         }
         for (PieceDto piece : blackPieces) {
-            pieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[] {
+            pieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[]{
                     piece.getId(), Constants.BLACK_COLOR, piece.getPieceType().ordinal()
             };
         }
@@ -131,4 +133,65 @@ class GameIaImplUnitTest {
         int expectedEvaluation = 0;
         Assertions.assertEquals(expectedEvaluation, evaluation);
     }
+
+    @Test
+    void testEvaluationPerPositioning() {
+
+        for (int i = 0; i < 8; i++) {
+            PieceDto piece = boardDto.getBlackPieces().get(i + 8);
+            piece.setPositionY(4);
+        }
+        Integer[][][] pieceMatrix = new Integer[8][8][1];
+        for (PieceDto piece : boardDto.getWhitePieces()) {
+            pieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[]{
+                    piece.getId(), Constants.WHITE_COLOR, piece.getPieceType().ordinal()
+            };
+        }
+        for (PieceDto piece : boardDto.getBlackPieces()) {
+            pieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[]{
+                    piece.getId(), Constants.BLACK_COLOR, piece.getPieceType().ordinal()
+            };
+        }
+        boardDto.setPieceMatrix(pieceMatrix);
+    }
+
+    @Test
+    void testExtraPointsForCheckMateShouldReturnCorrectValueWhenValidParametersGiven() {
+
+        Mockito.when(classicPIAGameService.getGameStatus(Mockito.any(GameDto.class), Mockito.anyBoolean()))
+                .thenReturn(GameStatus.NORMAL);
+        int extraPoints = gameIa.extraPointsForCheck(gameDto, Constants.WHITE_COLOR);
+
+        int expectedExtraPoints = 0;
+        Assertions.assertEquals(expectedExtraPoints, extraPoints);
+
+        extraPoints = gameIa.extraPointsForCheck(gameDto, Constants.BLACK_COLOR);
+        Assertions.assertEquals(expectedExtraPoints, extraPoints);
+
+        Mockito.when(classicPIAGameService.getGameStatus(Mockito.any(GameDto.class), Mockito.anyBoolean()))
+                .thenReturn(GameStatus.WHITE_WINS);
+
+        int extraPointsWithWins = gameIa.extraPointsForCheck(gameDto, Constants.WHITE_COLOR);
+        expectedExtraPoints = 5000;
+        Assertions.assertEquals(expectedExtraPoints, extraPointsWithWins);
+
+        Mockito.when(classicPIAGameService.getGameStatus(Mockito.any(GameDto.class), Mockito.anyBoolean()))
+                .thenReturn(GameStatus.BLACK_WINS);
+
+        extraPointsWithWins = gameIa.extraPointsForCheck(gameDto, Constants.BLACK_COLOR);
+        Assertions.assertEquals(expectedExtraPoints, extraPointsWithWins);
+
+        Mockito.when(classicPIAGameService.getGameStatus(Mockito.any(GameDto.class), Mockito.anyBoolean()))
+                .thenReturn(GameStatus.WHITE_CHECK);
+        int extraPointsWithCheck = gameIa.extraPointsForCheck(gameDto, Constants.WHITE_COLOR);
+        expectedExtraPoints = 200;
+        Assertions.assertEquals(expectedExtraPoints, extraPointsWithCheck);
+
+        Mockito.when(classicPIAGameService.getGameStatus(Mockito.any(GameDto.class), Mockito.anyBoolean()))
+                .thenReturn(GameStatus.BLACK_CHECK);
+        extraPointsWithCheck = gameIa.extraPointsForCheck(gameDto, Constants.BLACK_COLOR);
+
+        Assertions.assertEquals(expectedExtraPoints, extraPointsWithCheck);
+    }
+
 }
