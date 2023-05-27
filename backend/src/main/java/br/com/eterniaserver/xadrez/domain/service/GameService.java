@@ -329,14 +329,11 @@ public interface GameService {
             if (found != null) {
                 int index = found.getFirst();
                 enemyList.remove(index);
-                if (pieceDto.getWhitePiece()) {
-                    boardDto.setBlackPieces(enemyList);
-                }
-                else {
-                    boardDto.setWhitePieces(enemyList);
-                }
             }
         }
+
+        boardDto.setWhitePieces(whiteList);
+        boardDto.setBlackPieces(blackList);
 
         pieceDto.setPositionX(x);
         pieceDto.setPositionY(y);
