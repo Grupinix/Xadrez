@@ -68,7 +68,7 @@ public class GameIaImpl implements GameIa {
                 classicPIAGameService.movePieceOnBoardDto(b, pieceDtoListEntry.getKey(), legalMove);
                 GameDto tempGame = gameDto.copy();
                 tempGame.setBoard(b);
-                int bestBoardValue = evalutionFunction(tempGame, opponentColor);
+                int bestBoardValue = evaluationFunction(tempGame, opponentColor);
                 int value = minimaxValue(tempGame, opponentColor, currentColor, depth - 1, bestBoardValue);
 
                 lastMove = Pair.of(pieceDtoListEntry.getKey(), legalMove);
@@ -103,7 +103,7 @@ public class GameIaImpl implements GameIa {
                 BoardDto b = gameDto.getBoard().copy();
                 classicPIAGameService.movePieceOnBoardDto(b, pieceDtoListEntry.getKey(), legalMove);
                 tempGame.setBoard(b);
-                int value = evalutionFunction(tempGame, opponentColor);
+                int value = evaluationFunction(tempGame, opponentColor);
                 if (depth >= 2) {
                     int moveValue;
                     if (currentColor == Constants.WHITE_COLOR) {
@@ -159,12 +159,12 @@ public class GameIaImpl implements GameIa {
         return count;
     }
 
-    public int evalutionFunction(GameDto gameDto, int color) {
+    public int evaluationFunction(GameDto gameDto, int color) {
         BoardDto boardDto = gameDto.getBoard();
 
         int boardValue = 0;
         int numhorse;
-        int numrook;
+        int numtower;
         int numqueen;
         int numking;
         int numpawn;
@@ -179,15 +179,15 @@ public class GameIaImpl implements GameIa {
         boardValue = boardValue + 300 * (2 - numhorse);
         numbishop = countPiecesByType(boardDto, color, PieceType.BISHOP);
         boardValue = boardValue + 325 * (2 - numbishop);
-        numrook = countPiecesByType(boardDto, color, PieceType.TOWER);
-        boardValue = boardValue + 500 * (2 - numrook);
+        numtower = countPiecesByType(boardDto, color, PieceType.TOWER);
+        boardValue = boardValue + 500 * (2 - numtower);
         numqueen = countPiecesByType(boardDto, color, PieceType.QUEEN);
         boardValue = boardValue + 900 * (1 - numqueen);
         numking = countPiecesByType(boardDto, color, PieceType.KING);
         boardValue = boardValue + 3000 * (1 - numking);
         color = tempColor;
 
-        boardValue = boardValue + evalutionPerPositioning(boardDto, color);
+        boardValue = boardValue + evaluationPerPositioning(boardDto, color);
         boardValue = boardValue + extraPointsForCheck(gameDto, color);
 
         return boardValue;
@@ -222,7 +222,7 @@ public class GameIaImpl implements GameIa {
         return score;
     }
 
-    public int evalutionPerPositioning(BoardDto boardDto, int color) {
+    public int evaluationPerPositioning(BoardDto boardDto, int color) {
         Integer[][][] boardMatrix = boardDto.getPieceMatrix();
 
         int value = 0;
