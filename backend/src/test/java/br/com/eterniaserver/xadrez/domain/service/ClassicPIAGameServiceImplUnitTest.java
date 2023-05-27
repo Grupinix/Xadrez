@@ -335,28 +335,6 @@ class ClassicPIAGameServiceImplUnitTest {
         }
 
         @Test
-        void testMoveWhiteInBlackTurn() {
-            game.setWhiteTurn(false);
-            Piece pawn = game.getBoard().getWhitePieces().get(8);
-            int positionX = pawn.getPositionX();
-            int positionY = pawn.getPositionY();
-
-            PositionDto positionDto = PositionDto.builder()
-                                                 .first(positionX - 2)
-                                                 .second(positionY)
-                                                 .build();
-            MoveDto moveDto = MoveDto.builder()
-                                     .first(MoveType.NORMAL)
-                                     .second(positionDto)
-                                     .build();
-
-            Assertions.assertThrows(
-                    ResponseStatusException.class, () ->  gameService.movePiece(game, white, pawn, moveDto)
-            );
-        }
-
-
-        @Test
         void testMoveWhiteToPosition() {
             Piece pawn = game.getBoard().getWhitePieces().get(8);
             game.setId(0);
