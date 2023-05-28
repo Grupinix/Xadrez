@@ -1,7 +1,9 @@
 package br.com.eterniaserver.xadrez.domain.service;
 
 import br.com.eterniaserver.xadrez.Constants;
+import br.com.eterniaserver.xadrez.domain.entities.Board;
 import br.com.eterniaserver.xadrez.domain.entities.Game;
+import br.com.eterniaserver.xadrez.domain.entities.History;
 import br.com.eterniaserver.xadrez.domain.entities.Piece;
 import br.com.eterniaserver.xadrez.domain.enums.GameStatus;
 import br.com.eterniaserver.xadrez.domain.enums.MoveType;
@@ -78,6 +80,14 @@ class GameServiceUnitTest {
                                   Piece piece,
                                   MoveDto moveTypePairPair) throws ResponseStatusException {
                 return null;
+            }
+
+            @Override
+            public void deleteEntity(Piece piece) {
+            }
+
+            @Override
+            public void saveEntities(Game game, History history, Piece piece, Board board) {
             }
         };
     }
