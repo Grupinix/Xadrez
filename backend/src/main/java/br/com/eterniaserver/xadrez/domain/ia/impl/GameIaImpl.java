@@ -75,7 +75,7 @@ public class GameIaImpl implements GameIa {
                 classicPIAGameService.movePieceOnBoardDto(tempBoard, pieceDtoListEntry.getKey(), legalMove);
                 tempGame.setWhiteTurn(!tempGame.getWhiteTurn());
 
-                GameStatus gameStatus = classicPIAGameService.getGameStatus(tempGame, tempGame.getWhiteTurn());
+                GameStatus gameStatus = classicPIAGameService.getGameStatus(tempGame);
 
                 if (validStatus.contains(gameStatus)) {
                     int actualBoardValue = evaluationFunction(tempGame, currentColor);
@@ -193,9 +193,8 @@ public class GameIaImpl implements GameIa {
 
     public int extraPointsForCheck(GameDto gameDto, int color) {
         int score = 0;
-        boolean whiteTurn = color == Constants.WHITE_COLOR;
 
-        GameStatus gameStatus = classicPIAGameService.getGameStatus(gameDto, !whiteTurn);
+        GameStatus gameStatus = classicPIAGameService.getGameStatus(gameDto);
         if (gameStatus == GameStatus.NORMAL) {
             return score;
         }
