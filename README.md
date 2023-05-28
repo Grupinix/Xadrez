@@ -32,8 +32,6 @@
   </p>
 </div>
 
-
-
 <!-- TABLE OF CONTENTS -->
 <details>
   <summary>Table of Contents</summary>
@@ -55,8 +53,6 @@
     <li><a href="#creators">Creators</a></li>
   </ol>
 </details>
-
-
 
 <!-- ABOUT THE PROJECT -->
 ## About The Project
@@ -81,8 +77,6 @@
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-
-
 <!-- GETTING STARTED -->
 ## Getting Started
 
@@ -94,12 +88,39 @@ This steps were done in <strong>Ubuntu 23.04</strong>.
 ### Prerequisites
 
 In order to setup the project locally, you will need to install the following prerequisites:
+
+<details>
+  <summary>Archlinux Prequisites</summary>
+
+* Java 17
+  ```sh
+  sudo pacman -Syu
+  sudo pacman -S jdk17-openjdk
+  ```
+
+
+* NodeJS and npm
+  ```sh
+  sudo pacman -S nodejs npm
+  ```
+
+* Docker
+  ```sh
+  sudo pacman -S docker docker-compose
+  ```
+
+* Reboot
+</details>
+
+
+<details>
+  <summary>Ubuntu Prequisites</summary>
+
 * Java 17
   ```sh
   sudo apt update && sudo apt upgrade
   sudo apt install openjdk-17-jre
   sudo apt install openjdk-17-jdk
-  java --version # just for checking if installation was successful
   ```
 
 
@@ -107,13 +128,6 @@ In order to setup the project locally, you will need to install the following pr
   ```sh
   curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash - &&\
   sudo apt-get install -y nodejs
-  node -v && npm -v # just for checking if installation was successful
-  ```
-
-
-* Vue 3
-  ```sh
-  npm install vue
   ```
 
 * Docker
@@ -133,16 +147,19 @@ In order to setup the project locally, you will need to install the following pr
   sudo apt-get update
   sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
-  sudo docker run hello-world # just for checking if installation was successful
-  docker --version && docker compose version # just for checking if installation was successful
-
+  sudo groupadd docker
+  sudo usermod -aG docker $USER
+  newgrp docker
   ```
+
+* Reboot
+</details>
 
 <br />
 
 ### Building the project
 
-In order to build and run the project, it's recommended that you use an IDE. We recommend to use <strong>JetBrains IntelliJ IDEA Ultimate Edition 2023.1.2</strong>. The following steps will help you to setup the project using IntelliJ.
+In order to build and run the project, it's recommended that you use an IDE. We recommend to use <strong>JetBrains IntelliJ IDEA</strong>. The following steps will help you to setup the project using IntelliJ.
 
 1. Clone the project using 'Get from VCS' option as soon as you open IntelliJ.
    ```sh
@@ -180,7 +197,6 @@ In order to build and run the project, it's recommended that you use an IDE. We 
 - [ ] Rooms
 - [ ] Multiplayer
 - [ ] Score system
-- [ ] Turn-based system
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
