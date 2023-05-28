@@ -1,7 +1,9 @@
 package br.com.eterniaserver.xadrez.domain.service;
 
 import br.com.eterniaserver.xadrez.Constants;
+import br.com.eterniaserver.xadrez.domain.entities.Board;
 import br.com.eterniaserver.xadrez.domain.entities.Game;
+import br.com.eterniaserver.xadrez.domain.entities.History;
 import br.com.eterniaserver.xadrez.domain.entities.Piece;
 import br.com.eterniaserver.xadrez.domain.enums.GameStatus;
 import br.com.eterniaserver.xadrez.domain.enums.MoveType;
@@ -13,6 +15,7 @@ import br.com.eterniaserver.xadrez.rest.dtos.MoveDto;
 import br.com.eterniaserver.xadrez.rest.dtos.PieceDto;
 import br.com.eterniaserver.xadrez.rest.dtos.PositionDto;
 import org.springframework.data.util.Pair;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
@@ -222,6 +225,12 @@ public interface GameService {
 
     List<MoveDto> getPossibleMoves(GameDto game, PieceDto piece, UUID playerUUID);
 
+    Game movePiece(Game game, UUID playerUUID, Piece piece, MoveDto moveTypePairPair) throws ResponseStatusException;
+
+    void deleteEntity(Piece piece);
+
+    void saveEntities(Game game, History history, Piece piece, Board board);
+
     default Optional<PieceDto> getPieceOptional(List<PieceDto> pieceDtoList, PieceType pieceType) {
         return pieceDtoList.stream()
                            .filter(pieceDto -> pieceDto.getPieceType() == pieceType)
@@ -386,8 +395,6 @@ public interface GameService {
         gameDto.getBoard().setPieceMatrix(newPieceMatrix);
     }
 
-    Game movePiece(Game game, UUID playerUUID, Piece piece, MoveDto moveTypePairPair) throws ResponseStatusException;
-
     default Map<PieceDto, List<MoveDto>> getPlayerLegalMoves(GameDto gameDto, int playerColor) {
         BoardDto boardDto = gameDto.getBoard();
         Map<PieceDto, List<MoveDto>> moveDtoMap = new HashMap<>();
@@ -473,4 +480,87 @@ public interface GameService {
         return validMoves;
     }
 
+    default void movePieceOnGame(Game game,
+                                 Piece piece,
+                                 MoveDto moveTypePairPair,
+                                 boolean isWhite) throws ResponseStatusException {
+        Board board = game.getBoard();
+        MoveType moveType = moveTypePairPair.getFirst();
+        PositionDto position = moveTypePairPair.getSecond();
+        History history = createHistory(board, piece, position, isWhite);
+
+        if (moveType == MoveType.CAPTURE) {
+            handleCapture(board, position, history, isWhite);
+        }
+
+        piece.setPositionX(position.getFirst());
+        piece.setPositionY(position.getSecond());
+        game.setWhiteTurn(!game.getWhiteTurn());
+        game.setTimer(System.currentTimeMillis());
+        board.getHistories().add(history);
+
+        saveEntities(game, history, piece, board);
+    }
+
+
+    private History createHistory(Board board, Piece piece, PositionDto position, boolean isWhite) {
+        History history = new History();
+        history.setOldPositionX(piece.getPositionX());
+        history.setOldPositionY(piece.getPositionY());
+        history.setNewPositionX(position.getFirst());
+        history.setNewPositionY(position.getSecond());
+        history.setBoard(board);
+        history.setIsWhite(isWhite);
+        history.setPieceType(piece.getPieceType());
+        return history;
+    }
+
+    private void handleCapture(Board board,
+                               PositionDto position,
+                               History history,
+                               boolean isWhite) throws ResponseStatusException {
+
+        Integer[][][] pieceMatrix = board.getPieceMatrix();
+        Integer[] pieceInPos = pieceMatrix[position.getFirst()][position.getSecond()];
+
+        if (pieceInPos == null || pieceInPos[0] == null || pieceInPos[0] == 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Não há peça na posição");
+        }
+
+        int capturedPieceId = pieceInPos[0];
+        boolean capturedPieceIsWhite = pieceInPos[1] == Constants.WHITE_COLOR;
+
+        if (capturedPieceIsWhite && isWhite || !capturedPieceIsWhite && !isWhite) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Não pode capturar sua própria peça");
+        }
+
+        removeCapturedPiece(board, capturedPieceId, history, isWhite);
+
+    }
+
+    private void removeCapturedPiece(Board board,
+                                     Integer capturedPieceId,
+                                     History history,
+                                     boolean isWhite) throws ResponseStatusException {
+
+        List<Piece> pieceList = isWhite ? board.getBlackPieces() : board.getWhitePieces();
+        Pair<Integer, Piece> piecePair = null;
+        for (int i = 0; i < pieceList.size(); i++) {
+            Piece p = pieceList.get(i);
+            if (p != null && p.getId().equals(capturedPieceId)) {
+                piecePair = Pair.of(i, p);
+            }
+        }
+
+        if (piecePair == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Erro ao encontrar a peça capturada");
+        }
+
+        int removeIndex = piecePair.getFirst();
+        Piece capturedPiece = piecePair.getSecond();
+        history.setKilledPiece(capturedPiece.getPieceType());
+        pieceList.remove(removeIndex);
+
+        deleteEntity(capturedPiece);
+    }
 }

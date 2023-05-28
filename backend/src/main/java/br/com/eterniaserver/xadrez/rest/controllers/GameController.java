@@ -150,4 +150,11 @@ public class GameController {
         return getGameService(type).createGame(playerDto.getUuid()).getGameDto();
     }
 
+    @PutMapping("enter/{type}/{gameId}/")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public GameDto enterGame(@PathVariable GameType type,
+                             @PathVariable Integer gameId,
+                             @RequestBody PlayerDto playerDto) {
+        return getGameService(type).enterGame(playerDto.getUuid(), gameId).getGameDto();
+    }
 }
