@@ -113,8 +113,7 @@ public class ClassicPIAGameServiceImpl implements GameService {
                           UUID playerUUID,
                           Piece piece,
                           MoveDto moveTypePairPair) throws ResponseStatusException {
-
-        boolean isWhite = checkTurn(game, playerUUID);
+        boolean isWhite = game.getWhitePlayerUUID().equals(playerUUID);
         Board board = game.getBoard();
         MoveType moveType = moveTypePairPair.getFirst();
         PositionDto position = moveTypePairPair.getSecond();
@@ -133,14 +132,6 @@ public class ClassicPIAGameServiceImpl implements GameService {
         saveEntities(game, history, piece, board);
 
         return game;
-    }
-
-    private boolean checkTurn(Game game, UUID playerUUID) throws ResponseStatusException {
-        boolean isWhite = game.getWhitePlayerUUID().equals(playerUUID);
-        if (!game.getWhiteTurn().equals(isWhite)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Não é turno do jogador");
-        }
-        return isWhite;
     }
 
     private History createHistory(Board board, Piece piece, PositionDto position, boolean isWhite) {

@@ -9,8 +9,10 @@ import br.com.eterniaserver.xadrez.domain.repositories.PieceRepository;
 import br.com.eterniaserver.xadrez.domain.service.GameService;
 import br.com.eterniaserver.xadrez.domain.service.impl.ClassicPIAGameServiceImpl;
 import br.com.eterniaserver.xadrez.domain.service.impl.ClassicPPGameServiceImpl;
+import br.com.eterniaserver.xadrez.rest.dtos.BoardDto;
 import br.com.eterniaserver.xadrez.rest.dtos.GameDto;
 import br.com.eterniaserver.xadrez.rest.dtos.MoveDto;
+import br.com.eterniaserver.xadrez.rest.dtos.PieceDto;
 import br.com.eterniaserver.xadrez.rest.dtos.PlayerDto;
 
 import lombok.RequiredArgsConstructor;
@@ -95,8 +97,24 @@ public class GameController {
 
         GameService gameService = getGameService(type);
         Game game = gameService.getGame(gameId);
-        return getGameService(type).getPossibleMoves(game.getGameDto(), piece.getPieceDto(), uuid);
 
+        GameDto gameDto = game.getGameDto();
+        BoardDto boardDto = gameDto.getBoard();
+        boolean isWhiteTurn = game.getWhiteTurn();
+        boolean isWhitePlayer = game.getWhitePlayerUUID().equals(uuid);
+        List<PieceDto> playerPieces = isWhitePlayer ? boardDto.getWhitePieces() : boardDto.getBlackPieces();
+        PieceDto pieceDto = playerPieces.stream()
+                .filter(p -> p.getId().equals(piece.getId()))
+                .findFirst()
+                .orElseThrow();
+
+        List<MoveDto> possibleMoves = gameService.getPossibleMoves(gameDto, pieceDto, uuid);
+
+        List<GameStatus> validStatus = isWhitePlayer
+                ? List.of(GameStatus.NORMAL, GameStatus.WHITE_CHECK, GameStatus.WHITE_WINS)
+                : List.of(GameStatus.NORMAL, GameStatus.BLACK_CHECK, GameStatus.BLACK_WINS);
+
+        return gameService.getValidMoves(possibleMoves, validStatus, gameDto, pieceDto, isWhiteTurn);
     }
 
     @GetMapping("refresh/{type}/{gameId}/")
@@ -111,9 +129,7 @@ public class GameController {
         GameService gameService = getGameService(type);
         Game game = gameService.getGame(gameId);
 
-        boolean isWhiteTurn = game.getWhiteTurn();
-
-        return gameService.getGameStatus(game.getGameDto(), isWhiteTurn);
+        return gameService.getGameStatus(game.getGameDto());
     }
 
     @GetMapping("list/")
