@@ -6,8 +6,8 @@ export default {
         label: "Padrão",
       },
       {
-        value: "vemmonstro",
-        label: "Vem Monstro!",
+        value: "chad",
+        label: "Chad",
       },
       {
         value: "arroz",

@@ -90,7 +90,7 @@ This steps were done in <strong>Ubuntu 23.04</strong>.
 In order to setup the project locally, you will need to install the following prerequisites:
 
 <details>
-  <summary>Archlinux Prequisites</summary>
+  <summary>Archlinux Prerequisites</summary>
 
 * Java 17
   ```sh
@@ -114,7 +114,7 @@ In order to setup the project locally, you will need to install the following pr
 
 
 <details>
-  <summary>Ubuntu Prequisites</summary>
+  <summary>Ubuntu Prerequisites</summary>
 
 * Java 17
   ```sh
