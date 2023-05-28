@@ -13,6 +13,10 @@ export default {
         value: "arroz",
         label: "Arroz",
       },
+      {
+        value: "pink",
+        label: "Pink",
+      },
     ];
   },
 
