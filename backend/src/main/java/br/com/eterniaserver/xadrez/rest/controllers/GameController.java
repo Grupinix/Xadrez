@@ -110,7 +110,6 @@ public class GameController {
 
         List<MoveDto> possibleMoves = gameService.getPossibleMoves(gameDto, pieceDto, uuid);
 
-
         List<GameStatus> validStatus = isWhitePlayer
                 ? List.of(GameStatus.NORMAL, GameStatus.WHITE_CHECK, GameStatus.WHITE_WINS)
                 : List.of(GameStatus.NORMAL, GameStatus.BLACK_CHECK, GameStatus.BLACK_WINS);
@@ -130,9 +129,7 @@ public class GameController {
         GameService gameService = getGameService(type);
         Game game = gameService.getGame(gameId);
 
-        boolean isWhiteTurn = game.getWhiteTurn();
-
-        return gameService.getGameStatus(game.getGameDto(), isWhiteTurn);
+        return gameService.getGameStatus(game.getGameDto());
     }
 
     @GetMapping("list/")
