@@ -47,6 +47,13 @@ public class GameIaImpl implements GameIa {
         Pair<PieceDto, MoveDto> move = miniMax(
                 gameDto, Constants.BLACK_COLOR, Constants.WHITE_COLOR, depth
         );
+
+        if (move == null) {
+            game.setWhiteTurn(true);
+            gameRepository.save(game);
+            return;
+        }
+
         PieceDto pieceDto = move.getFirst();
         MoveDto moveDto = move.getSecond();
 
@@ -60,19 +67,27 @@ public class GameIaImpl implements GameIa {
                                            int opponentColor,
                                            int depth) {
         Map<PieceDto, List<MoveDto>> legalMovesMap = classicPIAGameService.getPlayerLegalMoves(gameDto, currentColor);
+
         List<GameStatus> validStatus = List.of(GameStatus.NORMAL, GameStatus.BLACK_CHECK, GameStatus.BLACK_WINS);
         int highestValue = Integer.MIN_VALUE;
         Pair<PieceDto, MoveDto> bestMove = null;
         Pair<PieceDto, MoveDto> lastMove = null;
 
         for (Map.Entry<PieceDto, List<MoveDto>> pieceDtoListEntry : legalMovesMap.entrySet()) {
+            PieceDto pieceDto = pieceDtoListEntry.getKey();
             List<MoveDto> legalMoves = pieceDtoListEntry.getValue();
+            legalMoves = classicPIAGameService.getValidMoves(
+                    legalMoves,
+                    validStatus,
+                    gameDto,
+                    pieceDto,
+                    false
+            );
             for (MoveDto legalMove : legalMoves) {
-                lastMove = Pair.of(pieceDtoListEntry.getKey(), legalMove);
+                lastMove = Pair.of(pieceDto, legalMove);
                 GameDto tempGame = gameDto.copy();
-                BoardDto tempBoard = tempGame.getBoard();
 
-                classicPIAGameService.movePieceOnBoardDto(tempBoard, pieceDtoListEntry.getKey(), legalMove);
+                classicPIAGameService.movePieceOnBoardDto(tempGame, pieceDtoListEntry.getKey(), legalMove);
                 tempGame.setWhiteTurn(!tempGame.getWhiteTurn());
 
                 GameStatus gameStatus = classicPIAGameService.getGameStatus(tempGame);
@@ -117,9 +132,8 @@ public class GameIaImpl implements GameIa {
             List<MoveDto> legalMoves = pieceDtoListEntry.getValue();
             for (MoveDto legalMove : legalMoves) {
                 GameDto tempGame = gameDto.copy();
-                BoardDto tempBoard = gameDto.getBoard();
 
-                classicPIAGameService.movePieceOnBoardDto(tempBoard, pieceDtoListEntry.getKey(), legalMove);
+                classicPIAGameService.movePieceOnBoardDto(tempGame, pieceDtoListEntry.getKey(), legalMove);
                 tempGame.setWhiteTurn(!tempGame.getWhiteTurn());
 
                 int value = actualMove;

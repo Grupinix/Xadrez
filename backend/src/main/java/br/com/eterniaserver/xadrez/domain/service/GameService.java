@@ -244,7 +244,7 @@ public interface GameService {
 
         GameStatus isInCheck = isCheck(tempGameDto, whiteKingOptional.get(), blackKingOptional.get());
         if (isInCheck != GameStatus.NORMAL) {
-            if (isMatte(tempGameDto, whiteKingOptional.get(), blackKingOptional.get())) {
+            if (isMatte(tempGameDto, whiteKingOptional.get(), blackKingOptional.get(), isInCheck)) {
                 return isInCheck == GameStatus.WHITE_CHECK ? GameStatus.WHITE_WINS : GameStatus.BLACK_WINS;
             }
             return isInCheck;
@@ -255,20 +255,52 @@ public interface GameService {
 
     default boolean isMatte(GameDto gameDto,
                             PieceDto whiteKing,
-                            PieceDto blackKing) {
-        GameDto tempGame = gameDto.copy();
+                            PieceDto blackKing,
+                            GameStatus isInCheck) {
+        boolean isWhiteObviousMatte = isInCheck == GameStatus.WHITE_CHECK && gameDto.getWhiteTurn();
+        boolean isBlackObviousMatte = isInCheck == GameStatus.BLACK_CHECK && !gameDto.getWhiteTurn();
+        if (isWhiteObviousMatte || isBlackObviousMatte) {
+            return true;
+        }
 
-        PieceDto king = tempGame.getWhiteTurn() ? whiteKing : blackKing;
+        List<PieceDto> whitePieces = gameDto.getBoard().getWhitePieces();
+        List<PieceDto> blackPieces = gameDto.getBoard().getBlackPieces();
+        List<PieceDto> playerPieces = gameDto.getWhiteTurn() ? whitePieces : blackPieces;
 
-        for (MoveDto possibleMove : getPiecePossibleMoves(tempGame, king, tempGame.getWhiteTurn())) {
-            movePieceOnBoardDto(tempGame.getBoard(), king, possibleMove);
-            tempGame.setWhiteTurn(!tempGame.getWhiteTurn());
+        for (PieceDto pieceDto : playerPieces) {
+            List<MoveDto> possibleMoves = getPiecePossibleMoves(gameDto, pieceDto, gameDto.getWhiteTurn());
+            for (MoveDto possibleMove : possibleMoves) {
+                GameDto tempGame = gameDto.copy();
+                BoardDto tempBoard = tempGame.getBoard();
 
-            GameStatus isCheckValue = isCheck(tempGame, whiteKing, blackKing);
-            if (isCheckValue == GameStatus.NORMAL) {
-                return false;
+                List<PieceDto> tempPlayerPieces = tempGame.getWhiteTurn()
+                        ? tempBoard.getWhitePieces()
+                        : tempBoard.getBlackPieces();
+                PieceDto tempPiece = tempPlayerPieces.stream()
+                                                     .filter(p -> p.getId().equals(pieceDto.getId()))
+                                                     .findFirst()
+                                                     .orElse(null);
+                PieceDto tempWhiteKing = tempBoard.getWhitePieces()
+                                                  .stream()
+                                                  .filter(p -> p.getId().equals(whiteKing.getId()))
+                                                  .findFirst()
+                                                  .orElse(null);
+                PieceDto tempBlackKing = tempBoard.getBlackPieces()
+                                                  .stream()
+                                                  .filter(p -> p.getId().equals(blackKing.getId()))
+                                                  .findFirst()
+                                                  .orElse(null);
+                if (tempPiece != null) {
+                    movePieceOnBoardDto(tempGame, tempPiece, possibleMove);
+
+                    GameStatus isCheckValue = isCheck(tempGame, tempWhiteKing, tempBlackKing);
+                    if (isCheckValue == GameStatus.NORMAL) {
+                        return false;
+                    }
+                }
             }
         }
+
 
         return true;
     }
@@ -276,7 +308,9 @@ public interface GameService {
     default GameStatus isCheck(GameDto gameDto, PieceDto whiteKing, PieceDto blackKing) {
         BoardDto boardDto = gameDto.getBoard();
 
-        for (boolean isWhite : new boolean[] {false, true}) {
+        boolean[] turnPriority = gameDto.getWhiteTurn() ? new boolean[] { true, false } : new boolean[] { false, true};
+
+        for (boolean isWhite : turnPriority) {
             List<PieceDto> pieceDtos = isWhite ? boardDto.getWhitePieces() : boardDto.getBlackPieces();
             PieceDto king = isWhite ? blackKing : whiteKing;
             for (PieceDto pieceDto : pieceDtos) {
@@ -305,7 +339,8 @@ public interface GameService {
         return GameStatus.NORMAL;
     }
 
-    default void movePieceOnBoardDto(BoardDto boardDto, PieceDto pieceDto, MoveDto moveDto) {
+    default void movePieceOnBoardDto(GameDto gameDto, PieceDto pieceDto, MoveDto moveDto) {
+        BoardDto boardDto = gameDto.getBoard();
         int x = moveDto.getSecond().getFirst();
         int y = moveDto.getSecond().getSecond();
 
@@ -335,6 +370,20 @@ public interface GameService {
 
         pieceDto.setPositionX(x);
         pieceDto.setPositionY(y);
+
+        gameDto.setWhiteTurn(!gameDto.getWhiteTurn());
+        Integer[][][] newPieceMatrix = new Integer[8][8][1];
+        for (PieceDto piece : gameDto.getBoard().getWhitePieces()) {
+            newPieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[] {
+                    piece.getId(), Constants.WHITE_COLOR, piece.getPieceType().ordinal()
+            };
+        }
+        for (PieceDto piece : gameDto.getBoard().getBlackPieces()) {
+            newPieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[] {
+                    piece.getId(), Constants.BLACK_COLOR, piece.getPieceType().ordinal()
+            };
+        }
+        gameDto.getBoard().setPieceMatrix(newPieceMatrix);
     }
 
     Game movePiece(Game game, UUID playerUUID, Piece piece, MoveDto moveTypePairPair) throws ResponseStatusException;
@@ -412,8 +461,8 @@ public interface GameService {
                     .orElse(null);
 
             if (tempPieceDto != null && whiteKing != null && blackKing != null) {
-                movePieceOnBoardDto(tempGame.getBoard(), tempPieceDto, move);
-                tempGame.setWhiteTurn(!tempGame.getWhiteTurn());
+                movePieceOnBoardDto(tempGame, tempPieceDto, move);
+
                 GameStatus checkStatus = getGameStatus(tempGame);
                 if (validStatus.contains(checkStatus)) {
                     validMoves.add(move);

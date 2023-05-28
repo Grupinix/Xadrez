@@ -623,7 +623,7 @@ class GameServiceUnitTest {
                 )
                 .build();
 
-        gameService.movePieceOnBoardDto(gameDto.getBoard(), blackPawn, pawnMove);
+        gameService.movePieceOnBoardDto(gameDto, blackPawn, pawnMove);
 
         Assertions.assertEquals(pawnMove.getSecond().getFirst(), blackPawn.getPositionX());
         Assertions.assertEquals(pawnMove.getSecond().getSecond(), blackPawn.getPositionY());
@@ -676,7 +676,7 @@ class GameServiceUnitTest {
                 )
                 .build();
 
-        gameService.movePieceOnBoardDto(gameDto.getBoard(), whitePawn, pawnMove);
+        gameService.movePieceOnBoardDto(gameDto, whitePawn, pawnMove);
 
         Assertions.assertEquals(pawnMove.getSecond().getFirst(), whitePawn.getPositionX());
         Assertions.assertEquals(pawnMove.getSecond().getSecond(), whitePawn.getPositionY());
@@ -731,7 +731,7 @@ class GameServiceUnitTest {
                 )
                 .build();
 
-        gameService.movePieceOnBoardDto(gameDto.getBoard(), blackPawn, pawnMove);
+        gameService.movePieceOnBoardDto(gameDto, blackPawn, pawnMove);
 
         Assertions.assertEquals(pawnMove.getSecond().getFirst(), blackPawn.getPositionX());
         Assertions.assertEquals(pawnMove.getSecond().getSecond(), blackPawn.getPositionY());
@@ -782,7 +782,7 @@ class GameServiceUnitTest {
                 )
                 .build();
 
-        gameService.movePieceOnBoardDto(gameDto.getBoard(), blackPawn, pawnMove);
+        gameService.movePieceOnBoardDto(gameDto, blackPawn, pawnMove);
 
         Assertions.assertEquals(pawnMove.getSecond().getFirst(), blackPawn.getPositionX());
         Assertions.assertEquals(pawnMove.getSecond().getSecond(), blackPawn.getPositionY());
@@ -837,7 +837,7 @@ class GameServiceUnitTest {
                 )
                 .build();
 
-        gameService.movePieceOnBoardDto(gameDto.getBoard(), blackPawn, pawnMove);
+        gameService.movePieceOnBoardDto(gameDto, blackPawn, pawnMove);
 
         Assertions.assertEquals(pawnMove.getSecond().getFirst(), blackPawn.getPositionX());
         Assertions.assertEquals(pawnMove.getSecond().getSecond(), blackPawn.getPositionY());

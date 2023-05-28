@@ -153,15 +153,22 @@ class GameIaImplUnitTest {
         PieceDto pieceDto = boardDto.getWhitePieces().get(8);
         MoveDto moveDto = new MoveDto();
         moveDto.setFirst(MoveType.NORMAL);
-        moveDto.setSecond(new PositionDto(3,4));
+        moveDto.setSecond(new PositionDto(3, 0));
 
-        Pair <PieceDto, MoveDto> move = Pair.of(pieceDto, moveDto);
+        Pair<PieceDto, MoveDto> move = Pair.of(pieceDto, moveDto);
         gameDto.setGameDifficulty(GameDifficulty.EASY);
         gameDto.setWhiteTurn(false);
 
         Map<PieceDto, List<MoveDto>> legalmoves = new HashMap<>();
         legalmoves.put(pieceDto, List.of(moveDto));
 
+        Mockito.when(classicPIAGameService.getValidMoves(
+                Mockito.anyList(),
+                Mockito.anyList(),
+                Mockito.any(GameDto.class),
+                Mockito.any(PieceDto.class),
+                Mockito.anyBoolean()
+        )).thenReturn(List.of(moveDto));
         Mockito.when(classicPIAGameService.getGameStatus(Mockito.any(GameDto.class))).thenReturn(GameStatus.NORMAL);
         Mockito.when(classicPIAGameService.getPlayerLegalMoves(gameDto, Constants.BLACK_COLOR)).thenReturn(legalmoves);
         Mockito.when(gameRepository.findById(1)).thenReturn(Optional.of(game));
