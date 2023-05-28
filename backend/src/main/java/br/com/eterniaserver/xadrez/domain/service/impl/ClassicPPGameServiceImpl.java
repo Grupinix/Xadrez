@@ -98,20 +98,25 @@ public class ClassicPPGameServiceImpl implements GameService {
         return game;
     }
 
-    @Override
-    public List<MoveDto> getPossibleMoves(GameDto game,
-                                          PieceDto piece,
-                                          UUID playerUUID) throws ResponseStatusException {
-        if (game.getBlackPlayerUUID() == null) {
+    private void verifyAction(GameDto gameDto, UUID playerUUID) throws ResponseStatusException {
+        if (gameDto.getBlackPlayerUUID() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Partida não possui dois jogadores");
         }
 
-        boolean isWhite = game.getWhitePlayerUUID().equals(playerUUID);
-        if (isWhite != game.getWhiteTurn()) {
+        boolean isWhiteTurn = gameDto.getWhiteTurn();
+        boolean isWhitePlayer = gameDto.getWhitePlayerUUID().equals(playerUUID);
+        if (isWhitePlayer != isWhiteTurn) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Não é turno do jogador");
         }
+    }
 
-        return getPiecePossibleMoves(game, piece, isWhite);
+    @Override
+    public List<MoveDto> getPossibleMoves(GameDto gameDto,
+                                          PieceDto piece,
+                                          UUID playerUUID) throws ResponseStatusException {
+        verifyAction(gameDto, playerUUID);
+
+        return getPiecePossibleMoves(gameDto, piece, gameDto.getWhitePlayerUUID().equals(playerUUID));
     }
 
     @Override
@@ -119,16 +124,9 @@ public class ClassicPPGameServiceImpl implements GameService {
                           UUID playerUUID,
                           Piece piece,
                           MoveDto moveTypePairPair) throws ResponseStatusException {
-        if (game.getBlackPlayerUUID() == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Partida não possui dois jogadores");
-        }
+        verifyAction(game.getGameDto(), playerUUID);
 
-        boolean isWhite = game.getWhitePlayerUUID().equals(playerUUID);
-        if (isWhite != game.getWhiteTurn()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Não é turno do jogador");
-        }
-
-        movePieceOnGame(game, piece, moveTypePairPair, isWhite);
+        movePieceOnGame(game, piece, moveTypePairPair, game.getWhitePlayerUUID().equals(playerUUID));
 
         return game;
 
@@ -141,10 +139,10 @@ public class ClassicPPGameServiceImpl implements GameService {
 
     @Override
     public void saveEntities(Game game, History history, Piece piece, Board board) {
-        gameRepository.save(game);
-        historyRepository.save(history);
         pieceRepository.save(piece);
         boardRepository.save(board);
+        gameRepository.save(game);
+        historyRepository.save(history);
     }
 
 }

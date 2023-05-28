@@ -290,20 +290,24 @@ class ClassicPPGameServiceImplUnitTest {
         @Test
         void testPossibleMovesWithoutBlackPlayer() {
             Piece pawn = gameInQueue.getBoard().getWhitePieces().get(8);
+            GameDto gameDto = gameInQueue.getGameDto();
+            PieceDto pieceDto = pawn.getPieceDto();
 
             Assertions.assertThrows(
                     ResponseStatusException.class,
-                    () -> gameService.getPossibleMoves(gameInQueue.getGameDto(), pawn.getPieceDto(), whiteTwo)
+                    () -> gameService.getPossibleMoves(gameDto, pieceDto, whiteTwo)
             );
         }
 
         @Test
         void testPossibleMovesInWrongTurn() {
             Piece pawn = game.getBoard().getBlackPieces().get(8);
+            GameDto gameDto = game.getGameDto();
+            PieceDto pieceDto = pawn.getPieceDto();
 
             Assertions.assertThrows(
                     ResponseStatusException.class,
-                    () -> gameService.getPossibleMoves(game.getGameDto(), pawn.getPieceDto(), black)
+                    () -> gameService.getPossibleMoves(gameDto, pieceDto, black)
             );
         }
 
@@ -346,10 +350,12 @@ class ClassicPPGameServiceImplUnitTest {
         @Test
         void testWhiteQueenStartMoves() {
             Piece pawn = game.getBoard().getBlackPieces().get(8);
+            GameDto gameDto = game.getGameDto();
+            PieceDto pieceDto = pawn.getPieceDto();
 
             Assertions.assertThrows(
                     ResponseStatusException.class,
-                    () -> gameService.getPossibleMoves(game.getGameDto(), pawn.getPieceDto(), black)
+                    () -> gameService.getPossibleMoves(gameDto, pieceDto, black)
             );
         }
 
