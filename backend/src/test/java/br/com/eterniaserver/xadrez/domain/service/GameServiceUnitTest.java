@@ -254,7 +254,7 @@ class GameServiceUnitTest {
                 .board(boardDto)
                 .whitePlayerUUID(whitePlayerUUID)
                 .blackPlayerUUID(blackPlayerUUID)
-                .whiteTurn(true)
+                .whiteTurn(false)
                 .build();
 
         GameStatus expectStatus = GameStatus.BLACK_CHECK;
@@ -553,7 +553,7 @@ class GameServiceUnitTest {
                 .board(boardDto)
                 .whitePlayerUUID(whitePlayerUUID)
                 .blackPlayerUUID(blackPlayerUUID)
-                .whiteTurn(true)
+                .whiteTurn(false)
                 .build();
 
         GameStatus expectedStatus = GameStatus.BLACK_CHECK;
