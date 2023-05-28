@@ -1,0 +1,216 @@
+/* APP Global Style */
+html {
+    height: 100%;
+}
+#app {
+    text-align: center;
+    height: 100%;
+}
+body {
+    margin: 0;
+    background-color: #e2e2e2;
+    height: 100%;
+}
+.pointer {
+    cursor: pointer;
+}
+.app-router-view {
+    margin: 0;
+}
+.app-header {
+    margin: 0;
+    padding: 0;
+}
+.app-main {
+    margin: 0;
+    padding: 0;
+}
+.app-footer {
+    margin: 0;
+    padding: 0;
+    height: 256px;
+}
+/* APP Header Style */
+.app-header-image-block {
+    background-color: #0d5469;
+    text-align: start;
+    height: 100%;
+}
+.app-header-image {
+    height: 100%;
+}
+/* APP Footer Style */
+.app-footer-block {
+    background-color: #f1f1f1;
+    height: 100%;
+}
+.app-footer-block-text {
+    padding-top: 64px;
+    padding-bottom: 64px;
+}
+.app-footer-block-project-link {
+}
+.app-footer-block-text-bold {
+}
+/* EnterView Style */
+.enter-view-row {
+    padding-top: 128px;
+    padding-bottom: 128px;
+}
+.enter-view-card {
+}
+.enter-view-card-title {
+    color: #4d5758;
+    font-weight: bolder;
+    font-size: large;
+}
+.enter-view-form {
+}
+.enter-view-form-identifier-block {
+}
+.enter-view-form-identifier-block-input {
+}
+.enter-view-form-identifier-block-button-row {
+}
+.enter-view-form-identifier-block-button-col {
+}
+.enter-view-form-identifier-block-button-col-button {
+}
+/* HomeView Style */
+.home-view-row {
+}
+.home-view-col {
+    margin: 16px 0;
+}
+.home-view-button {
+    font-size: 24px;
+    color: white;
+    background-color: #321d67;
+}
+.home-view-button:hover {
+    background-color: #3b2e6a;
+}
+.home-view-button:focus {
+    background-color: #3b2e6a;
+}
+.home-view-button:disabled {
+    background-color: #736e82;
+}
+.home-view-button:disabled:hover {
+    background-color: #736e82;
+}
+.home-view-button:disabled:focus {
+    background-color: #736e82;
+}
+/* SettingsView Style */
+.settings-view-row {
+    margin: 32px 0;
+}
+.settings-view-col {
+    margin-top: 8px;
+    font-size: 24px;
+}
+.settings-title-box {
+    text-align: center;
+    margin: auto;
+}
+.settings-title-text {
+    color: #1c1c1c;
+    font-weight: bolder;
+    font-size: 28px;
+}
+.settings-select-box {
+}
+.settings-select-option {
+}
+.settings-back-button {
+    font-size: 24px;
+    color: white;
+    background-color: #321d67;
+}
+.settings-back-button:hover {
+    background-color: #3b2e6a;
+}
+.settings-back-button:focus {
+    background-color: #3b2e6a;
+}
+/* Board Style */
+.chess-board {
+    margin: 32px 0;
+    display: flex;
+    flex-direction: column;
+}
+.chess-row {
+    display: flex;
+}
+.chess-square {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 24px;
+}
+.selected-square {
+    background-color: rgba(174, 38, 38, 0.75);
+}
+.possible-move-square {
+    background-color: rgba(99, 164, 33, 0.75);
+}
+.white-square {
+    background-color: #ffffff;
+}
+.black-square {
+    background-color: #b58863;
+}
+.chess-piece {
+    color: #1c1c1c;
+}
+@media screen and (max-width: 767px) {
+    .chess-square {
+        width: 40px;
+        height: 40px;
+    }
+    .chess-piece {
+        width: 25px;
+        height: 25px;
+    }
+}
+@media screen and (max-width: 991px) and (min-width: 768px) {
+    .chess-square {
+        width: 45px;
+        height: 45px;
+    }
+    .chess-piece {
+        width: 30px;
+        height: 30px;
+    }
+}
+@media screen and (max-width: 1199px) and (min-width: 992px) {
+    .chess-square {
+        width: 65px;
+        height: 50px;
+    }
+    .chess-piece {
+        width: 50px;
+        height: 50px;
+    }
+}
+@media screen and (max-width: 1919px) and (min-width: 1200px) {
+    .chess-square {
+        width: 85px;
+        height: 85px;
+    }
+    .chess-piece {
+        width: 60px;
+        height: 60px;
+    }
+}
+@media screen and (min-width: 1920px) {
+    .chess-square {
+        width: 90px;
+        height: 90px;
+    }
+    .chess-piece {
+        width: 65px;
+        height: 65px;
+    }
+}
