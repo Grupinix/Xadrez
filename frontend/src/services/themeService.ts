@@ -17,6 +17,10 @@ export default {
         value: "pink",
         label: "Pink",
       },
+      {
+        value: "developer-chess",
+        label: "Xadrez de Computação"
+      }
     ];
   },
 
