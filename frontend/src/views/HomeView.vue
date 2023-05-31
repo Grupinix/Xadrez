@@ -2,7 +2,7 @@
   <el-row class="home-view-row">
     <el-col class="home-view-col">
       <el-button
-        class="home-view-button"
+        class="home-view-button btn btn-success"
         size="large"
         :loading="vsIaLoading"
         @click="playVsIa"
@@ -12,7 +12,7 @@
     </el-col>
     <el-col class="home-view-col">
       <el-button
-        class="home-view-button"
+        class="home-view-button btn btn-success"
         size="large"
         @click="loadSettings"
       >
@@ -21,7 +21,7 @@
     </el-col>
     <el-col class="home-view-col">
       <el-button
-        class="home-view-button"
+        class="home-view-button btn btn-success"
         size="large"
         disabled
       >CRIAR SALA
@@ -29,7 +29,7 @@
     </el-col>
     <el-col class="home-view-col">
       <el-button
-        class="home-view-button"
+        class="home-view-button btn btn-success"
         size="large"
         disabled
       >
@@ -38,7 +38,7 @@
     </el-col>
     <el-col class="home-view-col">
       <el-button
-        class="home-view-button"
+        class="home-view-button btn btn-success"
         size="large"
         disabled
       >
