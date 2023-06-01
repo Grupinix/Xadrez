@@ -10,10 +10,6 @@ export default {
         label: "Chad",
       },
       {
-        value: "arroz",
-        label: "Arroz",
-      },
-      {
         value: "pink",
         label: "Pink",
       },

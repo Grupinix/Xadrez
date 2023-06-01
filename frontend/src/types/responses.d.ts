@@ -38,8 +38,10 @@ interface GameDto {
   board: BoardDto;
   whiteTurn: boolean;
   whitePlayerUUID: string;
+  whitePlayerIdentifier: string;
   whiteMoves: number;
   blackPlayerUUID: string;
+  blackPlayerIdentifier: string;
   blackMoves: number;
   timer: number;
 }
