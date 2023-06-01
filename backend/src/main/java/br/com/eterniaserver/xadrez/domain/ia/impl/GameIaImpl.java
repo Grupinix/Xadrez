@@ -50,6 +50,8 @@ public class GameIaImpl implements GameIa {
 
         if (move == null) {
             game.setWhiteTurn(true);
+            game.setStatusCached(true);
+            game.setGameStatus(GameStatus.WHITE_WINS);
             gameRepository.save(game);
             return;
         }
@@ -71,7 +73,6 @@ public class GameIaImpl implements GameIa {
         List<GameStatus> validStatus = List.of(GameStatus.NORMAL, GameStatus.BLACK_CHECK, GameStatus.BLACK_WINS);
         int highestValue = Integer.MIN_VALUE;
         Pair<PieceDto, MoveDto> bestMove = null;
-        Pair<PieceDto, MoveDto> lastMove = null;
 
         for (Map.Entry<PieceDto, List<MoveDto>> pieceDtoListEntry : legalMovesMap.entrySet()) {
             PieceDto pieceDto = pieceDtoListEntry.getKey();
@@ -84,11 +85,10 @@ public class GameIaImpl implements GameIa {
                     false
             );
             for (MoveDto legalMove : legalMoves) {
-                lastMove = Pair.of(pieceDto, legalMove);
                 GameDto tempGame = gameDto.copy();
 
                 classicPIAGameService.movePieceOnBoardDto(tempGame, pieceDtoListEntry.getKey(), legalMove);
-                tempGame.setWhiteTurn(!tempGame.getWhiteTurn());
+                tempGame.setStatusCached(false);
 
                 GameStatus gameStatus = classicPIAGameService.getGameStatus(tempGame);
 
@@ -110,7 +110,7 @@ public class GameIaImpl implements GameIa {
                 }
             }
         }
-        return bestMove != null ? bestMove : lastMove;
+        return bestMove;
     }
 
     private int minimaxValue(GameDto gameDto,
@@ -125,8 +125,9 @@ public class GameIaImpl implements GameIa {
 
         Map<PieceDto, List<MoveDto>> legalMovesMap = classicPIAGameService.getPlayerLegalMoves(gameDto, currentColor);
 
-        int actualMove = bestBoardValue;
+        int boardValue = bestBoardValue;
         int maxValue = Integer.MIN_VALUE;
+        int minValue = Integer.MAX_VALUE;
 
         for (Map.Entry<PieceDto, List<MoveDto>> pieceDtoListEntry : legalMovesMap.entrySet()) {
             List<MoveDto> legalMoves = pieceDtoListEntry.getValue();
@@ -134,9 +135,8 @@ public class GameIaImpl implements GameIa {
                 GameDto tempGame = gameDto.copy();
 
                 classicPIAGameService.movePieceOnBoardDto(tempGame, pieceDtoListEntry.getKey(), legalMove);
-                tempGame.setWhiteTurn(!tempGame.getWhiteTurn());
 
-                int value = actualMove;
+                int value = bestBoardValue;
                 if (currentColor == Constants.BLACK_COLOR) {
                     value += evaluationFunction(tempGame, currentColor);
                 }
@@ -155,14 +155,22 @@ public class GameIaImpl implements GameIa {
                 }
 
 
-                if (value > maxValue) {
-                    maxValue = value;
-                    bestBoardValue = value;
+                if (currentColor == Constants.BLACK_COLOR) {
+                    if (value > maxValue) {
+                        maxValue = value;
+                        boardValue = value;
+                    }
+                }
+                else {
+                    if (value < minValue) {
+                        minValue = value;
+                        boardValue = value;
+                    }
                 }
             }
         }
 
-        return bestBoardValue;
+        return boardValue;
     }
 
     public int countPiecesByType(BoardDto boardDto, int color, PieceType pieceType) {

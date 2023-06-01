@@ -1,6 +1,7 @@
 package br.com.eterniaserver.xadrez.rest.dtos;
 
 import br.com.eterniaserver.xadrez.domain.enums.GameDifficulty;
+import br.com.eterniaserver.xadrez.domain.enums.GameStatus;
 import br.com.eterniaserver.xadrez.domain.enums.GameType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,6 +19,8 @@ public class GameDto {
     private Integer id;
     private GameType gameType;
     private GameDifficulty gameDifficulty;
+    private GameStatus gameStatus;
+    private Boolean statusCached;
     private BoardDto board;
     private Boolean whiteTurn;
     private UUID whitePlayerUUID;
@@ -31,6 +34,8 @@ public class GameDto {
                        .id(getId())
                        .gameType(getGameType())
                        .gameDifficulty(getGameDifficulty())
+                       .gameStatus(getGameStatus())
+                       .statusCached(getStatusCached())
                        .board(getBoard().copy())
                        .whiteTurn(getWhiteTurn())
                        .whitePlayerUUID(getWhitePlayerUUID())

@@ -238,6 +238,10 @@ public interface GameService {
     }
 
     default GameStatus getGameStatus(GameDto gameDto) {
+        if (gameDto.getStatusCached()) {
+            return gameDto.getGameStatus();
+        }
+
         GameDto tempGameDto = gameDto.copy();
         BoardDto tempBoardDto = tempGameDto.getBoard();
 
@@ -410,6 +414,7 @@ public interface GameService {
             return moveDtoMap;
         }
 
+        gameDto.setStatusCached(false);
         GameStatus gameStatus = getGameStatus(gameDto);
         List<PieceDto> pieceDtoList = playerColor == Constants.WHITE_COLOR
                 ? boardDto.getWhitePieces()
@@ -470,6 +475,7 @@ public interface GameService {
             if (tempPieceDto != null && whiteKing != null && blackKing != null) {
                 movePieceOnBoardDto(tempGame, tempPieceDto, move);
 
+                tempGame.setStatusCached(false);
                 GameStatus checkStatus = getGameStatus(tempGame);
                 if (validStatus.contains(checkStatus)) {
                     validMoves.add(move);
@@ -495,8 +501,12 @@ public interface GameService {
 
         piece.setPositionX(position.getFirst());
         piece.setPositionY(position.getSecond());
+
         game.setWhiteTurn(!game.getWhiteTurn());
         game.setTimer(System.currentTimeMillis());
+        game.setGameStatus(getGameStatus(game.getGameDto()));
+        game.setStatusCached(true);
+
         board.getHistories().add(history);
 
         saveEntities(game, history, piece, board);
