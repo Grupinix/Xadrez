@@ -19,6 +19,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -236,6 +237,42 @@ public interface GameService {
                            .filter(pieceDto -> pieceDto.getPieceType() == pieceType)
                            .findFirst();
     }
+
+    private void changePawnForQueen(Game game, Board board, History history) {
+        List<Piece> pieceList = board.getWhitePieces();
+        Pair<Integer, Piece> piecePair;
+        List<Integer> pawns = new ArrayList<>();
+
+        for (int i = 0; i < pieceList.size(); i++) {
+            Piece p = pieceList.get(i);
+            if (!pawns.contains(p.getId()) && p.getPieceType() == PieceType.PAWN
+                    && p.getPositionX() == 0 && game.getWhiteTurn()) {
+                piecePair = Pair.of(i, p);
+                int removeIndex = piecePair.getFirst();
+                Piece pawnToQueen = piecePair.getSecond();
+                history.setKilledPiece(pawnToQueen.getPieceType());
+                pieceList.remove(removeIndex);
+                deleteEntity(pawnToQueen);
+
+                Piece newQueen = new Piece();
+                newQueen.setId(pawnToQueen.getId());
+                newQueen.setPieceType(PieceType.QUEEN);
+                newQueen.setPositionX(pawnToQueen.getPositionX());
+                newQueen.setPositionY(pawnToQueen.getPositionY());
+                newQueen.setWhiteBoard(board);
+                pieceList.add(newQueen);
+                PositionDto newQueenPos = new PositionDto(pawnToQueen.getPositionX(), pawnToQueen.getPositionY());
+                History newHistory = createHistory(board, newQueen, newQueenPos, true);
+                board.getHistories().add(newHistory);
+
+                board.setWhitePieces(pieceList);
+                board.setHistories(board.getHistories());
+                saveEntities(game, history, newQueen, board);
+                pawns.add(p.getId());
+            }
+        }
+    }
+
 
     default GameStatus getGameStatus(GameDto gameDto) {
         if (gameDto.getStatusCached()) {
@@ -510,6 +547,10 @@ public interface GameService {
         board.getHistories().add(history);
 
         saveEntities(game, history, piece, board);
+
+        if(piece.getPieceType() == PieceType.PAWN) {
+            changePawnForQueen(game, board, history);
+        }
     }
 
 
