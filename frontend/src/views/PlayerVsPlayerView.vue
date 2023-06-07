@@ -70,10 +70,10 @@
   const isOpenCheck = ref<boolean>(false);
   const gameStatus = ref<string>("");
   const timer = ref<number>();
-  const whiteTurn = ref<boolean>(true);
   const selectedPiece = ref<GameMatrixPiece>();
   const playerDto = ref<PlayerDto>(PlayerService.getPlayerDtoFromStorage());
-  const iaGameDto = ref<GameDto>(GameService.getIaGameDtoFromStorage());
+  const playerGameDto = ref<GameDto>(GameService.getPlayerGameDtoFromStorage());
+  const actualTurn = ref<boolean>(playerDto.value.uuid === playerGameDto.value.whitePlayerUUID);
   const gameMatrix = ref<GameMatrixPiece[][]>(buildMatrix());
   const pieceImages = ref<{[key: string]: string;}>({
     BISHOP_BLACK: BISHOP_BLACK,
@@ -92,24 +92,39 @@
 
   onMounted(() => {
     timer.value = window.setInterval(async () => {
-      iaGameDto.value = GameService.getIaGameDtoFromStorage();
-      if (iaGameDto.value && iaGameDto.value.id && !whiteTurn.value) {
-        GameService.get(iaGameDto.value.gameType, iaGameDto.value.id)
+      playerGameDto.value = GameService.getPlayerGameDtoFromStorage();
+      if (playerGameDto.value && playerGameDto.value.id && !actualTurn.value) {
+        GameService.get(playerGameDto.value.gameType, playerGameDto.value.id)
           .then((response) => {
             response.json().then((result) => {
               if (result) {
-                iaGameDto.value = result;
-                if (iaGameDto.value.whiteTurn) {
-                  whiteTurn.value = true;
+                playerGameDto.value = result;
+                PlayerService.get(playerGameDto.value.whitePlayerUUID).then((rp) => {
+                  rp.json().then((rs) => {
+                    playerGameDto.value.whitePlayerIdentifier = rs.identifier;
+                  });
+                });
+                if (playerGameDto.value.blackPlayerUUID) {
+                  PlayerService.get(playerGameDto.value.blackPlayerUUID).then((rp) => {
+                    rp.json().then((rs) => {
+                      playerGameDto.value.blackPlayerIdentifier = rs.identifier;
+                    });
+                  });
                 }
-                localStorage.setItem("iaGameDto", JSON.stringify(result));
+                if (playerDto.value.uuid === playerGameDto.value.whitePlayerUUID && playerGameDto.value.whiteTurn) {
+                  actualTurn.value = true;
+                }
+                else if (playerDto.value.uuid !== playerGameDto.value.whitePlayerUUID && !playerGameDto.value.whiteTurn) {
+                  actualTurn.value = true;
+                }
+                localStorage.setItem("playerGameDto", JSON.stringify(result));
                 clearGameMatrix();
-                fillGameMatrix(iaGameDto.value.board.whitePieces);
-                fillGameMatrix(iaGameDto.value.board.blackPieces);
+                fillGameMatrix(playerGameDto.value.board.whitePieces);
+                fillGameMatrix(playerGameDto.value.board.blackPieces);
                 verifyGameStatus(true);
               }
               else {
-                removeIaGameAndRedirect();
+                removePlayerGameAndRedirect();
               }
             });
           });
@@ -232,7 +247,7 @@
         instance.confirmButtonText = "Carregando..."
         isOpenMatte.value = false;
         setTimeout(() => {
-          localStorage.removeItem("iaGameDto");
+          localStorage.removeItem("playerGameDto");
           router.push({ path: "/inicio" });
           done();
         }, 1000);
@@ -258,8 +273,8 @@
   }
 
   function verifyGameStatus(silent: boolean) {
-    const gameId = iaGameDto.value.id;
-    const gameType = iaGameDto.value.gameType
+    const gameId = playerGameDto.value.id;
+    const gameType = playerGameDto.value.gameType
 
     let loading: { close: () => void; };
     if (!silent) {
@@ -289,13 +304,13 @@
         if (!silent) {
           loading.close();
         }
-        removeIaGameAndRedirect();
+        removePlayerGameAndRedirect();
       });
   }
 
   function movePiece(piece: GameMatrixPiece) {
     const uuid = playerDto.value.uuid;
-    const isWhite = uuid === iaGameDto.value.whitePlayerUUID;
+    const isWhite = uuid === playerGameDto.value.whitePlayerUUID;
 
     if (isWhite === piece.whitePiece || !piece.move
       || !selectedPiece.value || !selectedPiece.value.id) {
@@ -303,8 +318,8 @@
     }
 
     const move = piece.move;
-    const gameType = iaGameDto.value.gameType;
-    const gameId = iaGameDto.value.id;
+    const gameType = playerGameDto.value.gameType;
+    const gameId = playerGameDto.value.id;
     const pieceId = selectedPiece.value.id;
 
     const loading = ElLoading.service({
@@ -319,14 +334,26 @@
       .then((response) => {
         response.json().then((result) => {
           if (result) {
-            iaGameDto.value = result;
-            localStorage.setItem("iaGameDto", JSON.stringify(result));
+            playerGameDto.value = result;
+            PlayerService.get(playerGameDto.value.whitePlayerUUID).then((rp) => {
+              rp.json().then((rs) => {
+                playerGameDto.value.whitePlayerIdentifier = rs.identifier;
+              });
+            });
+            if (playerGameDto.value.blackPlayerUUID) {
+              PlayerService.get(playerGameDto.value.blackPlayerUUID).then((rp) => {
+                rp.json().then((rs) => {
+                  playerGameDto.value.blackPlayerIdentifier = rs.identifier;
+                });
+              });
+            }
+            localStorage.setItem("playerGameDto", JSON.stringify(result));
             verifyGameStatus(false);
             clearGameMatrix();
             fillGameMatrix(result.board.whitePieces);
             fillGameMatrix(result.board.blackPieces);
             loading.close();
-            whiteTurn.value = false;
+            actualTurn.value = false;
           }
         });
       })
@@ -336,7 +363,7 @@
   }
 
   function getPossibleMoves(piece: GameMatrixPiece) {
-    if (!whiteTurn.value) {
+    if (!actualTurn.value) {
       return;
     }
 
@@ -350,15 +377,15 @@
       return;
     }
 
-    if (!playerDto.value || !iaGameDto.value) {
+    if (!playerDto.value || !playerGameDto.value) {
       router.push({ path: "/" });
       return;
     }
 
     const uuid = playerDto.value.uuid;
-    const isWhitePlayer = uuid === iaGameDto.value.whitePlayerUUID;
+    const isWhitePlayer = uuid === playerGameDto.value.whitePlayerUUID;
     const isPlayerPiece = isWhitePlayer === piece.whitePiece;
-    const isPlayerTurn = isWhitePlayer === iaGameDto.value.whiteTurn;
+    const isPlayerTurn = isWhitePlayer === playerGameDto.value.whiteTurn;
 
     if (!isPlayerPiece || !isPlayerTurn) {
       return;
@@ -380,8 +407,8 @@
       }
 
       GameService.getPiecePossibleMoves(
-        iaGameDto.value.gameType,
-        iaGameDto.value.id,
+        playerGameDto.value.gameType,
+        playerGameDto.value.id,
         uuid,
         pieceDto
       ).then((response) => {
@@ -389,7 +416,14 @@
           if (piece.id !== null) {
             selectedPiece.value = piece;
             if (!result.length) {
-              if (gameStatus.value === "BLACK_CHECK") {
+              if (gameStatus.value === "BLACK_CHECK" && playerDto.value.uuid === playerGameDto.value.whitePlayerUUID) {
+                ElMessage({
+                  message: "Você está em cheque, só pode mover peças para salvar o Rei!",
+                  type: "error",
+                });
+                setPieceSelected(0);
+              }
+              else if (gameStatus.value === "WHITE_CHECK" && playerDto.value.uuid === playerGameDto.value.blackPlayerUUID) {
                 ElMessage({
                   message: "Você está em cheque, só pode mover peças para salvar o Rei!",
                   type: "error",
@@ -411,8 +445,8 @@
     }
   }
 
-  function removeIaGameAndRedirect() {
-    localStorage.removeItem("iaGameDto");
+  function removePlayerGameAndRedirect() {
+    localStorage.removeItem("playerGameDto");
     router.push({ path: "/inicio" });
   }
 
@@ -422,31 +456,31 @@
     background: "rgba(0, 0, 0, 0.8)",
   });
 
-  if (!iaGameDto.value || !iaGameDto.value.id || !iaGameDto.value.gameType) {
+  if (!playerGameDto.value || !playerGameDto.value.id || !playerGameDto.value.gameType) {
     loading.close();
-    removeIaGameAndRedirect();
+    removePlayerGameAndRedirect();
   }
   else {
-    const gameType = iaGameDto.value.gameType;
-    const gameId = iaGameDto.value.id;
+    const gameType = playerGameDto.value.gameType;
+    const gameId = playerGameDto.value.id;
     GameService.check(gameType, gameId)
       .then((response) => {
         response.json().then((result) => {
-          if (!result || !iaGameDto.value) {
+          if (!result || !playerGameDto.value) {
             loading.close();
-            removeIaGameAndRedirect();
+            removePlayerGameAndRedirect();
           }
           else {
             verifyGameStatus(false);
-            fillGameMatrix(iaGameDto.value.board.whitePieces);
-            fillGameMatrix(iaGameDto.value.board.blackPieces);
+            fillGameMatrix(playerGameDto.value.board.whitePieces);
+            fillGameMatrix(playerGameDto.value.board.blackPieces);
             loading.close();
           }
         });
       })
       .catch(() => {
         loading.close();
-        removeIaGameAndRedirect();
+        removePlayerGameAndRedirect();
       });
   }
 </script>

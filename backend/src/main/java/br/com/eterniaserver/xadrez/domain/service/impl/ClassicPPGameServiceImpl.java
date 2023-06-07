@@ -14,6 +14,7 @@ import br.com.eterniaserver.xadrez.domain.service.GameService;
 import br.com.eterniaserver.xadrez.rest.dtos.GameDto;
 import br.com.eterniaserver.xadrez.rest.dtos.MoveDto;
 import br.com.eterniaserver.xadrez.rest.dtos.PieceDto;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -81,6 +82,7 @@ public class ClassicPPGameServiceImpl implements GameService {
     }
 
     @Override
+    @Transactional
     public Game enterGame(UUID playerUUID, Integer gameId) {
         Game game = gameRepository.findById(gameId).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Partida não encontrada")
