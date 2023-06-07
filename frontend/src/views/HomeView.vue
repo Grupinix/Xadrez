@@ -2,7 +2,7 @@
   <el-row class="home-view-row">
     <el-col class="home-view-col">
       <el-button
-        class="home-view-button"
+        class="home-view-button btn btn-success"
         size="large"
         :loading="vsIaLoading"
         @click="playVsIa"
@@ -12,7 +12,7 @@
     </el-col>
     <el-col class="home-view-col">
       <el-button
-        class="home-view-button"
+        class="home-view-button btn btn-success"
         size="large"
         @click="loadSettings"
       >
@@ -21,24 +21,24 @@
     </el-col>
     <el-col class="home-view-col">
       <el-button
-        class="home-view-button"
+        class="home-view-button btn btn-success"
         size="large"
-        disabled
+        @click="createRoom"
       >CRIAR SALA
       </el-button>
     </el-col>
     <el-col class="home-view-col">
       <el-button
-        class="home-view-button"
+        class="home-view-button btn btn-success"
         size="large"
-        disabled
+        @click="loadRooms"
       >
         SALAS
       </el-button>
     </el-col>
     <el-col class="home-view-col">
       <el-button
-        class="home-view-button"
+        class="home-view-button btn btn-success"
         size="large"
         disabled
       >
@@ -57,6 +57,7 @@
   import PlayerService from "../services/playerService";
 
   const vsIaLoading = ref<boolean>(false);
+  const vsPlayerLoading = ref<boolean>(false);
   const playerDto = ref<PlayerDto>(PlayerService.getPlayerDtoFromStorage());
 
   function playVsIa() {
@@ -87,8 +88,36 @@
     router.push({ path: "/settings" });
   }
 
+  function loadRooms() {
+    router.push({ path: "/rooms" });
+  }
+
   function alertCreateFail() {
     ElMessage.error("Credenciais inválidas.");
+  }
+
+  function createRoom() {
+    vsPlayerLoading.value = true;
+
+    GameService.create("PLAYER_PLAYER_CLASSIC", playerDto.value)
+      .then((response) => {
+        response.json().then((data) => {
+          if (response.ok) {
+            localStorage.setItem("playerGameDto", JSON.stringify(data));
+            setTimeout(function() {
+              router.push({ path: "/playervsplayer" });
+            }, 250);
+          }
+          else {
+            alertCreateFail();
+            vsPlayerLoading.value = false;
+          }
+        });
+      })
+      .catch(() => {
+        alertCreateFail();
+        vsPlayerLoading.value = false;
+      });
   }
 
   function hasIaGameInProgress() {
@@ -116,5 +145,31 @@
       });
   }
 
+  function hasPlayerGameInProgress() {
+    if (!localStorage.getItem("playerGameDto")) {
+      return true;
+    }
+
+    const playerGameDto: GameDto = GameService.getPlayerGameDtoFromStorage();
+    const gameType = playerGameDto.gameType;
+    const gameId = playerGameDto.id;
+
+    if (!gameType || !gameId) {
+      localStorage.removeItem("playerGameDto");
+    }
+
+    GameService.check(gameType, gameId)
+      .then((response) => {
+        response.json().then((result) => {
+          if (result && gameType === "PLAYER_PLAYER_CLASSIC") {
+            setTimeout(function() {
+              router.push({ path: "/playervsplayer" });
+            }, 250);
+          }
+        });
+      });
+  }
+
   hasIaGameInProgress();
+  hasPlayerGameInProgress();
 </script>

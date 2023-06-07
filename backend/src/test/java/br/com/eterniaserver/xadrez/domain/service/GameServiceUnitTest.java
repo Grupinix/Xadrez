@@ -1,7 +1,9 @@
 package br.com.eterniaserver.xadrez.domain.service;
 
 import br.com.eterniaserver.xadrez.Constants;
+import br.com.eterniaserver.xadrez.domain.entities.Board;
 import br.com.eterniaserver.xadrez.domain.entities.Game;
+import br.com.eterniaserver.xadrez.domain.entities.History;
 import br.com.eterniaserver.xadrez.domain.entities.Piece;
 import br.com.eterniaserver.xadrez.domain.enums.GameStatus;
 import br.com.eterniaserver.xadrez.domain.enums.MoveType;
@@ -79,6 +81,14 @@ class GameServiceUnitTest {
                                   MoveDto moveTypePairPair) throws ResponseStatusException {
                 return null;
             }
+
+            @Override
+            public void deleteEntity(Piece piece) {
+            }
+
+            @Override
+            public void saveEntities(Game game, History history, Piece piece, Board board) {
+            }
         };
     }
 
@@ -117,6 +127,7 @@ class GameServiceUnitTest {
                 .build();
         GameDto gameDto = GameDto.builder()
                 .board(boardDto)
+                .statusCached(false)
                 .build();
 
         GameStatus expectStatus = GameStatus.WHITE_WINS;
@@ -138,6 +149,7 @@ class GameServiceUnitTest {
                 .pieceMatrix(new Integer[8][8][3])
                 .build();
         GameDto gameDto = GameDto.builder()
+                .statusCached(false)
                 .board(boardDto)
                 .build();
 
@@ -344,6 +356,7 @@ class GameServiceUnitTest {
         GameDto gameDto = GameDto.builder()
                 .board(boardDto)
                 .whiteTurn(true)
+                .statusCached(false)
                 .whitePlayerUUID(whitePlayerUUID)
                 .blackPlayerUUID(blackPlayerUUID)
                 .build();
@@ -404,6 +417,7 @@ class GameServiceUnitTest {
                 .whitePlayerUUID(whitePlayerUUID)
                 .blackPlayerUUID(blackPlayerUUID)
                 .whiteTurn(false)
+                .statusCached(false)
                 .build();
 
         GameStatus expectedStatus = GameStatus.BLACK_WINS;
@@ -437,6 +451,7 @@ class GameServiceUnitTest {
                 .whitePlayerUUID(whitePlayerUUID)
                 .blackPlayerUUID(blackPlayerUUID)
                 .whiteTurn(true)
+                .statusCached(false)
                 .build();
 
         GameStatus expectedStatus = GameStatus.NORMAL;
@@ -494,6 +509,7 @@ class GameServiceUnitTest {
         GameDto gameDto = GameDto.builder()
                 .board(boardDto)
                 .whiteTurn(false)
+                .statusCached(false)
                 .whitePlayerUUID(whitePlayerUUID)
                 .blackPlayerUUID(blackPlayerUUID)
                 .build();
@@ -554,6 +570,7 @@ class GameServiceUnitTest {
                 .whitePlayerUUID(whitePlayerUUID)
                 .blackPlayerUUID(blackPlayerUUID)
                 .whiteTurn(true)
+                .statusCached(false)
                 .build();
 
         GameStatus expectedStatus = GameStatus.BLACK_CHECK;

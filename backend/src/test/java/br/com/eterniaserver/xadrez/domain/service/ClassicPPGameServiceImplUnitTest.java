@@ -3,7 +3,6 @@ package br.com.eterniaserver.xadrez.domain.service;
 import br.com.eterniaserver.xadrez.domain.entities.Board;
 import br.com.eterniaserver.xadrez.domain.entities.Game;
 import br.com.eterniaserver.xadrez.domain.entities.Piece;
-import br.com.eterniaserver.xadrez.domain.enums.GameDifficulty;
 import br.com.eterniaserver.xadrez.domain.enums.GameType;
 import br.com.eterniaserver.xadrez.domain.enums.MoveType;
 import br.com.eterniaserver.xadrez.domain.repositories.BoardRepository;
@@ -11,7 +10,7 @@ import br.com.eterniaserver.xadrez.domain.repositories.GameRepository;
 import br.com.eterniaserver.xadrez.domain.repositories.HistoryRepository;
 import br.com.eterniaserver.xadrez.domain.repositories.PieceRepository;
 import br.com.eterniaserver.xadrez.domain.service.impl.BoardServiceImpl;
-import br.com.eterniaserver.xadrez.domain.service.impl.ClassicPIAGameServiceImpl;
+import br.com.eterniaserver.xadrez.domain.service.impl.ClassicPPGameServiceImpl;
 import br.com.eterniaserver.xadrez.rest.dtos.GameDto;
 import br.com.eterniaserver.xadrez.rest.dtos.MoveDto;
 import br.com.eterniaserver.xadrez.rest.dtos.PieceDto;
@@ -31,7 +30,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @ExtendWith(MockitoExtension.class)
-class ClassicPIAGameServiceImplUnitTest {
+class ClassicPPGameServiceImplUnitTest {
 
     @Mock
     private BoardService boardService;
@@ -43,20 +42,17 @@ class ClassicPIAGameServiceImplUnitTest {
     private PieceRepository pieceRepository;
     @Mock
     private HistoryRepository historyRepository;
-    @Mock
-    private PlayerService playerService;
 
     private GameService gameService;
 
     @BeforeEach
     void init() {
-        gameService = new ClassicPIAGameServiceImpl(
+        gameService = new ClassicPPGameServiceImpl(
                 boardService,
                 gameRepository,
                 historyRepository,
                 pieceRepository,
-                boardRepository,
-                playerService
+                boardRepository
         );
     }
 
@@ -67,23 +63,31 @@ class ClassicPIAGameServiceImplUnitTest {
     }
 
     @Test
-    void ensureThatGetAllGamesReturnNull() {
+    void ensureThatGetAllGamesReturnEvenIAGames() {
+        Game iaGame = new Game();
+        iaGame.setGameType(GameType.PLAYER_IA_CLASSIC);
+        Game playerGame = new Game();
+        playerGame.setGameType(GameType.PLAYER_PLAYER_CLASSIC);
+
+        Mockito.when(gameRepository.findAllByBlackPlayerUUIDIsNull()).thenReturn(
+                List.of(iaGame, playerGame)
+        );
+
         List<Game> games = gameService.getAllGames();
-        Assertions.assertNull(games);
+        Assertions.assertEquals(2, games.size());
     }
 
     @Test
-    void ensureThatGetGamesReturnNull() {
+    void ensureThatGetGamesReturnOnlyPlayerGames() {
+        Game playerGame = new Game();
+        playerGame.setGameType(GameType.PLAYER_PLAYER_CLASSIC);
+
+        Mockito.when(gameRepository.findAllByBlackPlayerUUIDIsNullAndGameTypeEquals(
+                GameType.PLAYER_PLAYER_CLASSIC
+        )).thenReturn(List.of(playerGame));
+
         List<Game> games = gameService.getGames();
-        Assertions.assertNull(games);
-    }
-
-    @Test
-    void ensureThatEnterGameReturnNull() {
-        UUID uuid = UUID.randomUUID();
-        Integer gameId = 1;
-        Game game = gameService.enterGame(uuid, gameId);
-        Assertions.assertNull(game);
+        Assertions.assertEquals(1, games.size());
     }
 
     @Test
@@ -105,12 +109,10 @@ class ClassicPIAGameServiceImplUnitTest {
     void testCreateGame() {
         UUID uuid = UUID.randomUUID();
 
-        Mockito.when(playerService.getGameDifficulty(uuid)).thenReturn(GameDifficulty.NORMAL);
-
         Game game = gameService.createGame(uuid);
 
-        Assertions.assertEquals(GameType.PLAYER_IA_CLASSIC, game.getGameType());
-        Assertions.assertEquals(GameDifficulty.NORMAL, game.getGameDifficulty());
+        Assertions.assertEquals(GameType.PLAYER_PLAYER_CLASSIC, game.getGameType());
+        Assertions.assertNull(game.getGameDifficulty());
         Assertions.assertTrue(game.getWhiteTurn());
         Assertions.assertEquals(uuid, game.getWhitePlayerUUID());
         Assertions.assertNull(game.getBlackPlayerUUID());
@@ -119,25 +121,45 @@ class ClassicPIAGameServiceImplUnitTest {
     }
 
     @Test
-    void testRefreshGameTimer() {
+    void testEnterGame() {
+        UUID uuid = UUID.randomUUID();
         Integer gameId = 1;
-        Game game = Mockito.mock(Game.class);
+        Game existentGame = Mockito.mock(Game.class);
 
-        Mockito.when(gameRepository.findById(gameId)).thenReturn(Optional.of(game));
+        Mockito.when(existentGame.getBlackPlayerUUID()).thenReturn(null);
+        Mockito.when(gameRepository.findById(gameId)).thenReturn(Optional.of(existentGame));
 
-        gameService.refreshGameTimer(gameId);
+        Game game = gameService.enterGame(uuid, gameId);
 
-        Mockito.verify(game, Mockito.times(1)).setTimer(Mockito.anyLong());
+        Mockito.verify(gameRepository, Mockito.times(1)).save(game);
+        Assertions.assertEquals(existentGame, game);
     }
 
     @Test
-    void testRefreshGameTimerWithInvalidGame() {
+    void testEnterNotExistentGame() {
+        UUID uuid = UUID.randomUUID();
         Integer gameId = 1;
+
         Mockito.when(gameRepository.findById(gameId)).thenReturn(Optional.empty());
 
-        gameService.refreshGameTimer(gameId);
+        Assertions.assertThrows(ResponseStatusException.class, () -> gameService.enterGame(uuid, gameId));
+    }
 
-        Mockito.verify(gameRepository, Mockito.times(1)).findById(gameId);
+    @Test
+    void testEnterGameWithBlackPlayer() {
+        UUID uuid = UUID.randomUUID();
+        Integer gameId = 1;
+        Game existentGame = Mockito.mock(Game.class);
+
+        Mockito.when(existentGame.getBlackPlayerUUID()).thenReturn(uuid);
+        Mockito.when(gameRepository.findById(gameId)).thenReturn(Optional.of(existentGame));
+
+        Assertions.assertThrows(ResponseStatusException.class, () -> gameService.enterGame(uuid, gameId));
+    }
+
+    @Test
+    void testRefreshGameTimer() {
+        Assertions.assertThrows(ResponseStatusException.class, () -> gameService.refreshGameTimer(1));
     }
 
     @Test
@@ -166,14 +188,17 @@ class ClassicPIAGameServiceImplUnitTest {
     class TestMoves {
 
         private Game game;
+        private Game gameInQueue;
         private UUID white;
         private UUID black;
+        private UUID whiteTwo;
 
 
         @BeforeEach
         void init() {
             BoardServiceImpl boardService = new BoardServiceImpl(boardRepository, pieceRepository);
             Board board = boardService.createBoard();
+            Board boardTwo = boardService.createBoard();
 
             int idIncrement = 0;
             for (Piece piece : board.getWhitePieces()) {
@@ -182,12 +207,24 @@ class ClassicPIAGameServiceImplUnitTest {
             for (Piece piece : board.getBlackPieces()) {
                 piece.setId(idIncrement++);
             }
+            idIncrement = 0;
+            for (Piece piece : boardTwo.getWhitePieces()) {
+                piece.setId(idIncrement++);
+            }
+            for (Piece piece : boardTwo.getBlackPieces()) {
+                piece.setId(idIncrement++);
+            }
 
             white = UUID.randomUUID();
             black = UUID.randomUUID();
+            whiteTwo = UUID.randomUUID();
 
             game = gameService.createGame(white);
             game.setBoard(board);
+            game.setBlackPlayerUUID(black);
+
+            gameInQueue = gameService.createGame(whiteTwo);
+            gameInQueue.setBoard(boardTwo);
         }
 
         @Test
@@ -251,12 +288,75 @@ class ClassicPIAGameServiceImplUnitTest {
         }
 
         @Test
+        void testPossibleMovesWithoutBlackPlayer() {
+            Piece pawn = gameInQueue.getBoard().getWhitePieces().get(8);
+            GameDto gameDto = gameInQueue.getGameDto();
+            PieceDto pieceDto = pawn.getPieceDto();
+
+            Assertions.assertThrows(
+                    ResponseStatusException.class,
+                    () -> gameService.getPossibleMoves(gameDto, pieceDto, whiteTwo)
+            );
+        }
+
+        @Test
+        void testPossibleMovesInWrongTurn() {
+            Piece pawn = game.getBoard().getBlackPieces().get(8);
+            GameDto gameDto = game.getGameDto();
+            PieceDto pieceDto = pawn.getPieceDto();
+
+            Assertions.assertThrows(
+                    ResponseStatusException.class,
+                    () -> gameService.getPossibleMoves(gameDto, pieceDto, black)
+            );
+        }
+
+        @Test
+        void testMovePieceWithoutBlackPlayer() {
+            Piece pawn = gameInQueue.getBoard().getWhitePieces().get(8);
+            PositionDto positionDto = PositionDto.builder()
+                    .first(pawn.getPositionX() - 2)
+                    .second(pawn.getPositionY())
+                    .build();
+            MoveDto moveDto = MoveDto.builder()
+                    .first(MoveType.NORMAL)
+                    .second(positionDto)
+                    .build();
+
+            Assertions.assertThrows(
+                    ResponseStatusException.class,
+                    () -> gameService.movePiece(gameInQueue, whiteTwo, pawn, moveDto)
+            );
+        }
+
+        @Test
+        void testMovePieceInWrongTurn() {
+            Piece pawn = game.getBoard().getBlackPieces().get(8);
+            PositionDto positionDto = PositionDto.builder()
+                    .first(pawn.getPositionX() + 2)
+                    .second(pawn.getPositionY())
+                    .build();
+            MoveDto moveDto = MoveDto.builder()
+                    .first(MoveType.NORMAL)
+                    .second(positionDto)
+                    .build();
+
+            Assertions.assertThrows(
+                    ResponseStatusException.class,
+                    () -> gameService.movePiece(game, black, pawn, moveDto)
+            );
+        }
+
+        @Test
         void testWhiteQueenStartMoves() {
-            Piece queen = game.getBoard().getWhitePieces().get(3);
+            Piece pawn = game.getBoard().getBlackPieces().get(8);
+            GameDto gameDto = game.getGameDto();
+            PieceDto pieceDto = pawn.getPieceDto();
 
-            List<MoveDto> moves = gameService.getPossibleMoves(game.getGameDto(), queen.getPieceDto(), white);
-
-            Assertions.assertEquals(0, moves.size());
+            Assertions.assertThrows(
+                    ResponseStatusException.class,
+                    () -> gameService.getPossibleMoves(gameDto, pieceDto, black)
+            );
         }
 
         @Test

@@ -48,7 +48,7 @@
     </el-col>
     <el-col class="settings-view-col">
       <el-button
-        class="settings-back-button"
+        class="settings-back-button btn btn-success mt-3 mb-3"
         size="large"
         @click="goToHome"
       >

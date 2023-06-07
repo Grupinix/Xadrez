@@ -13,6 +13,7 @@ const router = createRouter({
       meta: {
         requiresPlayerDto: false,
         requiresIaGameDto: false,
+        requiresPlayerGameDto: false,
       },
     },
     {
@@ -22,6 +23,7 @@ const router = createRouter({
       meta: {
         requiresPlayerDto: true,
         requiresIaGameDto: false,
+        requiresPlayerGameDto: false,
       },
     },
     {
@@ -31,7 +33,18 @@ const router = createRouter({
       meta: {
         requiresPlayerDto: true,
         requiresIaGameDto: true,
+        requiresPlayerGameDto: false,
       },
+    },
+    {
+      path: "/playervsplayer",
+      name: "playervsplayer",
+      component: () => import("../views/PlayerVsPlayerView.vue"),
+      meta: {
+        requiresPlayerDto: true,
+        requiresIaGameDto: false,
+        requiresPlayerGameDto: true,
+      }
     },
     {
       path: "/settings",
@@ -40,22 +53,36 @@ const router = createRouter({
       meta: {
         requiresPlayerDto: true,
         requiresIaGameDto: false,
+        requiresPlayerGameDto: false,
       },
     },
+    {
+      path: "/rooms",
+      name: "rooms",
+      component: () => import("../views/RoomsView.vue"),
+      meta: {
+        requiresPlayerDto: true,
+        requiresIaGameDto: false,
+        requiresPlayerGameDto: false,
+      }
+    }
   ],
 });
 
 router.beforeEach((to, _, next) => {
   const requiresPlayerDto = to.meta.requiresPlayerDto;
   const requiresIaGameDto = to.meta.requiresIaGameDto;
+  const requiresPlayerGameDto = to.meta.requiresPlayerGameDto;
 
   const playerDtoStringed = localStorage.getItem("playerDto");
   const iaGameDtoStringed = localStorage.getItem("iaGameDto");
+  const playerGameDtoStringed = localStorage.getItem("playerGameDto");
 
   const notHasIaGameAndNeed = requiresIaGameDto && !iaGameDtoStringed;
   const notHasPlayerAndNeed = requiresPlayerDto && !playerDtoStringed;
+  const notHasPlayerGameAndNeed = requiresPlayerGameDto && !playerGameDtoStringed;
 
-  if (notHasIaGameAndNeed || notHasPlayerAndNeed) {
+  if (notHasIaGameAndNeed || notHasPlayerAndNeed || notHasPlayerGameAndNeed) {
     return next({ path: "/" });
   }
   if (!requiresPlayerDto && playerDtoStringed) {

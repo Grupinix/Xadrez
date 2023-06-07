@@ -7,6 +7,7 @@ import br.com.eterniaserver.xadrez.domain.enums.GameType;
 import br.com.eterniaserver.xadrez.domain.ia.GameIa;
 import br.com.eterniaserver.xadrez.domain.repositories.PieceRepository;
 import br.com.eterniaserver.xadrez.domain.service.GameService;
+import br.com.eterniaserver.xadrez.domain.service.PlayerService;
 import br.com.eterniaserver.xadrez.domain.service.impl.ClassicPIAGameServiceImpl;
 import br.com.eterniaserver.xadrez.domain.service.impl.ClassicPPGameServiceImpl;
 import br.com.eterniaserver.xadrez.rest.dtos.BoardDto;
@@ -37,6 +38,7 @@ public class GameController {
     private final ClassicPIAGameServiceImpl classicPIAGameService;
     private final ClassicPPGameServiceImpl classicPPGameService;
     private final PieceRepository pieceRepository;
+    private final PlayerService playerService;
     private final GameIa gameIa;
 
     private GameService getGameService(GameType gameType) {
@@ -83,7 +85,9 @@ public class GameController {
         Game game = gameService.getGame(gameId);
         Piece piece = pieceRepository.findById(pieceId).orElseThrow();
 
-        iaGamesMap.put(gameId, gameId);
+        if (game.getGameType() == GameType.PLAYER_IA_CLASSIC) {
+            iaGamesMap.put(gameId, gameId);
+        }
 
         return gameService.movePiece(game, uuid, piece, move).getGameDto();
     }
@@ -147,7 +151,17 @@ public class GameController {
     @PostMapping("create/{type}/")
     @ResponseStatus(HttpStatus.OK)
     public GameDto createGame(@PathVariable GameType type, @RequestBody PlayerDto playerDto) {
+        playerService.verify(playerDto);
         return getGameService(type).createGame(playerDto.getUuid()).getGameDto();
     }
 
+    @PutMapping("enter/{type}/{gameId}/")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public GameDto enterGame(@PathVariable GameType type,
+                             @PathVariable Integer gameId,
+                             @RequestBody PlayerDto playerDto) {
+        playerService.verify(playerDto);
+
+        return getGameService(type).enterGame(playerDto.getUuid(), gameId).getGameDto();
+    }
 }
