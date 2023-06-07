@@ -18,6 +18,14 @@ export default {
     });
   },
 
+  enter(type: string, gameId: number, playerDto: PlayerDto): Promise<Response> {
+    return fetch(`${url}/enter/${type}/${gameId}/`, {
+      method: "PUT",
+      headers: headers,
+      body: JSON.stringify(playerDto),
+    });
+  },
+
   movePiece(type: string, gameId: number, uuid: string, pieceId: number, moveDto: object): Promise<Response> {
     return fetch(`${url}/move/${type}/${gameId}/${uuid}/${pieceId}/`, {
       method: "POST",
@@ -73,5 +81,10 @@ export default {
   getIaGameDtoFromStorage(): GameDto {
     const iaGameDtoStringed = localStorage.getItem("iaGameDto") || "";
     return JSON.parse(iaGameDtoStringed);
+  },
+
+  getPlayerGameDtoFromStorage(): GameDto {
+    const playerGameDtoStringed = localStorage.getItem("playerGameDto") || "";
+    return JSON.parse(playerGameDtoStringed);
   }
 };
