@@ -1,4 +1,11 @@
 <template>
+  <el-button
+    v-if="gameStatus"
+    type="danger"
+    @click="removeIaGameAndRedirect"
+  >
+    Sair
+  </el-button>
   <el-row type="flex" justify="center">
     <div class="chess-board">
       <div
@@ -39,6 +46,11 @@
       </div>
     </div>
   </el-row>
+  <div class="move-history">
+    <div v-for="(move, index) in moveHistory" :key="index" class="move-item">
+      {{ move }}
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -72,6 +84,7 @@
   const timer = ref<number>();
   const whiteTurn = ref<boolean>(true);
   const selectedPiece = ref<GameMatrixPiece>();
+  const moveHistory = ref<HistoryDto[]>([]);
   const playerDto = ref<PlayerDto>(PlayerService.getPlayerDtoFromStorage());
   const iaGameDto = ref<GameDto>(GameService.getIaGameDtoFromStorage());
   const gameMatrix = ref<GameMatrixPiece[][]>(buildMatrix());
@@ -306,6 +319,13 @@
     const gameType = iaGameDto.value.gameType;
     const gameId = iaGameDto.value.id;
     const pieceId = selectedPiece.value.id;
+
+    moveHistory.value.push({
+      pieceType: selectedPiece.value.pieceType,
+      whitePiece: selectedPiece.value.whitePiece,
+      oldPositionX: selectedPiece.value.positionX,
+      oldPositionY: selectedPiece.value.positionY
+    });
 
     const loading = ElLoading.service({
       lock: true,
