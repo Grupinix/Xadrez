@@ -175,6 +175,8 @@
         gameMatrix.value[i][j].isSelected = false;
       }
     }
+    moveHistory.value = [];
+    moveHistory.value.push(...iaGameDto.value.board.histories);
   }
 
   function fillGameMatrix(pieceArray: PieceDto[]) {
@@ -327,13 +329,6 @@
     const gameType = playerGameDto.value.gameType;
     const gameId = playerGameDto.value.id;
     const pieceId = selectedPiece.value.id;
-
-    moveHistory.value.push({
-      pieceType: selectedPiece.value.pieceType,
-      whitePiece: selectedPiece.value.whitePiece,
-      oldPositionX: selectedPiece.value.positionX,
-      oldPositionY: selectedPiece.value.positionY
-    });
 
     const loading = ElLoading.service({
       lock: true,
