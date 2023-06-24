@@ -40,7 +40,7 @@
       <el-button
         class="home-view-button btn btn-success"
         size="large"
-        disabled
+        @click="loadRanking"
       >
         RANK
       </el-button>
@@ -62,26 +62,35 @@
 
   function playVsIa() {
     vsIaLoading.value = true;
-
-    GameService.create("PLAYER_IA_CLASSIC", playerDto.value)
-      .then((response) => {
-        response.json().then((data) => {
-          if (response.ok) {
-            localStorage.setItem("iaGameDto", JSON.stringify(data));
-            setTimeout(function() {
-              router.push({ path: "/playervsia" });
-            }, 250);
-          }
-          else {
-            alertCreateFail();
-            vsIaLoading.value = false;
-          }
-        });
-      })
-      .catch(() => {
-        alertCreateFail();
-        vsIaLoading.value = false;
+    PlayerService.verify(playerDto.value).then((response) => {
+      response.json().then((data) => {
+        if (data) {
+          GameService.create("PLAYER_IA_CLASSIC", playerDto.value)
+            .then((response) => {
+              response.json().then((data) => {
+                if (response.ok) {
+                  localStorage.setItem("iaGameDto", JSON.stringify(data));
+                  setTimeout(function() {
+                    router.push({ path: "/playervsia" });
+                  }, 250);
+                }
+                else {
+                  alertCreateFail();
+                  vsIaLoading.value = false;
+                }
+              });
+            })
+            .catch(() => {
+              alertCreateFail();
+              vsIaLoading.value = false;
+            });
+        }
+        else {
+          alertCreateFail();
+          vsIaLoading.value = false;
+        }
       });
+    });
   }
 
   function loadSettings() {
@@ -92,6 +101,10 @@
     router.push({ path: "/rooms" });
   }
 
+  function loadRanking() {
+    router.push({ path: "/ranking" });
+  }
+
   function alertCreateFail() {
     ElMessage.error("Credenciais inválidas.");
   }
@@ -99,25 +112,34 @@
   function createRoom() {
     vsPlayerLoading.value = true;
 
-    GameService.create("PLAYER_PLAYER_CLASSIC", playerDto.value)
-      .then((response) => {
-        response.json().then((data) => {
-          if (response.ok) {
-            localStorage.setItem("playerGameDto", JSON.stringify(data));
-            setTimeout(function() {
-              router.push({ path: "/playervsplayer" });
-            }, 250);
-          }
-          else {
-            alertCreateFail();
-            vsPlayerLoading.value = false;
-          }
-        });
-      })
-      .catch(() => {
-        alertCreateFail();
-        vsPlayerLoading.value = false;
+    PlayerService.verify(playerDto.value).then((response) => {
+      response.json().then((data) => {
+        if (data) {
+          GameService.create("PLAYER_PLAYER_CLASSIC", playerDto.value)
+            .then((response) => {
+              response.json().then((data) => {
+                if (response.ok) {
+                  localStorage.setItem("playerGameDto", JSON.stringify(data));
+                  setTimeout(function() {
+                    router.push({ path: "/playervsplayer" });
+                  }, 250);
+                }
+                else {
+                  alertCreateFail();
+                  vsPlayerLoading.value = false;
+                }
+              });
+            })
+            .catch(() => {
+              alertCreateFail();
+              vsPlayerLoading.value = false;
+            });        }
+        else {
+          alertCreateFail();
+          vsPlayerLoading.value = false;
+        }
       });
+    });
   }
 
   function hasIaGameInProgress() {

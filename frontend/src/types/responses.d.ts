@@ -31,6 +31,13 @@ interface BoardDto {
   pieceMatrix: [][][];
 }
 
+interface RankDto {
+  identifier: string;
+  gameType: string;
+  moves: number;
+  dateTime: string;
+}
+
 interface GameDto {
   id: number;
   gameType: string;
