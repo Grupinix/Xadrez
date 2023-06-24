@@ -582,6 +582,13 @@ public interface GameService {
 
         board.getHistories().add(history);
 
+        if (isWhite) {
+            game.setWhiteMoves(game.getWhiteMoves() + 1);
+        }
+        else {
+            game.setBlackMoves(game.getBlackMoves() + 1);
+        }
+
         saveEntities(game, history, piece, board);
 
         if(piece.getPieceType() == PieceType.PAWN) {

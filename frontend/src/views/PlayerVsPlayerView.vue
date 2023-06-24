@@ -176,7 +176,7 @@
       }
     }
     moveHistory.value = [];
-    moveHistory.value.push(...iaGameDto.value.board.histories);
+    moveHistory.value.push(...playerGameDto.value.board.histories);
   }
 
   function fillGameMatrix(pieceArray: PieceDto[]) {
