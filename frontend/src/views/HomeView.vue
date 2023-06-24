@@ -40,7 +40,7 @@
       <el-button
         class="home-view-button btn btn-success"
         size="large"
-        @click="loadRanks"
+        @click="loadRanking"
       >
         RANK
       </el-button>
@@ -101,8 +101,8 @@
     router.push({ path: "/rooms" });
   }
 
-  function loadRanks() {
-    router.push({ path: "/ranks" });
+  function loadRanking() {
+    router.push({ path: "/ranking" });
   }
 
   function alertCreateFail() {
