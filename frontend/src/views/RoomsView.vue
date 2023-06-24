@@ -1,6 +1,6 @@
 <template>
-  <el-row style="margin-top: 32px">
-    <el-table :data="filterGameList" style="width: 75%; margin: auto">
+  <el-row style="padding-top: 32px; padding-bottom: 32px">
+    <el-table :data="filterGameList" style="width: 75%; margin: auto;">
       <el-table-column label="Tipo" prop="gameType" />
       <el-table-column label="Jogador Branco" prop="whitePlayerIdentifier" />
       <el-table-column label="Jogador Preto" prop="blackPlayerIdentifier" />
@@ -70,18 +70,29 @@
       background: "rgba(0,0,0,0.8)",
     });
 
-    GameService.enter(labelType(gameDto.gameType), gameDto.id, playerDto.value)
+    PlayerService.verify(playerDto.value)
       .then((response) => {
         response.json().then((result) => {
           if (result) {
-            localStorage.setItem("playerGameDto", JSON.stringify(result));
-            setTimeout(function() {
-              loading.close();
-              router.push({ path: "/playervsplayer" });
-            }, 1000);
+            GameService.enter(labelType(gameDto.gameType), gameDto.id, playerDto.value)
+              .then((response) => {
+                response.json().then((result) => {
+                  if (result) {
+                    localStorage.setItem("playerGameDto", JSON.stringify(result));
+                    setTimeout(function() {
+                      loading.close();
+                      router.push({ path: "/playervsplayer" });
+                    }, 1000);
+                  }
+                  else {
+                    loading.close();
+                  }
+                });
+              });
           }
           else {
             loading.close();
+            router.push({ path: "/" });
           }
         });
       });

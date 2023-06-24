@@ -65,6 +65,16 @@ const router = createRouter({
         requiresIaGameDto: false,
         requiresPlayerGameDto: false,
       }
+    },
+    {
+      path: "/ranks",
+      name: "ranks",
+      component: () => import("../views/RanksView.vue"),
+      meta: {
+        requiresPlayerDto: true,
+        requiresIaGameDto: false,
+        requiresPlayerGameDto: false,
+      }
     }
   ],
 });
