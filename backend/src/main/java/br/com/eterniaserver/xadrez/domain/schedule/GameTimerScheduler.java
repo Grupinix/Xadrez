@@ -50,7 +50,7 @@ public class GameTimerScheduler {
             boolean lobbyRemoveRule = !isIaGame && !hasSecondPlayer && seconds > LOBBY_GAME_TTL;
 
             if (!(iaRemoveRule || gameRemoveRule || lobbyRemoveRule)) {
-                return;
+                continue;
             }
 
             if (endStatus.contains(game.getGameStatus())) {
