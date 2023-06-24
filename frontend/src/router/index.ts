@@ -67,8 +67,8 @@ const router = createRouter({
       }
     },
     {
-      path: "/ranks",
-      name: "ranks",
+      path: "/ranking",
+      name: "ranking",
       component: () => import("../views/RanksView.vue"),
       meta: {
         requiresPlayerDto: true,
