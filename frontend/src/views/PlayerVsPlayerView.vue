@@ -39,6 +39,11 @@
       </div>
     </div>
   </el-row>
+  <div class="move-history">
+    <div v-for="(move, index) in moveHistory" :key="index" class="move-item">
+      {{ move }}
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -71,6 +76,7 @@
   const gameStatus = ref<string>("");
   const timer = ref<number>();
   const selectedPiece = ref<GameMatrixPiece>();
+  const moveHistory = ref<HistoryDto[]>([]);
   const playerDto = ref<PlayerDto>(PlayerService.getPlayerDtoFromStorage());
   const playerGameDto = ref<GameDto>(GameService.getPlayerGameDtoFromStorage());
   const actualTurn = ref<boolean>(playerDto.value.uuid === playerGameDto.value.whitePlayerUUID);
@@ -169,6 +175,8 @@
         gameMatrix.value[i][j].isSelected = false;
       }
     }
+    moveHistory.value = [];
+    moveHistory.value.push(...playerGameDto.value.board.histories);
   }
 
   function fillGameMatrix(pieceArray: PieceDto[]) {

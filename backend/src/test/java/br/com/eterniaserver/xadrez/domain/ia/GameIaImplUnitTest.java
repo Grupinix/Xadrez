@@ -214,6 +214,11 @@ class GameIaImplUnitTest {
             };
         }
         boardDto.setPieceMatrix(pieceMatrix);
+
+        int result = gameIa.evaluationPerPositioning(boardDto, Constants.BLACK_COLOR);
+        int expect = -40;
+
+        Assertions.assertEquals(expect, result);
     }
 
     @Test
