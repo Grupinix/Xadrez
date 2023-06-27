@@ -399,7 +399,6 @@ public interface GameService {
         List<PieceDto> blackList = new ArrayList<>(boardDto.getBlackPieces());
         List<PieceDto> enemyList = pieceDto.getWhitePiece() ? blackList : whiteList;
 
-
         if (possibleKilled != null && possibleKilled[0] != null) {
             Pair<Integer, PieceDto> found = null;
             for (int i = 0; i < enemyList.size(); i++) {
@@ -419,6 +418,17 @@ public interface GameService {
 
         pieceDto.setPositionX(x);
         pieceDto.setPositionY(y);
+
+        if (moveDto.getFirst() == MoveType.ROQUE) {
+            int towerY = y == 2 ? 0 : 7;
+            List<PieceDto> towerList = pieceDto.getWhitePiece() ? boardDto.getWhitePieces() : boardDto.getBlackPieces();
+            for (PieceDto tower : towerList) {
+                if (tower.getPositionX() == x && tower.getPositionY() == towerY) {
+                    tower.setPositionY(y == 2 ? 3 : 5);
+                    break;
+                }
+            }
+        }
 
         gameDto.setWhiteTurn(!gameDto.getWhiteTurn());
         Integer[][][] newPieceMatrix = new Integer[8][8][1];
