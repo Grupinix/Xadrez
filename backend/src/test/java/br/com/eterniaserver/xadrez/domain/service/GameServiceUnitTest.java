@@ -161,6 +161,19 @@ class GameServiceUnitTest {
     }
 
     @Test
+    void testGameStatusCached() {
+        GameDto gameDto = GameDto.builder()
+                .statusCached(true)
+                .gameStatus(GameStatus.WHITE_WINS)
+                .build();
+
+        GameStatus expectStatus = GameStatus.WHITE_WINS;
+        GameStatus actualStatus = gameService.getGameStatus(gameDto);
+
+        Assertions.assertEquals(expectStatus, actualStatus);
+    }
+
+    @Test
     void testWhiteCheck() {
         PieceDto whiteKing = PieceDto.builder()
                 .id(1)
@@ -363,6 +376,72 @@ class GameServiceUnitTest {
                 .build();
 
         GameStatus expectedStatus = GameStatus.WHITE_WINS;
+        GameStatus actualStatus = gameService.getGameStatus(gameDto);
+
+        Assertions.assertEquals(expectedStatus, actualStatus);
+    }
+
+    @Test
+    void verifyIsBlackMatteNotObvious() {
+        PieceDto whiteKing = PieceDto.builder()
+                .id(1)
+                .pieceType(PieceType.KING)
+                .positionX(7)
+                .positionY(7)
+                .whitePiece(true)
+                .build();
+        PieceDto blackTowerOne = PieceDto.builder()
+                .id(2)
+                .pieceType(PieceType.TOWER)
+                .positionX(6)
+                .positionY(5)
+                .whitePiece(false)
+                .build();
+        PieceDto blackTowerTwo = PieceDto.builder()
+                .id(2)
+                .pieceType(PieceType.TOWER)
+                .positionX(7)
+                .positionY(5)
+                .whitePiece(false)
+                .build();
+        PieceDto blackKing = PieceDto.builder()
+                .id(3)
+                .pieceType(PieceType.KING)
+                .positionX(0)
+                .positionY(0)
+                .whitePiece(false)
+                .build();
+
+        List<PieceDto> whitePieces = List.of(whiteKing);
+        List<PieceDto> blackPieces = List.of(blackKing, blackTowerOne, blackTowerTwo);
+
+        Integer[][][] pieceMatrix = new Integer[8][8][1];
+        for (PieceDto piece : whitePieces) {
+            pieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[]{
+                    piece.getId(), Constants.WHITE_COLOR, piece.getPieceType().ordinal()
+            };
+        }
+        for (PieceDto piece : blackPieces) {
+            pieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[]{
+                    piece.getId(), Constants.BLACK_COLOR, piece.getPieceType().ordinal()
+            };
+        }
+
+        BoardDto boardDto = BoardDto.builder()
+                .whitePieces(whitePieces)
+                .blackPieces(blackPieces)
+                .histories(List.of())
+                .pieceMatrix(pieceMatrix)
+                .build();
+        GameDto gameDto = GameDto.builder()
+                .board(boardDto)
+                .whitePlayerUUID(whitePlayerUUID)
+                .blackPlayerUUID(blackPlayerUUID)
+                .whiteTurn(true)
+                .statusCached(false)
+                .build();
+
+        GameStatus expectedStatus = GameStatus.BLACK_WINS;
         GameStatus actualStatus = gameService.getGameStatus(gameDto);
 
         Assertions.assertEquals(expectedStatus, actualStatus);
