@@ -48,18 +48,20 @@ public interface GameService {
             case PAWN -> addPawnMoves(pieceMatrix, rowCol, moves, isWhite);
         }
 
+        int enemyColor = isWhite ? Constants.BLACK_COLOR : Constants.WHITE_COLOR;
+
         for (PositionDto move : moves) {
             Integer[] pieceInMatrix = pieceMatrix[move.getFirst()][move.getSecond()];
-            if (pieceInMatrix == null || pieceInMatrix[0] == null || pieceInMatrix[0] == 0) {
+            if (!hasPieceInteger(pieceInMatrix)) {
                 boolean canRoq = canRoque(game.getBoard(), piece);
-                if ((move.getSecond() == 6 || move.getSecond() == 2) && piece.getPieceType() == PieceType.KING && canRoq) {
+                int moveY = move.getSecond();
+
+                if ((moveY == 6 || moveY == 2) && piece.getPieceType() == PieceType.KING && canRoq) {
                     possibleMoves.add(new MoveDto(MoveType.ROQUE, move));
-                }
-                else {
+                } else {
                     possibleMoves.add(new MoveDto(MoveType.NORMAL, move));
                 }
-            } else if (pieceInMatrix[1] == Constants.WHITE_COLOR && !isWhite
-                    || pieceInMatrix[1] == Constants.BLACK_COLOR && isWhite) {
+            } else if (pieceInMatrix[1] == enemyColor) {
                 possibleMoves.add(new MoveDto(MoveType.CAPTURE, move));
             }
         }
@@ -82,30 +84,34 @@ public interface GameService {
         int x = isWhite ? 7 : 0;
         int color = isWhite ? Constants.WHITE_COLOR : Constants.BLACK_COLOR;
 
-        if (pieceMatrix[x][4] == null || pieceMatrix[x][4][0] == null || pieceMatrix[x][4][0] == 0 || pieceMatrix[x][4][1] != color) {
+        Integer[] kingPiece = pieceMatrix[x][4];
+        if (!hasPieceInteger(kingPiece) || kingPiece[1] != color || kingPiece[2] != PieceType.KING.ordinal()) {
             return;
         }
 
-        boolean leftRoque = true;
-        for (int i = 1; i < 4; i++) {
-            if (pieceMatrix[x][i] != null && pieceMatrix[x][i][0] != null && pieceMatrix[x][i][0] != 0) {
-                leftRoque = false;
+        addRoqueMove(pieceMatrix, moves, isWhite, false);
+        addRoqueMove(pieceMatrix, moves, isWhite, true);
+    }
+
+    private void addRoqueMove(Integer[][][] pieceMatrix, List<PositionDto> moves, boolean isWhite, boolean right) {
+        int i = right ? 5 : 1;
+        int n = right ? 7 : 4;
+        int x = isWhite ? 7 : 0;
+        int towerY = right ? 7 : 0;
+        int kingNewY = right ? 6 : 2;
+        int color = isWhite ? Constants.WHITE_COLOR : Constants.BLACK_COLOR;
+
+        boolean invalidRoque = true;
+        for (; i < n; i++) {
+            if (hasPieceInteger(pieceMatrix[x][i])) {
+                invalidRoque = false;
                 break;
             }
-        }
-        if (leftRoque && pieceMatrix[x][0] != null && pieceMatrix[x][0][0] != null && pieceMatrix[x][0][0] != 0 && pieceMatrix[x][0][1] == color && pieceMatrix[x][0][2] == PieceType.TOWER.ordinal()) {
-            moves.add(new PositionDto(x, 2));
         }
 
-        boolean rightRoque = true;
-        for (int i = 5; i < 7; i++) {
-            if (pieceMatrix[x][i] != null && pieceMatrix[x][i][0] != null && pieceMatrix[x][i][0] != 0) {
-                rightRoque = false;
-                break;
-            }
-        }
-        if (rightRoque && pieceMatrix[x][7] != null && pieceMatrix[x][7][0] != null && pieceMatrix[x][7][0] != 0 && pieceMatrix[x][7][1] == color && pieceMatrix[x][7][2] == PieceType.TOWER.ordinal()) {
-            moves.add(new PositionDto(x, 6));
+        Integer[] tower = pieceMatrix[x][towerY];
+        if (invalidRoque && hasPieceInteger(tower) && tower[1] == color && tower[2] == PieceType.TOWER.ordinal()) {
+            moves.add(new PositionDto(x, kingNewY));
         }
     }
 
@@ -201,6 +207,7 @@ public interface GameService {
         int col = rowCol[1];
         int ri = riCi[0];
         int ci = riCi[1];
+        int enemyColor = isWhite ? Constants.BLACK_COLOR : Constants.WHITE_COLOR;
 
         for (int i = 1; i <= length; i++) {
             int newRow = row + ri * i;
@@ -209,16 +216,19 @@ public interface GameService {
                 break;
             }
 
-            Integer[] pieceInMatrix = pieceMatrix[newRow][newCol];
-            if (pieceInMatrix != null && pieceInMatrix[0] != null && pieceInMatrix[0] != 0) {
-                if ((pieceInMatrix[1] == Constants.WHITE_COLOR && !isWhite
-                        || pieceInMatrix[1] == Constants.BLACK_COLOR && isWhite) && !isPawn) {
+            Integer[] piece = pieceMatrix[newRow][newCol];
+            if (hasPieceInteger(piece)) {
+                if (piece[1] == enemyColor && !isPawn) {
                     moves.add(new PositionDto(newRow, newCol));
                 }
                 break;
             }
             moves.add(new PositionDto(newRow, newCol));
         }
+    }
+
+    default boolean hasPieceInteger(Integer[] pieceInt) {
+        return pieceInt != null && pieceInt[0] != null && pieceInt[0] != 0;
     }
 
     private void addPawnCapture(Integer[][][] pieceMatrix,
@@ -237,9 +247,8 @@ public interface GameService {
             int y = col + (left ? -1 : 1);
 
             Integer[] leftPiece = pieceMatrix[x][y];
-            boolean hasPiece = leftPiece != null && leftPiece[0] != null;
-            if (hasPiece && (leftPiece[1] == Constants.WHITE_COLOR && !isWhite
-                    || leftPiece[1] == Constants.BLACK_COLOR && isWhite)) {
+            boolean hasPiece = hasPieceInteger(leftPiece);
+            if (hasPiece && (leftPiece[1] == Constants.WHITE_COLOR && !isWhite || leftPiece[1] == Constants.BLACK_COLOR && isWhite)) {
                 moves.add(new PositionDto(x, y));
             }
         }
@@ -399,7 +408,7 @@ public interface GameService {
         List<PieceDto> blackList = new ArrayList<>(boardDto.getBlackPieces());
         List<PieceDto> enemyList = pieceDto.getWhitePiece() ? blackList : whiteList;
 
-        if (possibleKilled != null && possibleKilled[0] != null) {
+        if (hasPieceInteger(possibleKilled)) {
             Pair<Integer, PieceDto> found = null;
             for (int i = 0; i < enemyList.size(); i++) {
                 if (enemyList.get(i).getId().equals(possibleKilled[0])) {
