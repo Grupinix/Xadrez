@@ -28,6 +28,8 @@ import java.util.UUID;
 
 public interface GameService {
 
+    PlayerService getPlayerService();
+
     default List<MoveDto> getPiecePossibleMoves(GameDto game,
                                                 PieceDto piece,
                                                 boolean isWhite) {
@@ -92,7 +94,7 @@ public interface GameService {
                 break;
             }
         }
-        if (leftRoque && pieceMatrix[x][0] != null && pieceMatrix[x][0][0] != null && pieceMatrix[x][7][0] != 0 && pieceMatrix[x][0][1] == color && pieceMatrix[x][0][2] == PieceType.TOWER.ordinal()) {
+        if (leftRoque && pieceMatrix[x][0] != null && pieceMatrix[x][0][0] != null && pieceMatrix[x][0][0] != 0 && pieceMatrix[x][0][1] == color && pieceMatrix[x][0][2] == PieceType.TOWER.ordinal()) {
             moves.add(new PositionDto(x, 2));
         }
 
@@ -271,42 +273,6 @@ public interface GameService {
                 .filter(pieceDto -> pieceDto.getPieceType() == pieceType)
                 .findFirst();
     }
-
-    private void changePawnForQueen(Game game, Board board, History history) {
-        List<Piece> pieceList = board.getWhitePieces();
-        Pair<Integer, Piece> piecePair;
-        List<Integer> pawns = new ArrayList<>();
-
-        for (int i = 0; i < pieceList.size(); i++) {
-            Piece p = pieceList.get(i);
-            if (!pawns.contains(p.getId()) && p.getPieceType() == PieceType.PAWN
-                    && p.getPositionX() == 0 && game.getWhiteTurn()) {
-                piecePair = Pair.of(i, p);
-                int removeIndex = piecePair.getFirst();
-                Piece pawnToQueen = piecePair.getSecond();
-                history.setKilledPiece(pawnToQueen.getPieceType());
-                pieceList.remove(removeIndex);
-                deleteEntity(pawnToQueen);
-
-                Piece newQueen = new Piece();
-                newQueen.setId(pawnToQueen.getId());
-                newQueen.setPieceType(PieceType.QUEEN);
-                newQueen.setPositionX(pawnToQueen.getPositionX());
-                newQueen.setPositionY(pawnToQueen.getPositionY());
-                newQueen.setWhiteBoard(board);
-                pieceList.add(newQueen);
-                PositionDto newQueenPos = new PositionDto(pawnToQueen.getPositionX(), pawnToQueen.getPositionY());
-                History newHistory = createHistory(board, newQueen, newQueenPos, true);
-                board.getHistories().add(newHistory);
-
-                board.setWhitePieces(pieceList);
-                board.setHistories(board.getHistories());
-                saveEntities(game, history, newQueen, board);
-                pawns.add(p.getId());
-            }
-        }
-    }
-
 
     default GameStatus getGameStatus(GameDto gameDto) {
         if (gameDto.getStatusCached()) {
@@ -616,6 +582,17 @@ public interface GameService {
             }
         }
 
+        if (piece.getPieceType() == PieceType.PAWN) {
+            UUID uuid = isWhite ? game.getWhitePlayerUUID() : game.getBlackPlayerUUID();
+            PieceType pieceType = getPlayerService().getPawnToPiece(uuid);
+            if (isWhite && position.getFirst() == 0) {
+                piece.setPieceType(pieceType);
+            }
+            else if (!isWhite && position.getFirst() == 7) {
+                piece.setPieceType(pieceType);
+            }
+        }
+
         piece.setPositionX(position.getFirst());
         piece.setPositionY(position.getSecond());
 
@@ -635,10 +612,6 @@ public interface GameService {
         saveEntities(game, history, piece, board);
         if (tower != null) {
             saveEntities(game, towerHistory, tower, board);
-        }
-
-        if (piece.getPieceType() == PieceType.PAWN) {
-            changePawnForQueen(game, board, history);
         }
     }
 

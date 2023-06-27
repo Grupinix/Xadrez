@@ -42,6 +42,8 @@ class ClassicPPGameServiceImplUnitTest {
     private PieceRepository pieceRepository;
     @Mock
     private HistoryRepository historyRepository;
+    @Mock
+    private PlayerService playerService;
 
     private GameService gameService;
 
@@ -52,7 +54,8 @@ class ClassicPPGameServiceImplUnitTest {
                 gameRepository,
                 historyRepository,
                 pieceRepository,
-                boardRepository
+                boardRepository,
+                playerService
         );
     }
 

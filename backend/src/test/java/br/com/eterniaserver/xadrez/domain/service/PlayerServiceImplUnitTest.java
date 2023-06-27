@@ -1,6 +1,7 @@
 package br.com.eterniaserver.xadrez.domain.service;
 
 import br.com.eterniaserver.xadrez.domain.enums.GameDifficulty;
+import br.com.eterniaserver.xadrez.domain.enums.PieceType;
 import br.com.eterniaserver.xadrez.domain.service.impl.PlayerServiceImpl;
 import br.com.eterniaserver.xadrez.rest.dtos.PlayerDto;
 import org.junit.jupiter.api.*;
@@ -98,5 +99,30 @@ class PlayerServiceImplUnitTest {
         Assertions.assertEquals(GameDifficulty.NORMAL, gameDifficulty);
     }
 
+    @Test
+    void verifyPawnToPieceNullIsQueen() {
+        PlayerDto playerRegistered = playerService.register(VALID);
+
+        playerService.setPawnToPiece(playerRegistered.getUuid(), null);
+        PieceType pieceType = playerService.getPawnToPiece(playerRegistered.getUuid());
+
+        Assertions.assertEquals(PieceType.QUEEN, pieceType);
+    }
+
+    @Test
+    void verifyPawnToPiece() {
+        PlayerDto playerRegistered = playerService.register(VALID);
+
+        playerService.setPawnToPiece(playerRegistered.getUuid(), PieceType.TOWER);
+        PieceType pieceType = playerService.getPawnToPiece(playerRegistered.getUuid());
+
+        Assertions.assertEquals(pieceType, PieceType.TOWER);
+    }
+
+    @Test
+    void verifyUUIDNull() {
+        PieceType pieceType = playerService.getPawnToPiece(null);
+        Assertions.assertEquals(pieceType, PieceType.QUEEN);
+    }
 
 }

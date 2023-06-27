@@ -1,6 +1,7 @@
 package br.com.eterniaserver.xadrez.domain.service.impl;
 
 import br.com.eterniaserver.xadrez.domain.enums.GameDifficulty;
+import br.com.eterniaserver.xadrez.domain.enums.PieceType;
 import br.com.eterniaserver.xadrez.domain.service.PlayerService;
 import br.com.eterniaserver.xadrez.rest.dtos.PlayerDto;
 import lombok.AllArgsConstructor;
@@ -18,6 +19,7 @@ public class PlayerServiceImpl implements PlayerService {
 
     private static final Map<UUID, PlayerDto> uuidIdentifierMap = new HashMap<>();
     private static final Map<UUID, GameDifficulty> uuidGameDifficultyMap = new HashMap<>();
+    private static final Map<UUID, PieceType> pawnToPiece = new HashMap<>();
 
     @Override
     public PlayerDto register(String identifier) throws ResponseStatusException {
@@ -65,6 +67,26 @@ public class PlayerServiceImpl implements PlayerService {
         uuidGameDifficultyMap.put(uuid, gameDifficulty);
 
         return gameDifficulty;
+    }
+
+    @Override
+    public void setPawnToPiece(UUID uuid, PieceType piece) {
+        pawnToPiece.put(uuid, piece);
+    }
+
+    @Override
+    public PieceType getPawnToPiece(UUID uuid) {
+        if (uuid == null) {
+            return PieceType.QUEEN;
+        }
+
+        PieceType piece = pawnToPiece.get(uuid);
+        if (piece != null) {
+            return piece;
+        }
+
+        pawnToPiece.put(uuid, PieceType.QUEEN);
+        return PieceType.QUEEN;
     }
 
 }
