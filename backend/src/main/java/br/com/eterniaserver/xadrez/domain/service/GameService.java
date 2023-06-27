@@ -11,6 +11,7 @@ import br.com.eterniaserver.xadrez.domain.enums.MoveType;
 import br.com.eterniaserver.xadrez.domain.enums.PieceType;
 import br.com.eterniaserver.xadrez.rest.dtos.BoardDto;
 import br.com.eterniaserver.xadrez.rest.dtos.GameDto;
+import br.com.eterniaserver.xadrez.rest.dtos.HistoryDto;
 import br.com.eterniaserver.xadrez.rest.dtos.MoveDto;
 import br.com.eterniaserver.xadrez.rest.dtos.PieceDto;
 import br.com.eterniaserver.xadrez.rest.dtos.PositionDto;
@@ -56,6 +57,10 @@ public interface GameService {
                     || pieceInMatrix[1] == Constants.BLACK_COLOR && isWhite) {
                 possibleMoves.add(new MoveDto(MoveType.CAPTURE, move));
             }
+            else if (pieceInMatrix[1] == Constants.WHITE_COLOR
+                    && pieceInMatrix[2] == PieceType.TOWER.ordinal() && checkForLongRock(game.getBoard())) {
+                possibleMoves.add(new MoveDto(MoveType.ROQUE, move));
+            }
         }
 
         return possibleMoves;
@@ -69,7 +74,14 @@ public interface GameService {
 
         addMovesInAllDirections(pieceMatrix, rowCol, moves, 1, isWhite);
         addDiagonalMoves(pieceMatrix, rowCol, moves, 1, isWhite);
+        addLongRockMove(moves, isWhite);
+    }
 
+    private void addLongRockMove(List<PositionDto> moves,
+                                 boolean isWhite) {
+        if(isWhite) {
+            moves.add(new PositionDto(7, 0));
+        }
     }
 
     private void addQueenMoves(Integer[][][] pieceMatrix,
@@ -183,7 +195,6 @@ public interface GameService {
             }
             moves.add(new PositionDto(newRow, newCol));
         }
-
     }
 
     private void addPawnCapture(Integer[][][] pieceMatrix,
@@ -236,6 +247,23 @@ public interface GameService {
         return pieceDtoList.stream()
                            .filter(pieceDto -> pieceDto.getPieceType() == pieceType)
                            .findFirst();
+    }
+
+    private boolean checkForLongRock(BoardDto boardDto) {
+        Integer[][][] pieceMatrix = boardDto.getPieceMatrix();
+
+        HistoryDto towerHist = boardDto.getHistories().stream()
+                .filter(h -> h.getPieceType() == PieceType.TOWER && h.getIsWhite())
+                .findFirst()
+                .orElse(null);
+
+        HistoryDto kingHist = boardDto.getHistories().stream()
+                .filter(h -> h.getPieceType() == PieceType.KING && h.getIsWhite())
+                .findFirst()
+                .orElse(null);
+
+        return (towerHist == null && kingHist == null && pieceMatrix[7][1][0] == null
+                && pieceMatrix[7][2][0] == null && pieceMatrix[7][3][0] == null);
     }
 
     private void changePawnForQueen(Game game, Board board, History history) {
@@ -401,6 +429,7 @@ public interface GameService {
         List<PieceDto> blackList = new ArrayList<>(boardDto.getBlackPieces());
         List<PieceDto> enemyList = pieceDto.getWhitePiece() ? blackList : whiteList;
 
+
         if (possibleKilled != null && possibleKilled[0] != null) {
             Pair<Integer, PieceDto> found = null;
             for (int i = 0; i < enemyList.size(); i++) {
@@ -510,6 +539,13 @@ public interface GameService {
                     .orElse(null);
 
             if (tempPieceDto != null && whiteKing != null && blackKing != null) {
+                if(pieceDto.getPieceType() == PieceType.KING && pieceDto.getWhitePiece() && checkForLongRock(tempBoard)) {
+                    PositionDto towerPos = new PositionDto(7, 0);
+                    MoveDto longRock = new MoveDto(MoveType.ROQUE, towerPos);
+                    validMoves.add(longRock);
+                    movePieceOnBoardDto(tempGame, tempPieceDto, longRock);
+                }
+
                 movePieceOnBoardDto(tempGame, tempPieceDto, move);
 
                 tempGame.setStatusCached(false);

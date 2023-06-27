@@ -113,7 +113,7 @@ public class GameController {
         List<GameStatus> validStatus = isWhitePlayer
                 ? List.of(GameStatus.NORMAL, GameStatus.WHITE_CHECK, GameStatus.WHITE_WINS)
                 : List.of(GameStatus.NORMAL, GameStatus.BLACK_CHECK, GameStatus.BLACK_WINS);
-
+        
         return gameService.getValidMoves(possibleMoves, validStatus, gameDto, pieceDto, isWhiteTurn);
     }
 
