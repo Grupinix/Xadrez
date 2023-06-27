@@ -628,7 +628,7 @@ public interface GameService {
 
         if (isWhite) {
             game.setWhiteMoves(game.getWhiteMoves() + 1);
-        else {
+        } else {
             game.setBlackMoves(game.getBlackMoves() + 1);
         }
 
