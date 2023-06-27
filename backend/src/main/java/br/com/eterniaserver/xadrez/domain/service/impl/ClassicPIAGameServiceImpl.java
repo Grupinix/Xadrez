@@ -38,11 +38,6 @@ public class ClassicPIAGameServiceImpl implements GameService {
     private final PlayerService playerService;
 
     @Override
-    public PlayerService getPlayerService() {
-        return playerService;
-    }
-
-    @Override
     public List<Game> getAllGames() {
         return null;
     }

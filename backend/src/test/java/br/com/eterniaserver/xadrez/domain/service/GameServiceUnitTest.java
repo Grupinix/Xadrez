@@ -35,10 +35,6 @@ class GameServiceUnitTest {
     @BeforeEach
     void init() {
         gameService = new GameService() {
-            @Override
-            public PlayerService getPlayerService() {
-                return null;
-            }
 
             @Override
             public List<Game> getAllGames() {

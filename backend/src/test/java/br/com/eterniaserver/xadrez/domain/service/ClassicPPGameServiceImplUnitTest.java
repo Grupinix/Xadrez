@@ -54,8 +54,7 @@ class ClassicPPGameServiceImplUnitTest {
                 gameRepository,
                 historyRepository,
                 pieceRepository,
-                boardRepository,
-                playerService
+                boardRepository
         );
     }
 

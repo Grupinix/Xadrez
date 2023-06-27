@@ -21,6 +21,4 @@ public interface PlayerService {
 
     void setPawnToPiece(UUID uuid, PieceType piece);
 
-    PieceType getPawnToPiece(UUID uuid);
-
 }

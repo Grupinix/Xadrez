@@ -74,8 +74,7 @@ public class PlayerServiceImpl implements PlayerService {
         pawnToPiece.put(uuid, piece);
     }
 
-    @Override
-    public PieceType getPawnToPiece(UUID uuid) {
+    public static PieceType getPawnToPiece(UUID uuid) {
         if (uuid == null) {
             return PieceType.QUEEN;
         }

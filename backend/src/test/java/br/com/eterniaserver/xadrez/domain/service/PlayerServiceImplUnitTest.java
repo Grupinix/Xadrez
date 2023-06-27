@@ -104,7 +104,7 @@ class PlayerServiceImplUnitTest {
         PlayerDto playerRegistered = playerService.register(VALID);
 
         playerService.setPawnToPiece(playerRegistered.getUuid(), null);
-        PieceType pieceType = playerService.getPawnToPiece(playerRegistered.getUuid());
+        PieceType pieceType = PlayerServiceImpl.getPawnToPiece(playerRegistered.getUuid());
 
         Assertions.assertEquals(PieceType.QUEEN, pieceType);
     }
@@ -114,14 +114,14 @@ class PlayerServiceImplUnitTest {
         PlayerDto playerRegistered = playerService.register(VALID);
 
         playerService.setPawnToPiece(playerRegistered.getUuid(), PieceType.TOWER);
-        PieceType pieceType = playerService.getPawnToPiece(playerRegistered.getUuid());
+        PieceType pieceType = PlayerServiceImpl.getPawnToPiece(playerRegistered.getUuid());
 
         Assertions.assertEquals(pieceType, PieceType.TOWER);
     }
 
     @Test
     void verifyUUIDNull() {
-        PieceType pieceType = playerService.getPawnToPiece(null);
+        PieceType pieceType = PlayerServiceImpl.getPawnToPiece(null);
         Assertions.assertEquals(pieceType, PieceType.QUEEN);
     }
 

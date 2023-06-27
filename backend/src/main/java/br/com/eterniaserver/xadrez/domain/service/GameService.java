@@ -9,6 +9,7 @@ import br.com.eterniaserver.xadrez.domain.enums.GameStatus;
 import br.com.eterniaserver.xadrez.domain.enums.MoveType;
 
 import br.com.eterniaserver.xadrez.domain.enums.PieceType;
+import br.com.eterniaserver.xadrez.domain.service.impl.PlayerServiceImpl;
 import br.com.eterniaserver.xadrez.rest.dtos.BoardDto;
 import br.com.eterniaserver.xadrez.rest.dtos.GameDto;
 import br.com.eterniaserver.xadrez.rest.dtos.HistoryDto;
@@ -27,8 +28,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface GameService {
-
-    PlayerService getPlayerService();
 
     default List<MoveDto> getPiecePossibleMoves(GameDto game,
                                                 PieceDto piece,
@@ -584,7 +583,7 @@ public interface GameService {
 
         if (piece.getPieceType() == PieceType.PAWN) {
             UUID uuid = isWhite ? game.getWhitePlayerUUID() : game.getBlackPlayerUUID();
-            PieceType pieceType = getPlayerService().getPawnToPiece(uuid);
+            PieceType pieceType = PlayerServiceImpl.getPawnToPiece(uuid);
             if (isWhite && position.getFirst() == 0) {
                 piece.setPieceType(pieceType);
             }

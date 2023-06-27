@@ -34,12 +34,6 @@ public class ClassicPPGameServiceImpl implements GameService {
     private final HistoryRepository historyRepository;
     private final PieceRepository pieceRepository;
     private final BoardRepository boardRepository;
-    private final PlayerService playerService;
-
-    @Override
-    public PlayerService getPlayerService() {
-        return playerService;
-    }
 
     @Override
     public List<Game> getAllGames() {
