@@ -1286,6 +1286,74 @@ class GameServiceUnitTest {
     }
 
     @Test
+    void testPlayerLegalMovesBlackPawnMovesWithPieceInFront() {
+        PieceDto whiteKing = PieceDto.builder()
+                .pieceType(PieceType.KING)
+                .positionX(2)
+                .positionY(5)
+                .id(1)
+                .whitePiece(true)
+                .build();
+        PieceDto blackKing = PieceDto.builder()
+                .pieceType(PieceType.KING)
+                .positionX(4)
+                .positionY(6)
+                .id(3)
+                .whitePiece(false)
+                .build();
+        PieceDto blackPawn = PieceDto.builder()
+                .pieceType(PieceType.PAWN)
+                .positionX(1)
+                .positionY(0)
+                .id(2)
+                .whitePiece(false)
+                .build();
+        PieceDto whitePawn = PieceDto.builder()
+                .pieceType(PieceType.PAWN)
+                .positionX(2)
+                .positionY(0)
+                .id(2)
+                .whitePiece(true)
+                .build();
+
+        List<PieceDto> whitePieces = List.of(whiteKing, whitePawn);
+        List<PieceDto> blackPieces = List.of(blackKing, blackPawn);
+
+        Integer[][][] pieceMatrix = new Integer[8][8][1];
+        for (PieceDto piece : whitePieces) {
+            pieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[]{
+                    piece.getId(), Constants.WHITE_COLOR, piece.getPieceType().ordinal()
+            };
+        }
+        for (PieceDto piece : blackPieces) {
+            pieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[]{
+                    piece.getId(), Constants.BLACK_COLOR, piece.getPieceType().ordinal()
+            };
+        }
+
+        BoardDto boardDto = BoardDto.builder()
+                .whitePieces(whitePieces)
+                .blackPieces(blackPieces)
+                .histories(List.of())
+                .pieceMatrix(pieceMatrix)
+                .build();
+        GameDto gameDto = GameDto.builder()
+                .board(boardDto)
+                .whitePlayerUUID(whitePlayerUUID)
+                .blackPlayerUUID(blackPlayerUUID)
+                .whiteTurn(false)
+                .build();
+
+        Map<PieceDto, List<MoveDto>> legalMoves = gameService.getPlayerLegalMoves(gameDto, Constants.BLACK_COLOR);
+
+        Assertions.assertEquals(8, legalMoves.get(blackKing).size());
+        for (MoveDto move : legalMoves.get(blackKing)) {
+            Assertions.assertEquals(MoveType.NORMAL, move.getFirst());
+        }
+        Assertions.assertEquals(0, legalMoves.get(blackPawn).size());
+    }
+
+    @Test
     void testPlayerLegalMovesBlackPawnMoves() {
         PieceDto whiteKing = PieceDto.builder()
                 .pieceType(PieceType.KING)

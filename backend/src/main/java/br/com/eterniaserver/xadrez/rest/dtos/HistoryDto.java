@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 public class HistoryDto {
 
     private Integer id;
+    private Integer pieceId;
     private PieceType pieceType;
     private Boolean isWhite;
     private Integer oldPositionX;
@@ -24,6 +25,7 @@ public class HistoryDto {
     public HistoryDto copy() {
         return HistoryDto.builder()
                          .id(getId())
+                         .pieceId(getPieceId())
                          .pieceType(getPieceType())
                          .isWhite(getIsWhite())
                          .oldPositionX(getOldPositionX())

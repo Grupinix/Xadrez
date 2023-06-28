@@ -50,6 +50,16 @@ public interface GameService {
 
         int enemyColor = isWhite ? Constants.BLACK_COLOR : Constants.WHITE_COLOR;
 
+        if (piece.getPieceType() == PieceType.PAWN && isWhite == game.getWhiteTurn()) {
+            int pieceX = piece.getPositionX();
+            int pieceY = piece.getPositionY();
+
+            if (isWhite && pieceX == 3 || !isWhite && pieceY == 4) {
+                addEnPassant(pieceMatrix, game, possibleMoves, -1, pieceX, pieceY, enemyColor);
+                addEnPassant(pieceMatrix, game, possibleMoves, 1, pieceX, pieceY, enemyColor);
+            }
+        }
+
         for (PositionDto move : moves) {
             Integer[] pieceInMatrix = pieceMatrix[move.getFirst()][move.getSecond()];
             if (!hasPieceInteger(pieceInMatrix)) {
@@ -61,13 +71,44 @@ public interface GameService {
                 } else {
                     possibleMoves.add(new MoveDto(MoveType.NORMAL, move));
                 }
-            } else if (pieceInMatrix[1] == enemyColor) {
+            } else if (isEnemy(pieceInMatrix, enemyColor)) {
                 possibleMoves.add(new MoveDto(MoveType.CAPTURE, move));
             }
         }
 
         return possibleMoves;
 
+    }
+
+    private void addEnPassant(Integer[][][] pieceMatrix,
+                              GameDto gameDto,
+                              List<MoveDto> possibleMoves,
+                              int side,
+                              int pieceX,
+                              int pieceY,
+                              int enemyColor) {
+        List<HistoryDto> histories = gameDto.getBoard().getHistories();
+
+        if (pieceY + side > 0 && pieceY + side < 8) {
+            final Integer[] pawn = pieceMatrix[pieceX][pieceY + side];
+            if (hasPieceInteger(pawn) && isEnemy(pawn, enemyColor) && isPieceType(pawn, PieceType.PAWN)) {
+                long enemyMoves = histories.stream().filter(h -> h.getPieceId().equals(pawn[0])).count();
+                if (enemyMoves == 1) {
+                    int multiplier = enemyColor == Constants.WHITE_COLOR ? 1 : -1;
+                    possibleMoves.add(
+                            new MoveDto(MoveType.EN_PASSANT, new PositionDto(pieceX + multiplier, pieceY + side))
+                    );
+                }
+            }
+        }
+    }
+
+    private boolean isPieceType(Integer[] pieceMatrix, PieceType pieceType) {
+        return pieceMatrix[2] == pieceType.ordinal();
+    }
+
+    private boolean isEnemy(Integer[] pieceMatrix, int enemyColor) {
+        return pieceMatrix[1] == enemyColor;
     }
 
     private void addKingMoves(Integer[][][] pieceMatrix,
@@ -110,7 +151,7 @@ public interface GameService {
         }
 
         Integer[] tower = pieceMatrix[x][towerY];
-        if (invalidRoque && hasPieceInteger(tower) && tower[1] == color && tower[2] == PieceType.TOWER.ordinal()) {
+        if (invalidRoque && hasPieceInteger(tower) && tower[1] == color && isPieceType(tower, PieceType.TOWER)) {
             moves.add(new PositionDto(x, kingNewY));
         }
     }
@@ -160,7 +201,9 @@ public interface GameService {
 
         if ((rowCol[0] == 1 && !isWhite) || (rowCol[0] == 6 && isWhite)) {
             addMovesInDirection(pieceMatrix, rowCol, moves, 1, new int[]{multiplier, 0}, isWhite, true);
-            addMovesInDirection(pieceMatrix, rowCol, moves, 1, new int[]{2 * multiplier, 0}, isWhite, true);
+            if (!hasPieceInteger(pieceMatrix[rowCol[0] + multiplier][rowCol[1]])) {
+                addMovesInDirection(pieceMatrix, rowCol, moves, 1, new int[]{2 * multiplier, 0}, isWhite, true);
+            }
         } else {
             addMovesInDirection(pieceMatrix, rowCol, moves, 1, new int[]{multiplier, 0}, isWhite, true);
         }
@@ -408,7 +451,22 @@ public interface GameService {
         List<PieceDto> blackList = new ArrayList<>(boardDto.getBlackPieces());
         List<PieceDto> enemyList = pieceDto.getWhitePiece() ? blackList : whiteList;
 
-        if (hasPieceInteger(possibleKilled)) {
+        if (moveDto.getFirst() == MoveType.EN_PASSANT) {
+            int multiplier = pieceDto.getWhitePiece() ? 1 : -1;
+            int pawnX = x + multiplier;
+            Pair<Integer, PieceDto> found = null;
+            for (int i = 0; i < enemyList.size(); i++) {
+                if (enemyList.get(i).getPositionX() == pawnX && enemyList.get(i).getPositionY() == y) {
+                    found = Pair.of(i, enemyList.get(i));
+                    break;
+                }
+            }
+            if (found != null) {
+                int index = found.getFirst();
+                enemyList.remove(index);
+            }
+        }
+        else if (hasPieceInteger(possibleKilled)) {
             Pair<Integer, PieceDto> found = null;
             for (int i = 0; i < enemyList.size(); i++) {
                 if (enemyList.get(i).getId().equals(possibleKilled[0])) {
@@ -553,7 +611,7 @@ public interface GameService {
         }
 
         for (HistoryDto history : boardDto.getHistories()) {
-            if (history.getId().equals(pieceDto.getId())) {
+            if (history.getPieceId().equals(pieceDto.getId())) {
                 return false;
             }
         }
@@ -573,9 +631,24 @@ public interface GameService {
 
         Piece tower = null;
         List<Piece> pieces = isWhite ? board.getWhitePieces() : board.getBlackPieces();
+        List<Piece> enemyPieces = isWhite ? board.getBlackPieces() : board.getWhitePieces();
 
         if (moveType == MoveType.CAPTURE) {
             handleCapture(board, position, history, isWhite);
+        }
+        else if (moveType == MoveType.EN_PASSANT) {
+            int multiplier = isWhite ? 1 : -1;
+            int pawnX = position.getFirst() + multiplier;
+            int pawnY = position.getSecond();
+
+            for (Piece maybePawn : enemyPieces) {
+                if (maybePawn.getPieceType() == PieceType.PAWN
+                        && maybePawn.getPositionX() == pawnX
+                        && maybePawn.getPositionY() == pawnY) {
+                    removeCapturedPiece(board, maybePawn.getId(), history, isWhite);
+                    break;
+                }
+            }
         }
         else if (moveType == MoveType.ROQUE) {
             if (position.getSecond() == 2) {
@@ -636,6 +709,7 @@ public interface GameService {
 
     private History createHistory(Board board, Piece piece, PositionDto position, boolean isWhite) {
         History history = new History();
+        history.setPieceId(piece.getId());
         history.setOldPositionX(piece.getPositionX());
         history.setOldPositionY(piece.getPositionY());
         history.setNewPositionX(position.getFirst());
