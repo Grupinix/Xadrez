@@ -184,12 +184,12 @@
     }
   }
 
-  function getPieceName(piece: PieceDto) {
+  function getPieceName(piece: GameMatrixPiece) {
     const pieceColor = piece.whitePiece ? "_WHITE" : "_BLACK";
     return `${piece.pieceType}${pieceColor}`;
   }
 
-  function getPieceImage(piece: PieceDto) {
+  function getPieceImage(piece: GameMatrixPiece) {
     const pieceName = getPieceName(piece);
     return pieceImages.value[pieceName];
   }
@@ -321,6 +321,7 @@
     const gameType = iaGameDto.value.gameType;
     const gameId = iaGameDto.value.id;
     const pieceId = selectedPiece.value.id;
+    const pieceType = selectedPiece.value.pieceType;
 
 
     const loading = ElLoading.service({
@@ -330,25 +331,62 @@
     });
 
     setPieceSelected(0);
+    if (move.second.first === 0 && pieceType === "PAWN") {
+      ElMessageBox.prompt("Escolha a peça para promoção, as válidas são: 'rainha', 'torre', 'cavalo', 'bispo'", "Promoção", {
+        showCancelButton: false,
+        confirmButtonText: "Confirmar",
+        inputPattern: /^(?:\s|^)(rainha|torre|cavalo|bispo)(?=\s|$)$/,
+        inputErrorMessage: "Peça inválida",
+      }).then(({ value }) => {
+        const rightValue: string = {
+          rainha: "QUEEN",
+          torre: "TOWER",
+          cavalo: "HORSE",
+          bispo: "BISHOP",
+        }[value] || "QUEEN";
 
-    GameService.movePiece(gameType, gameId, uuid, pieceId, move)
-      .then((response) => {
-        response.json().then((result) => {
-          if (result) {
-            iaGameDto.value = result;
-            localStorage.setItem("iaGameDto", JSON.stringify(result));
-            verifyGameStatus(false);
-            clearGameMatrix();
-            fillGameMatrix(result.board.whitePieces);
-            fillGameMatrix(result.board.blackPieces);
-            loading.close();
-            whiteTurn.value = false;
-          }
+        PlayerService.setPawnPromotion(playerDto.value, rightValue).then(() => {
+          GameService.movePiece(gameType, gameId, uuid, pieceId, move)
+            .then((response) => {
+              response.json().then((result) => {
+                if (result) {
+                  iaGameDto.value = result;
+                  localStorage.setItem("iaGameDto", JSON.stringify(result));
+                  verifyGameStatus(false);
+                  clearGameMatrix();
+                  fillGameMatrix(result.board.whitePieces);
+                  fillGameMatrix(result.board.blackPieces);
+                  loading.close();
+                  whiteTurn.value = false;
+                }
+              });
+            })
+            .catch(() => {
+              loading.close();
+            });
         });
-      })
-      .catch(() => {
-        loading.close();
       });
+    }
+    else {
+      GameService.movePiece(gameType, gameId, uuid, pieceId, move)
+        .then((response) => {
+          response.json().then((result) => {
+            if (result) {
+              iaGameDto.value = result;
+              localStorage.setItem("iaGameDto", JSON.stringify(result));
+              verifyGameStatus(false);
+              clearGameMatrix();
+              fillGameMatrix(result.board.whitePieces);
+              fillGameMatrix(result.board.blackPieces);
+              loading.close();
+              whiteTurn.value = false;
+            }
+          });
+        })
+        .catch(() => {
+          loading.close();
+        });
+    }
   }
 
   function getPossibleMoves(piece: GameMatrixPiece) {

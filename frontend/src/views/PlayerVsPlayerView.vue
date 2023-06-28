@@ -192,12 +192,12 @@
     }
   }
 
-  function getPieceName(piece: PieceDto) {
+  function getPieceName(piece: GameMatrixPiece) {
     const pieceColor = piece.whitePiece ? "_WHITE" : "_BLACK";
     return `${piece.pieceType}${pieceColor}`;
   }
 
-  function getPieceImage(piece: PieceDto) {
+  function getPieceImage(piece: GameMatrixPiece) {
     const pieceName = getPieceName(piece);
     return pieceImages.value[pieceName];
   }
@@ -329,6 +329,7 @@
     const gameType = playerGameDto.value.gameType;
     const gameId = playerGameDto.value.id;
     const pieceId = selectedPiece.value.id;
+    const pieceType = selectedPiece.value.pieceType;
 
     const loading = ElLoading.service({
       lock: true,
@@ -337,37 +338,86 @@
     });
 
     setPieceSelected(0);
+    if (move.second.first === 0 && pieceType === "PAWN") {
+      ElMessageBox.prompt("Escolha a peça para promoção, as válidas são: 'rainha', 'torre', 'cavalo', 'bispo'", "Promoção", {
+        showCancelButton: false,
+        confirmButtonText: "Confirmar",
+        inputPattern: /^(?:\s|^)(rainha|torre|cavalo|bispo)(?=\s|$)$/,
+        inputErrorMessage: "Peça inválida",
+      }).then(({ value }) => {
+        const rightValue: string = {
+          rainha: "QUEEN",
+          torre: "TOWER",
+          cavalo: "HORSE",
+          bispo: "BISHOP",
+        }[value] || "QUEEN";
 
-    GameService.movePiece(gameType, gameId, uuid, pieceId, move)
-      .then((response) => {
-        response.json().then((result) => {
-          if (result) {
-            playerGameDto.value = result;
-            PlayerService.get(playerGameDto.value.whitePlayerUUID).then((rp) => {
-              rp.json().then((rs) => {
-                playerGameDto.value.whitePlayerIdentifier = rs.identifier;
+        PlayerService.setPawnPromotion(playerDto.value, rightValue).then(() => {
+          GameService.movePiece(gameType, gameId, uuid, pieceId, move)
+            .then((response) => {
+              response.json().then((result) => {
+                if (result) {
+                  playerGameDto.value = result;
+                  PlayerService.get(playerGameDto.value.whitePlayerUUID).then((rp) => {
+                    rp.json().then((rs) => {
+                      playerGameDto.value.whitePlayerIdentifier = rs.identifier;
+                    });
+                  });
+                  if (playerGameDto.value.blackPlayerUUID) {
+                    PlayerService.get(playerGameDto.value.blackPlayerUUID).then((rp) => {
+                      rp.json().then((rs) => {
+                        playerGameDto.value.blackPlayerIdentifier = rs.identifier;
+                      });
+                    });
+                  }
+                  localStorage.setItem("playerGameDto", JSON.stringify(result));
+                  verifyGameStatus(false);
+                  clearGameMatrix();
+                  fillGameMatrix(result.board.whitePieces);
+                  fillGameMatrix(result.board.blackPieces);
+                  loading.close();
+                  actualTurn.value = false;
+                }
               });
+            })
+            .catch(() => {
+              loading.close();
             });
-            if (playerGameDto.value.blackPlayerUUID) {
-              PlayerService.get(playerGameDto.value.blackPlayerUUID).then((rp) => {
+        });
+      });
+    }
+    else {
+      GameService.movePiece(gameType, gameId, uuid, pieceId, move)
+        .then((response) => {
+          response.json().then((result) => {
+            if (result) {
+              playerGameDto.value = result;
+              PlayerService.get(playerGameDto.value.whitePlayerUUID).then((rp) => {
                 rp.json().then((rs) => {
-                  playerGameDto.value.blackPlayerIdentifier = rs.identifier;
+                  playerGameDto.value.whitePlayerIdentifier = rs.identifier;
                 });
               });
+              if (playerGameDto.value.blackPlayerUUID) {
+                PlayerService.get(playerGameDto.value.blackPlayerUUID).then((rp) => {
+                  rp.json().then((rs) => {
+                    playerGameDto.value.blackPlayerIdentifier = rs.identifier;
+                  });
+                });
+              }
+              localStorage.setItem("playerGameDto", JSON.stringify(result));
+              verifyGameStatus(false);
+              clearGameMatrix();
+              fillGameMatrix(result.board.whitePieces);
+              fillGameMatrix(result.board.blackPieces);
+              loading.close();
+              actualTurn.value = false;
             }
-            localStorage.setItem("playerGameDto", JSON.stringify(result));
-            verifyGameStatus(false);
-            clearGameMatrix();
-            fillGameMatrix(result.board.whitePieces);
-            fillGameMatrix(result.board.blackPieces);
-            loading.close();
-            actualTurn.value = false;
-          }
+          });
+        })
+        .catch(() => {
+          loading.close();
         });
-      })
-      .catch(() => {
-        loading.close();
-      });
+    }
   }
 
   function getPossibleMoves(piece: GameMatrixPiece) {

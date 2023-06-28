@@ -12,6 +12,14 @@ export default {
     });
   },
 
+  setPawnPromotion(playerDto: PlayerDto, piece: string): Promise<Response> {
+    return fetch(`${url}/setPawnToPiece/${piece}/`, {
+      method: "PUT",
+      headers: headers,
+      body: JSON.stringify(playerDto),
+    });
+  },
+
   register(identifier: string): Promise<Response> {
     return fetch(`${url}/${identifier}/`, {
       method: "PUT",
