@@ -15,6 +15,9 @@ public class History {
     @Column(name = "id", nullable = false)
     private Integer id;
 
+    @Column(name = "piece_id")
+    private Integer pieceId;
+
     @ManyToOne
     @JoinColumn(name = "board_id", nullable = false)
     private Board board;
@@ -45,6 +48,7 @@ public class History {
     public HistoryDto getHistoryDto() {
         return HistoryDto.builder()
                 .id(getId())
+                .pieceId(getPieceId())
                 .pieceType(getPieceType())
                 .isWhite(getIsWhite())
                 .oldPositionX(getOldPositionX())

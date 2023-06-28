@@ -1,6 +1,7 @@
 package br.com.eterniaserver.xadrez.rest.controllers;
 
 import br.com.eterniaserver.xadrez.domain.enums.GameDifficulty;
+import br.com.eterniaserver.xadrez.domain.enums.PieceType;
 import br.com.eterniaserver.xadrez.domain.service.PlayerService;
 import br.com.eterniaserver.xadrez.rest.dtos.PlayerDto;
 
@@ -42,6 +43,12 @@ public class PlayerController {
         playerDto.setGameDifficulty(gameDifficulty);
         playerService.setGameDifficulty(playerDto.getUuid(), gameDifficulty);
         return playerDto;
+    }
+
+    @PutMapping("setPawnToPiece/{piece}/")
+    @ResponseStatus(HttpStatus.OK)
+    public void setPawnToPiece(@PathVariable PieceType piece, @RequestBody PlayerDto playerDto) {
+        playerService.setPawnToPiece(playerDto.getUuid(), piece);
     }
 
 }

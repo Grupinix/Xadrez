@@ -35,6 +35,7 @@ class GameServiceUnitTest {
     @BeforeEach
     void init() {
         gameService = new GameService() {
+
             @Override
             public List<Game> getAllGames() {
                 return null;
@@ -160,6 +161,19 @@ class GameServiceUnitTest {
     }
 
     @Test
+    void testGameStatusCached() {
+        GameDto gameDto = GameDto.builder()
+                .statusCached(true)
+                .gameStatus(GameStatus.WHITE_WINS)
+                .build();
+
+        GameStatus expectStatus = GameStatus.WHITE_WINS;
+        GameStatus actualStatus = gameService.getGameStatus(gameDto);
+
+        Assertions.assertEquals(expectStatus, actualStatus);
+    }
+
+    @Test
     void testWhiteCheck() {
         PieceDto whiteKing = PieceDto.builder()
                 .id(1)
@@ -188,12 +202,12 @@ class GameServiceUnitTest {
 
         Integer[][][] pieceMatrix = new Integer[8][8][1];
         for (PieceDto piece : whitePieces) {
-            pieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[] {
+            pieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[]{
                     piece.getId(), Constants.WHITE_COLOR, piece.getPieceType().ordinal()
             };
         }
         for (PieceDto piece : blackPieces) {
-            pieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[] {
+            pieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[]{
                     piece.getId(), Constants.BLACK_COLOR, piece.getPieceType().ordinal()
             };
         }
@@ -246,12 +260,12 @@ class GameServiceUnitTest {
 
         Integer[][][] pieceMatrix = new Integer[8][8][1];
         for (PieceDto piece : whitePieces) {
-            pieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[] {
+            pieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[]{
                     piece.getId(), Constants.WHITE_COLOR, piece.getPieceType().ordinal()
             };
         }
         for (PieceDto piece : blackPieces) {
-            pieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[] {
+            pieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[]{
                     piece.getId(), Constants.BLACK_COLOR, piece.getPieceType().ordinal()
             };
         }
@@ -337,12 +351,12 @@ class GameServiceUnitTest {
 
         Integer[][][] pieceMatrix = new Integer[8][8][1];
         for (PieceDto piece : whitePieces) {
-            pieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[] {
+            pieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[]{
                     piece.getId(), Constants.WHITE_COLOR, piece.getPieceType().ordinal()
             };
         }
         for (PieceDto piece : blackPieces) {
-            pieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[] {
+            pieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[]{
                     piece.getId(), Constants.BLACK_COLOR, piece.getPieceType().ordinal()
             };
         }
@@ -362,6 +376,72 @@ class GameServiceUnitTest {
                 .build();
 
         GameStatus expectedStatus = GameStatus.WHITE_WINS;
+        GameStatus actualStatus = gameService.getGameStatus(gameDto);
+
+        Assertions.assertEquals(expectedStatus, actualStatus);
+    }
+
+    @Test
+    void verifyIsBlackMatteNotObvious() {
+        PieceDto whiteKing = PieceDto.builder()
+                .id(1)
+                .pieceType(PieceType.KING)
+                .positionX(7)
+                .positionY(7)
+                .whitePiece(true)
+                .build();
+        PieceDto blackTowerOne = PieceDto.builder()
+                .id(2)
+                .pieceType(PieceType.TOWER)
+                .positionX(6)
+                .positionY(5)
+                .whitePiece(false)
+                .build();
+        PieceDto blackTowerTwo = PieceDto.builder()
+                .id(2)
+                .pieceType(PieceType.TOWER)
+                .positionX(7)
+                .positionY(5)
+                .whitePiece(false)
+                .build();
+        PieceDto blackKing = PieceDto.builder()
+                .id(3)
+                .pieceType(PieceType.KING)
+                .positionX(0)
+                .positionY(0)
+                .whitePiece(false)
+                .build();
+
+        List<PieceDto> whitePieces = List.of(whiteKing);
+        List<PieceDto> blackPieces = List.of(blackKing, blackTowerOne, blackTowerTwo);
+
+        Integer[][][] pieceMatrix = new Integer[8][8][1];
+        for (PieceDto piece : whitePieces) {
+            pieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[]{
+                    piece.getId(), Constants.WHITE_COLOR, piece.getPieceType().ordinal()
+            };
+        }
+        for (PieceDto piece : blackPieces) {
+            pieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[]{
+                    piece.getId(), Constants.BLACK_COLOR, piece.getPieceType().ordinal()
+            };
+        }
+
+        BoardDto boardDto = BoardDto.builder()
+                .whitePieces(whitePieces)
+                .blackPieces(blackPieces)
+                .histories(List.of())
+                .pieceMatrix(pieceMatrix)
+                .build();
+        GameDto gameDto = GameDto.builder()
+                .board(boardDto)
+                .whitePlayerUUID(whitePlayerUUID)
+                .blackPlayerUUID(blackPlayerUUID)
+                .whiteTurn(true)
+                .statusCached(false)
+                .build();
+
+        GameStatus expectedStatus = GameStatus.BLACK_WINS;
         GameStatus actualStatus = gameService.getGameStatus(gameDto);
 
         Assertions.assertEquals(expectedStatus, actualStatus);
@@ -396,12 +476,12 @@ class GameServiceUnitTest {
 
         Integer[][][] pieceMatrix = new Integer[8][8][1];
         for (PieceDto piece : whitePieces) {
-            pieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[] {
+            pieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[]{
                     piece.getId(), Constants.WHITE_COLOR, piece.getPieceType().ordinal()
             };
         }
         for (PieceDto piece : blackPieces) {
-            pieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[] {
+            pieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[]{
                     piece.getId(), Constants.BLACK_COLOR, piece.getPieceType().ordinal()
             };
         }
@@ -489,12 +569,12 @@ class GameServiceUnitTest {
 
         Integer[][][] pieceMatrix = new Integer[8][8][1];
         for (PieceDto piece : whitePieces) {
-            pieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[] {
+            pieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[]{
                     piece.getId(), Constants.WHITE_COLOR, piece.getPieceType().ordinal()
             };
         }
         for (PieceDto piece : blackPieces) {
-            pieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[] {
+            pieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[]{
                     piece.getId(), Constants.BLACK_COLOR, piece.getPieceType().ordinal()
             };
         }
@@ -549,12 +629,12 @@ class GameServiceUnitTest {
 
         Integer[][][] pieceMatrix = new Integer[8][8][1];
         for (PieceDto piece : whitePieces) {
-            pieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[] {
+            pieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[]{
                     piece.getId(), Constants.WHITE_COLOR, piece.getPieceType().ordinal()
             };
         }
         for (PieceDto piece : blackPieces) {
-            pieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[] {
+            pieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[]{
                     piece.getId(), Constants.BLACK_COLOR, piece.getPieceType().ordinal()
             };
         }
@@ -578,6 +658,215 @@ class GameServiceUnitTest {
 
         Assertions.assertEquals(expectedStatus, actualStatus);
     }
+
+    @Test
+    void testMoveRoqueRight() {
+        PieceDto whiteKing = PieceDto.builder()
+                .id(1)
+                .pieceType(PieceType.KING)
+                .positionX(7)
+                .positionY(4)
+                .whitePiece(true)
+                .build();
+        PieceDto whiteRook = PieceDto.builder()
+                .id(2)
+                .pieceType(PieceType.TOWER)
+                .positionX(7)
+                .positionY(7)
+                .whitePiece(true)
+                .build();
+        PieceDto blackKing = PieceDto.builder()
+                .id(3)
+                .pieceType(PieceType.KING)
+                .positionX(0)
+                .positionY(4)
+                .whitePiece(false)
+                .build();
+
+        List<PieceDto> whitePieces = List.of(whiteKing, whiteRook);
+        List<PieceDto> blackPieces = List.of(blackKing);
+
+        Integer[][][] pieceMatrix = new Integer[8][8][1];
+        for (PieceDto piece : whitePieces) {
+            pieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[]{
+                    piece.getId(), Constants.WHITE_COLOR, piece.getPieceType().ordinal()
+            };
+        }
+        for (PieceDto piece : blackPieces) {
+            pieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[]{
+                    piece.getId(), Constants.BLACK_COLOR, piece.getPieceType().ordinal()
+            };
+        }
+
+        BoardDto boardDto = BoardDto.builder()
+                .whitePieces(whitePieces)
+                .blackPieces(blackPieces)
+                .histories(List.of())
+                .pieceMatrix(pieceMatrix)
+                .build();
+        GameDto gameDto = GameDto.builder()
+                .board(boardDto)
+                .whitePlayerUUID(whitePlayerUUID)
+                .blackPlayerUUID(blackPlayerUUID)
+                .whiteTurn(true)
+                .statusCached(false)
+                .build();
+
+        MoveDto moveDto = MoveDto.builder()
+                .first(MoveType.ROQUE)
+                .second(PositionDto.builder().first(7).second(6).build())
+                .build();
+
+        gameService.movePieceOnBoardDto(gameDto, whiteKing, moveDto);
+
+        Assertions.assertEquals(7, whiteKing.getPositionX());
+        Assertions.assertEquals(6, whiteKing.getPositionY());
+        Assertions.assertEquals(7, whiteRook.getPositionX());
+        Assertions.assertEquals(5, whiteRook.getPositionY());
+    }
+
+    @Test
+    void testMoveRoque() {
+        PieceDto whiteKing = PieceDto.builder()
+                .id(1)
+                .pieceType(PieceType.KING)
+                .positionX(7)
+                .positionY(4)
+                .whitePiece(true)
+                .build();
+        PieceDto whiteRook = PieceDto.builder()
+                .id(2)
+                .pieceType(PieceType.TOWER)
+                .positionX(7)
+                .positionY(0)
+                .whitePiece(true)
+                .build();
+        PieceDto blackKing = PieceDto.builder()
+                .id(3)
+                .pieceType(PieceType.KING)
+                .positionX(0)
+                .positionY(4)
+                .whitePiece(false)
+                .build();
+
+        List<PieceDto> whitePieces = List.of(whiteKing, whiteRook);
+        List<PieceDto> blackPieces = List.of(blackKing);
+
+        Integer[][][] pieceMatrix = new Integer[8][8][1];
+        for (PieceDto piece : whitePieces) {
+            pieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[]{
+                    piece.getId(), Constants.WHITE_COLOR, piece.getPieceType().ordinal()
+            };
+        }
+        for (PieceDto piece : blackPieces) {
+            pieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[]{
+                    piece.getId(), Constants.BLACK_COLOR, piece.getPieceType().ordinal()
+            };
+        }
+
+        BoardDto boardDto = BoardDto.builder()
+                .whitePieces(whitePieces)
+                .blackPieces(blackPieces)
+                .histories(List.of())
+                .pieceMatrix(pieceMatrix)
+                .build();
+        GameDto gameDto = GameDto.builder()
+                .board(boardDto)
+                .whitePlayerUUID(whitePlayerUUID)
+                .blackPlayerUUID(blackPlayerUUID)
+                .whiteTurn(true)
+                .statusCached(false)
+                .build();
+
+        MoveDto moveDto = MoveDto.builder()
+                .first(MoveType.ROQUE)
+                .second(PositionDto.builder().first(7).second(2).build())
+                .build();
+
+        gameService.movePieceOnBoardDto(gameDto, whiteKing, moveDto);
+
+        Assertions.assertEquals(7, whiteKing.getPositionX());
+        Assertions.assertEquals(2, whiteKing.getPositionY());
+        Assertions.assertEquals(7, whiteRook.getPositionX());
+        Assertions.assertEquals(3, whiteRook.getPositionY());
+    }
+
+    @Test
+    void testGetPlayerLegalMovesWithRooke() {
+        PieceDto whiteKing = PieceDto.builder()
+                .id(1)
+                .pieceType(PieceType.KING)
+                .positionX(7)
+                .positionY(4)
+                .whitePiece(true)
+                .build();
+        PieceDto whiteRookLeft = PieceDto.builder()
+                .id(2)
+                .pieceType(PieceType.TOWER)
+                .positionX(7)
+                .positionY(0)
+                .whitePiece(true)
+                .build();
+        PieceDto whiteRookRight = PieceDto.builder()
+                .id(2)
+                .pieceType(PieceType.TOWER)
+                .positionX(7)
+                .positionY(7)
+                .whitePiece(true)
+                .build();
+        PieceDto blackKing = PieceDto.builder()
+                .id(3)
+                .pieceType(PieceType.KING)
+                .positionX(0)
+                .positionY(4)
+                .whitePiece(false)
+                .build();
+
+        List<PieceDto> whitePieces = List.of(whiteKing, whiteRookLeft, whiteRookRight);
+        List<PieceDto> blackPieces = List.of(blackKing);
+
+        Integer[][][] pieceMatrix = new Integer[8][8][1];
+        for (PieceDto piece : whitePieces) {
+            pieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[]{
+                    piece.getId(), Constants.WHITE_COLOR, piece.getPieceType().ordinal()
+            };
+        }
+        for (PieceDto piece : blackPieces) {
+            pieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[]{
+                    piece.getId(), Constants.BLACK_COLOR, piece.getPieceType().ordinal()
+            };
+        }
+
+        BoardDto boardDto = BoardDto.builder()
+                .whitePieces(whitePieces)
+                .blackPieces(blackPieces)
+                .histories(List.of())
+                .pieceMatrix(pieceMatrix)
+                .build();
+        GameDto gameDto = GameDto.builder()
+                .board(boardDto)
+                .whitePlayerUUID(whitePlayerUUID)
+                .blackPlayerUUID(blackPlayerUUID)
+                .whiteTurn(true)
+                .statusCached(false)
+                .build();
+
+        Map<PieceDto, List<MoveDto>> legalMoves = gameService.getPlayerLegalMoves(gameDto, Constants.WHITE_COLOR);
+
+        int expected = 2;
+        int found = 0;
+
+        for (int i = 0; i < 7; i++) {
+            if (legalMoves.get(whiteKing).get(i).getFirst() == MoveType.ROQUE) {
+                found++;
+            }
+        }
+
+        Assertions.assertEquals(3, legalMoves.size());
+        Assertions.assertEquals(7, legalMoves.get(whiteKing).size());
+        Assertions.assertEquals(expected, found);
+    }
+
 
     @Test
     void testMovePawnInBoard() {
@@ -608,12 +897,12 @@ class GameServiceUnitTest {
 
         Integer[][][] pieceMatrix = new Integer[8][8][1];
         for (PieceDto piece : whitePieces) {
-            pieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[] {
+            pieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[]{
                     piece.getId(), Constants.WHITE_COLOR, piece.getPieceType().ordinal()
             };
         }
         for (PieceDto piece : blackPieces) {
-            pieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[] {
+            pieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[]{
                     piece.getId(), Constants.BLACK_COLOR, piece.getPieceType().ordinal()
             };
         }
@@ -963,12 +1252,12 @@ class GameServiceUnitTest {
 
         Integer[][][] pieceMatrix = new Integer[8][8][1];
         for (PieceDto piece : whitePieces) {
-            pieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[] {
+            pieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[]{
                     piece.getId(), Constants.WHITE_COLOR, piece.getPieceType().ordinal()
             };
         }
         for (PieceDto piece : blackPieces) {
-            pieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[] {
+            pieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[]{
                     piece.getId(), Constants.BLACK_COLOR, piece.getPieceType().ordinal()
             };
         }
@@ -994,6 +1283,74 @@ class GameServiceUnitTest {
         }
         Assertions.assertEquals(1, legalMoves.get(whitePawn).size());
         Assertions.assertEquals(MoveType.NORMAL, legalMoves.get(whitePawn).get(0).getFirst());
+    }
+
+    @Test
+    void testPlayerLegalMovesBlackPawnMovesWithPieceInFront() {
+        PieceDto whiteKing = PieceDto.builder()
+                .pieceType(PieceType.KING)
+                .positionX(2)
+                .positionY(5)
+                .id(1)
+                .whitePiece(true)
+                .build();
+        PieceDto blackKing = PieceDto.builder()
+                .pieceType(PieceType.KING)
+                .positionX(4)
+                .positionY(6)
+                .id(3)
+                .whitePiece(false)
+                .build();
+        PieceDto blackPawn = PieceDto.builder()
+                .pieceType(PieceType.PAWN)
+                .positionX(1)
+                .positionY(0)
+                .id(2)
+                .whitePiece(false)
+                .build();
+        PieceDto whitePawn = PieceDto.builder()
+                .pieceType(PieceType.PAWN)
+                .positionX(2)
+                .positionY(0)
+                .id(2)
+                .whitePiece(true)
+                .build();
+
+        List<PieceDto> whitePieces = List.of(whiteKing, whitePawn);
+        List<PieceDto> blackPieces = List.of(blackKing, blackPawn);
+
+        Integer[][][] pieceMatrix = new Integer[8][8][1];
+        for (PieceDto piece : whitePieces) {
+            pieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[]{
+                    piece.getId(), Constants.WHITE_COLOR, piece.getPieceType().ordinal()
+            };
+        }
+        for (PieceDto piece : blackPieces) {
+            pieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[]{
+                    piece.getId(), Constants.BLACK_COLOR, piece.getPieceType().ordinal()
+            };
+        }
+
+        BoardDto boardDto = BoardDto.builder()
+                .whitePieces(whitePieces)
+                .blackPieces(blackPieces)
+                .histories(List.of())
+                .pieceMatrix(pieceMatrix)
+                .build();
+        GameDto gameDto = GameDto.builder()
+                .board(boardDto)
+                .whitePlayerUUID(whitePlayerUUID)
+                .blackPlayerUUID(blackPlayerUUID)
+                .whiteTurn(false)
+                .build();
+
+        Map<PieceDto, List<MoveDto>> legalMoves = gameService.getPlayerLegalMoves(gameDto, Constants.BLACK_COLOR);
+
+        Assertions.assertEquals(8, legalMoves.get(blackKing).size());
+        for (MoveDto move : legalMoves.get(blackKing)) {
+            Assertions.assertEquals(MoveType.NORMAL, move.getFirst());
+        }
+        Assertions.assertEquals(0, legalMoves.get(blackPawn).size());
     }
 
     @Test
@@ -1025,12 +1382,12 @@ class GameServiceUnitTest {
 
         Integer[][][] pieceMatrix = new Integer[8][8][1];
         for (PieceDto piece : whitePieces) {
-            pieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[] {
+            pieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[]{
                     piece.getId(), Constants.WHITE_COLOR, piece.getPieceType().ordinal()
             };
         }
         for (PieceDto piece : blackPieces) {
-            pieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[] {
+            pieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[]{
                     piece.getId(), Constants.BLACK_COLOR, piece.getPieceType().ordinal()
             };
         }
@@ -1087,12 +1444,12 @@ class GameServiceUnitTest {
 
         Integer[][][] pieceMatrix = new Integer[8][8][1];
         for (PieceDto piece : whitePieces) {
-            pieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[] {
+            pieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[]{
                     piece.getId(), Constants.WHITE_COLOR, piece.getPieceType().ordinal()
             };
         }
         for (PieceDto piece : blackPieces) {
-            pieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[] {
+            pieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[]{
                     piece.getId(), Constants.BLACK_COLOR, piece.getPieceType().ordinal()
             };
         }
@@ -1144,12 +1501,12 @@ class GameServiceUnitTest {
 
         Integer[][][] pieceMatrix = new Integer[8][8][1];
         for (PieceDto piece : whitePieces) {
-            pieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[] {
+            pieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[]{
                     piece.getId(), Constants.WHITE_COLOR, piece.getPieceType().ordinal()
             };
         }
         for (PieceDto piece : blackPieces) {
-            pieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[] {
+            pieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[]{
                     piece.getId(), Constants.BLACK_COLOR, piece.getPieceType().ordinal()
             };
         }
@@ -1202,12 +1559,12 @@ class GameServiceUnitTest {
 
         Integer[][][] pieceMatrix = new Integer[8][8][1];
         for (PieceDto piece : whitePieces) {
-            pieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[] {
+            pieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[]{
                     piece.getId(), Constants.WHITE_COLOR, piece.getPieceType().ordinal()
             };
         }
         for (PieceDto piece : blackPieces) {
-            pieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[] {
+            pieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[]{
                     piece.getId(), Constants.BLACK_COLOR, piece.getPieceType().ordinal()
             };
         }
@@ -1259,12 +1616,12 @@ class GameServiceUnitTest {
 
         Integer[][][] pieceMatrix = new Integer[8][8][1];
         for (PieceDto piece : whitePieces) {
-            pieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[] {
+            pieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[]{
                     piece.getId(), Constants.WHITE_COLOR, piece.getPieceType().ordinal()
             };
         }
         for (PieceDto piece : blackPieces) {
-            pieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[] {
+            pieceMatrix[piece.getPositionX()][piece.getPositionY()] = new Integer[]{
                     piece.getId(), Constants.BLACK_COLOR, piece.getPieceType().ordinal()
             };
         }
